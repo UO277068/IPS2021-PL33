@@ -4,6 +4,6 @@ Colaboradores:
 
 Roberto de la Roza Carrasco
 
-Pedro
+Pedro Zahonero Mangas
 
 Fernando

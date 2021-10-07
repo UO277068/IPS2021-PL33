@@ -1,0 +1,4 @@
+#Comentario--> Colocar aqui los archivos(extension completa) que se desee ignorar a la hora de añadir archivos al commit
+#Comandos:
+#*.txt-->ignora todos los archivos de extension txt
+#nombre.nm-->ignora el archivo nombre.nm

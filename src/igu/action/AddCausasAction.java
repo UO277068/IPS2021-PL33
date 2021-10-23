@@ -3,7 +3,7 @@ package igu.action;
 import Logica.BusinessFactory;
 import Logica.crud.CitaCrudService;
 
-public class AddCausasAction {//GPE
+public class AddCausasAction {//G
 
 	 private CitaCrudService service = BusinessFactory.forCitaCrudService();
 	 private String id;

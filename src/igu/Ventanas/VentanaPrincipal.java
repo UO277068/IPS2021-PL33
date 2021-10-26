@@ -115,6 +115,10 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btContacto;
 	private JButton btCausa;
 	private JButton btPrescripcion;
+	private JDateChooser dateChooser;
+	private JLabel lbFechaCita;
+	private JScrollPane scCitas;
+	private JList listCitas;
 	
 
 	/**
@@ -160,6 +164,9 @@ public class VentanaPrincipal extends JFrame {
 			pnMedico.add(getBtContinuar());
 			pnMedico.add(getBtHistorial());
 			pnMedico.add(getBtnAtrasE());
+			pnMedico.add(getDateChooser());
+			pnMedico.add(getLbFechaCita());
+			pnMedico.add(getScCitas());
 		}
 		return pnMedico;
 	}
@@ -411,10 +418,10 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					Timestamp d1 = new Timestamp(getDcDesde().getDate().getTime());
 					Timestamp d2 = new Timestamp(getDcHasta().getDate().getTime());
-					d1.setHours((int)getCbHoraD().getSelectedItem());
-					d1.setMinutes((int)getCbMinutosD().getSelectedItem());
-					d2.setHours((int)getCbHoraH().getSelectedItem());
-					d2.setMinutes((int)getCbMinutosH().getSelectedItem());
+//					d1.setHours((int)getCbHoraD().getSelectedItem());
+//					d1.setMinutes((int)getCbMinutosD().getSelectedItem());
+//					d2.setHours((int)getCbHoraH().getSelectedItem());
+//					d2.setMinutes((int)getCbMinutosH().getSelectedItem());
 					new AddHorarioAction(d1, d2,getCbOpcion().getSelectedIndex(), getList().getSelectedIndices()).execute();
 				}
 			});
@@ -858,5 +865,34 @@ public class VentanaPrincipal extends JFrame {
 			btPrescripcion.setBounds(205, 204, 159, 29);
 		}
 		return btPrescripcion;
+	}
+	private JDateChooser getDateChooser() {
+		if (dateChooser == null) {
+			dateChooser = new JDateChooser();
+			dateChooser.setBounds(155, 167, 224, 26);
+		}
+		return dateChooser;
+	}
+	private JLabel getLbFechaCita() {
+		if (lbFechaCita == null) {
+			lbFechaCita = new JLabel("Fecha de la cita:");
+			lbFechaCita.setBounds(51, 167, 140, 16);
+		}
+		return lbFechaCita;
+	}
+	private JScrollPane getScCitas() {
+		if (scCitas == null) {
+			scCitas = new JScrollPane();
+			scCitas.setBounds(438, 123, 366, 110);
+			scCitas.setViewportView(getListCitas());
+		}
+		return scCitas;
+	}
+	private JList getListCitas() {
+		if (listCitas == null) {
+			listCitas = new JList();
+			listCitas.setBorder(new TitledBorder(null, "Citas", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		}
+		return listCitas;
 	}
 }

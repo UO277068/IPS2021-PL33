@@ -39,5 +39,5 @@ public interface CitaCrudService {
 	String getContactoByIdPaciente(String id);
 	void updateCausasInHistorial(String id, String idPaciente, String causa);
 	void updatePrescripcionInHistorial(String id, String prescripcion);
-	
+	void updateAcudioCita(String id,String acude);
 }

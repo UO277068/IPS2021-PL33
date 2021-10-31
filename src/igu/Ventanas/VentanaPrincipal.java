@@ -30,18 +30,16 @@ import javax.swing.border.TitledBorder;
 import com.toedter.calendar.JDateChooser;
 import Logica.crud.dto.*;
 import igu.action.AddHorarioAction;
-import igu.action.ListAllCitasByIdAction;
-import igu.action.ListAllMedicosAction;
-import igu.action.ListAllPacientesAction;
-import igu.action.ListDiagnosticoByIdAction;
-import igu.action.ListVacunaByIdAction;
-import igu.action.UpdateHoraEntradaSalidaAction;
+import igu.action.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
+import javax.swing.ButtonGroup;
 
 
 
@@ -50,6 +48,7 @@ public class VentanaPrincipal extends JFrame {
 	List<PacienteDto> listapacientes;
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
+	private String acude = "INDEFINIDO";
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -115,6 +114,8 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btContacto;
 	private JButton btCausa;
 	private JButton btPrescripcion;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JButton btAsignarAcude;
 	
 
 	/**
@@ -189,6 +190,7 @@ public class VentanaPrincipal extends JFrame {
 			btContinuar = new JButton("Continuar");
 			btContinuar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					acude = "INDEFINIDO";
 					idPaciente=idsPaciente[getCbCita().getSelectedIndex()];
 					idCita=idsCita[getCbCita().getSelectedIndex()];
 					mostrarPnCita();
@@ -210,6 +212,34 @@ public class VentanaPrincipal extends JFrame {
 			pnCita.add(getBtnAtrasM());
 			pnCita.add(getBtCausa());
 			pnCita.add(getBtPrescripcion());
+			
+			JPanel pnAcudeCita = new JPanel();
+			pnAcudeCita.setBorder(new TitledBorder(null, "Acude el paciente a la cita", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			pnAcudeCita.setBounds(344, 52, 164, 117);
+			pnCita.add(pnAcudeCita);
+			pnAcudeCita.setLayout(null);
+			
+			JRadioButton rbSiAcude = new JRadioButton("Si");
+			rbSiAcude.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					acude = "ACUDIÓ";
+				}
+			});
+			buttonGroup.add(rbSiAcude);
+			rbSiAcude.setBounds(25, 38, 63, 23);
+			rbSiAcude.setHorizontalAlignment(SwingConstants.LEFT);
+			pnAcudeCita.add(rbSiAcude);
+			
+			JRadioButton rbNoAcude = new JRadioButton("No");
+			rbNoAcude.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					acude = "NO ACUDIÓ";
+				}
+			});
+			buttonGroup.add(rbNoAcude);
+			rbNoAcude.setBounds(90, 38, 63, 23);
+			pnAcudeCita.add(rbNoAcude);
+			pnAcudeCita.add(getBtAsignarAcude());
 		}
 		return pnCita;
 	}
@@ -858,5 +888,17 @@ public class VentanaPrincipal extends JFrame {
 			btPrescripcion.setBounds(205, 204, 159, 29);
 		}
 		return btPrescripcion;
+	}
+	private JButton getBtAsignarAcude() {
+		if (btAsignarAcude == null) {
+			btAsignarAcude = new JButton("Asignar");
+			btAsignarAcude.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new UpdateAcudioCitaAction(idCita, acude).execute();
+				}
+			});
+			btAsignarAcude.setBounds(25, 68, 117, 29);
+		}
+		return btAsignarAcude;
 	}
 }

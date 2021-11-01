@@ -204,7 +204,7 @@ public class VentanaPrincipal extends JFrame {
 					mostrarPnCita();
 				}
 			});
-			btContinuar.setBounds(485, 50, 117, 29);
+			btContinuar.setBounds(393, 50, 117, 29);
 		}
 		return btContinuar;
 	}
@@ -945,21 +945,21 @@ public class VentanaPrincipal extends JFrame {
 					getListCitas().setModel(model);
 				}
 			});
-			dateChooser.setBounds(155, 167, 224, 26);
+			dateChooser.setBounds(133, 50, 224, 26);
 		}
 		return dateChooser;
 	}
 	private JLabel getLbFechaCita() {
 		if (lbFechaCita == null) {
 			lbFechaCita = new JLabel("Fecha de la cita:");
-			lbFechaCita.setBounds(51, 167, 140, 16);
+			lbFechaCita.setBounds(29, 50, 140, 16);
 		}
 		return lbFechaCita;
 	}
 	private JScrollPane getScCitas() {
 		if (scCitas == null) {
 			scCitas = new JScrollPane();
-			scCitas.setBounds(438, 123, 292, 110);
+			scCitas.setBounds(29, 109, 292, 110);
 			scCitas.setViewportView(getListCitas());
 		}
 		return scCitas;
@@ -998,7 +998,7 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane getScInfo() {
 		if (scInfo == null) {
 			scInfo = new JScrollPane();
-			scInfo.setBounds(742, 123, 160, 110);
+			scInfo.setBounds(333, 109, 273, 110);
 			scInfo.setViewportView(getTxInfo());
 		}
 		return scInfo;

@@ -3,12 +3,15 @@ package igu.Ventanas;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -42,6 +46,12 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 
 
@@ -118,7 +128,10 @@ public class VentanaPrincipal extends JFrame {
 	private JDateChooser dateChooser;
 	private JLabel lbFechaCita;
 	private JScrollPane scCitas;
-	private JList listCitas;
+	private JList<String> listCitas;
+	List<CitaDto> lista;
+	private JScrollPane scInfo;
+	private JTextArea txInfo;
 	
 
 	/**
@@ -167,6 +180,7 @@ public class VentanaPrincipal extends JFrame {
 			pnMedico.add(getDateChooser());
 			pnMedico.add(getLbFechaCita());
 			pnMedico.add(getScCitas());
+			pnMedico.add(getScInfo());
 		}
 		return pnMedico;
 	}
@@ -180,7 +194,7 @@ public class VentanaPrincipal extends JFrame {
 	private JComboBox<String> getCbCita() {
 		if (cbCita == null) {
 			idMedico=1;
-			String[] pacientes= getPacientesCita(idMedico);
+			String[] pacientes= getPacientesCita(new ListAllCitasByIdAction(idMedico).execute());
 			if(idsPaciente.length==0) {
 				getBtContinuar().setEnabled(false);
 				getBtHistorial().setEnabled(false);
@@ -196,8 +210,10 @@ public class VentanaPrincipal extends JFrame {
 			btContinuar = new JButton("Continuar");
 			btContinuar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					idPaciente=idsPaciente[getCbCita().getSelectedIndex()];
-					idCita=idsCita[getCbCita().getSelectedIndex()];
+					//idPaciente=idsPaciente[getListCitas().getSelectedIndex()];
+					//idCita=idsCita[getListCitas().getSelectedIndex()];
+					idPaciente=lista.get(getListCitas().getSelectedIndex()).idPaciente;
+					idCita=lista.get(getListCitas().getSelectedIndex()).id;
 					mostrarPnCita();
 				}
 			});
@@ -296,8 +312,9 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						changeWindow=1;
-						idPaciente=idsPaciente[getCbCita().getSelectedIndex()];
-						if(getCbCita().getSelectedItem()!=null)
+						idPaciente=lista.get(getListCitas().getSelectedIndex()).idPaciente;
+						idCita=lista.get(getListCitas().getSelectedIndex()).id;
+						if(getListCitas().getSelectedValue()!=null)
 							mostrarPnHistorial();
 					} catch (Exception e1) {
 						e1.printStackTrace();
@@ -731,7 +748,7 @@ public class VentanaPrincipal extends JFrame {
 			cbMedicos.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					idMedico=cbMedicos.getSelectedIndex()+1;
-					getCbPacientes().setModel(new DefaultComboBoxModel<String>(getPacientesCita(idMedico)));
+					getCbPacientes().setModel(new DefaultComboBoxModel<String>(getPacientesCita(new ListAllCitasByIdAction(idMedico).execute())));
 				}
 			});
 			idMedico=cbMedicos.getSelectedIndex()+1;
@@ -759,7 +776,7 @@ public class VentanaPrincipal extends JFrame {
 			cbPacientes = new JComboBox<String>();
 			cbPacientes.setBounds(497, 113, 225, 27);
 			idMedico=cbMedicos.getSelectedIndex()+1;
-			cbPacientes.setModel(new DefaultComboBoxModel<String>(getPacientesCita(idMedico)));
+			cbPacientes.setModel(new DefaultComboBoxModel<String>(getPacientesCita(new ListAllCitasByIdAction(idMedico).execute())));
 		}
 		return cbPacientes;
 	}
@@ -783,8 +800,21 @@ public class VentanaPrincipal extends JFrame {
 		return btHistorialA;
 	}
 	
-	private String[] getPacientesCita(int idMedico) {
-		List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+//	private String[] getPacientesCita(int idMedico) {
+//		List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+//		String[] pacientes = new String[lista.size()];
+//		idsCita = new String[lista.size()];
+//		idsPaciente = new String[lista.size()];
+//		for (int i = 0; i < pacientes.length; i++) {
+//			pacientes[i]=lista.get(i).namePaciente+" "+lista.get(i).surnamePaciente+" "+lista.get(i).horaInicio.split(":00.000")[0];
+//			idsCita[i]=lista.get(i).id;
+//			idsPaciente[i]=lista.get(i).idPaciente;
+//		}
+//		return pacientes;
+//	}
+	
+	private String[] getPacientesCita(List<CitaDto> lista) {
+		//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
 		String[] pacientes = new String[lista.size()];
 		idsCita = new String[lista.size()];
 		idsPaciente = new String[lista.size()];
@@ -869,6 +899,23 @@ public class VentanaPrincipal extends JFrame {
 	private JDateChooser getDateChooser() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser();
+			dateChooser.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+					List<CitaDto> listaFiltrada = new ArrayList<CitaDto>();
+					for (CitaDto cita : lista) {
+						if(getDateChooser().getDate()!=null) {
+						Timestamp m = Timestamp.from(getDateChooser().getDate().toInstant());
+						String string = m.toString().split(" ")[0];
+						if(Date.valueOf(string).compareTo(Date.valueOf(cita.horaInicio.split(" ")[0]))==0)
+								listaFiltrada.add(cita);
+						}
+					}
+					String[] pacientes= getPacientesCita(listaFiltrada);
+					ListModel<String> model = new DefaultComboBoxModel<String>(pacientes);
+					getListCitas().setModel(model);
+				}
+			});
 			dateChooser.setBounds(155, 167, 224, 26);
 		}
 		return dateChooser;
@@ -883,16 +930,54 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane getScCitas() {
 		if (scCitas == null) {
 			scCitas = new JScrollPane();
-			scCitas.setBounds(438, 123, 366, 110);
+			scCitas.setBounds(438, 123, 292, 110);
 			scCitas.setViewportView(getListCitas());
 		}
 		return scCitas;
 	}
-	private JList getListCitas() {
+	private JList<String> getListCitas() {
 		if (listCitas == null) {
-			listCitas = new JList();
+			listCitas = new JList<String>();
+			listCitas.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					if(getListCitas().getSelectedIndex()!=-1) {
+						String sala=lista.get(getListCitas().getSelectedIndex()).idSala;
+						String inicio = lista.get(getListCitas().getSelectedIndex()).horaInicio.split(" ")[1].split(":00.")[0];
+						String salida = lista.get(getListCitas().getSelectedIndex()).horaFinal.split(" ")[1].split(":00.")[0];
+						String motivo = lista.get(getListCitas().getSelectedIndex()).causa;
+						getTxInfo().setText("Sala de la cita: "+sala+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+					}
+					else
+						getTxInfo().setText("");
+				}
+			});
+			idMedico=1;
+			lista = new ListAllCitasByIdAction(idMedico).execute();
+			String[] pacientes= getPacientesCita(lista);
+			if(idsPaciente.length==0) {
+				getBtContinuar().setEnabled(false);
+				getBtHistorial().setEnabled(false);
+			}
 			listCitas.setBorder(new TitledBorder(null, "Citas", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			listCitas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			ListModel<String> model = new DefaultComboBoxModel<String>(pacientes);
+			listCitas.setModel(model);
 		}
 		return listCitas;
+	}
+	private JScrollPane getScInfo() {
+		if (scInfo == null) {
+			scInfo = new JScrollPane();
+			scInfo.setBounds(742, 123, 160, 110);
+			scInfo.setViewportView(getTxInfo());
+		}
+		return scInfo;
+	}
+	private JTextArea getTxInfo() {
+		if (txInfo == null) {
+			txInfo = new JTextArea();
+			txInfo.setBorder(new TitledBorder(null, "Informacion cita:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		}
+		return txInfo;
 	}
 }

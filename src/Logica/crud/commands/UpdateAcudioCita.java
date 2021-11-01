@@ -2,22 +2,22 @@ package Logica.crud.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import Logica.DataBaseManager;
+import Logica.crud.dto.CitaDto;
 
+public class UpdateAcudioCita {
 
-public class UpdateHoraEntradaSalida {
-	private String SQL = "update public.cita set hora_entrada=?, hora_salida=? where id=?";
-	private Timestamp entrada;
-	private Timestamp salida;
+	private String SQL = "update public.cita set acudio_cita=? where id=?";
+	private String acude;
 	private String id;
 	
-	public UpdateHoraEntradaSalida(String id, Timestamp entrada, Timestamp salida ) {
+	public UpdateAcudioCita(String id, String acude) {
 		this.id=id;
-		this.entrada=entrada;
-		this.salida=salida;
+		this.acude = acude;
 	}
 	
 	public void execute() {
@@ -25,10 +25,10 @@ public class UpdateHoraEntradaSalida {
 		PreparedStatement pst = null;
 		try {
 			c = DataBaseManager.getConnection();
+			
 			pst = c.prepareStatement(SQL);
-			pst.setTimestamp(1, entrada);
-			pst.setTimestamp(2, salida);
-			pst.setString(3, id);
+			pst.setString(1, acude);
+			pst.setString(2, id);
 			pst.executeUpdate();
 			pst.close();
 			

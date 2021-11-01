@@ -12,6 +12,7 @@ public class CitaDto
 	public String horaFinal;
 	public String horaEntrada;
 	public String horaSalida;
+	public String acude;
 	
 	public String idMedico;
 	public String idPaciente;

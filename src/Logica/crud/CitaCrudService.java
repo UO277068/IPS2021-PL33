@@ -29,7 +29,7 @@ public interface CitaCrudService {
 	List<CitaDto> ListCitasByMedico(String id);
 	void InsertCita(CitaDto cita);
 	List<CitaDto> listAllCitas();
-	void EnviarEmail(String correo);
+	void EnviarEmail(String correo,PacienteDto paciente,CitaDto cita);
 	//fer
 	void AddCausa(String id, String causa);
 	List<CitaDto> listAllCausas();

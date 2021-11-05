@@ -28,6 +28,7 @@ public class ListAllMedicos
 			while(rs.next()) {
 				medico = new MedicoDto();
 				medico.id=rs.getString("id");
+				medico.dni=rs.getString("dni");
 				medico.name=rs.getString("nombre");
 				medico.surname=rs.getString("apellidos");
 				medico.correo=rs.getString("correo");

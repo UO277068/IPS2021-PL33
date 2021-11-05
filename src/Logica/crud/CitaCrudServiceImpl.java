@@ -85,8 +85,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void EnviarEmail(String correo) {
-		new EnviarGmailUrgente(correo).execute();
+	public void EnviarEmail(String correo,PacienteDto paciente,CitaDto cita) {
+		new EnviarGmailUrgente(correo,paciente,cita).execute();
 		
 	}
 	

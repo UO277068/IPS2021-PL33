@@ -3,13 +3,18 @@ package Logica.crud.commands;
 import javax.mail.*;
 import javax.mail.internet.*;
 
+import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.PacienteDto;
+
 import java.util.*;
 public class EnviarGmailUrgente 
 {
 	 private final Properties properties = new Properties();
 	 private Session session;
 	 private String correoMedico;
-	 public EnviarGmailUrgente(String correo) 
+	 private PacienteDto paciente;
+	 private CitaDto cita;
+	 public EnviarGmailUrgente(String correo,PacienteDto pa,CitaDto ci) 
 	 {
 		    properties.put("mail.smtp.host", "smtp-mail.outlook.com");
 	        properties.put("mail.smtp.starttls.enable", "true");
@@ -18,6 +23,8 @@ public class EnviarGmailUrgente
 	 
 	        session = Session.getDefaultInstance(properties);
 	        this.correoMedico=correo;
+	        this.paciente=pa;
+	        this.cita=ci;
 	 }
 	 
 	 public void execute(){
@@ -27,7 +34,9 @@ public class EnviarGmailUrgente
 	            String contrasena = "IPSFRPhospital1"; //Contrase�a del emisor
 	            String des = correoMedico; //Correo del destinatario
 	            String asunto = "Urgencia Hospital Central";
-	            String mensaje = "Se le solicita en el Hospital para atender una Urgencia";
+	            String mensaje = "Se le solicita en el Hospital para atender una Urgencia: /t Paciente:"+this.paciente.name+
+	            		" "+this.paciente.surname+" con dni "+this.paciente.dni+" /t Cita:"+this.cita.id+" Hora inicio:"+this.cita.horaInicio
+	            		+" Hora final:"+this.cita.horaFinal;
 	            
 	            MimeMessage message = new MimeMessage(session);
 	            message.setFrom(new InternetAddress(correoEnvia));

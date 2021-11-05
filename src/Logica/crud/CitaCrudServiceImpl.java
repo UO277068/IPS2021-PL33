@@ -134,6 +134,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new UpdatePrescripcionInHistorial( id,  prescripcion).execute();
 		
 	}
+
+	@Override
+	public void updateAcudioCita(String id, String acude) {
+		new UpdateAcudioCita(id, acude).execute();
+		
+	}
 	
 	
 

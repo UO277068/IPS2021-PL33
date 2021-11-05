@@ -13,7 +13,7 @@ import Logica.crud.dto.CitaDto;
 
 
 public class ListAllCitasById {
-private String SQL = "select id, id_paciente, nombre, apellidos, hora_inicio, dni from public.cita c, public.paciente p where c.id_paciente=p.id and c.id_medico=?";
+private String SQL = "select id, id_paciente, nombre, apellidos, hora_inicio, hora_fin, dni from public.cita c, public.paciente p where c.id_paciente=p.id and c.id_medico=?";
 
 	
 	private int id_medico;
@@ -40,6 +40,7 @@ private String SQL = "select id, id_paciente, nombre, apellidos, hora_inicio, dn
 				cita.namePaciente=rs.getString("nombre");
 				cita.surnamePaciente=rs.getString("apellidos");
 				cita.horaInicio=rs.getString("hora_inicio");
+				cita.horaFinal=rs.getString("hora_fin");
 				result.add(cita);
 			}
 			pst.close();

@@ -125,7 +125,6 @@ public class VentanaPrincipal extends JFrame {
 	private JComboBox<String> cbPacientes;
 	private JButton btHistorialA;
 	private JButton btAtrasA;
-	private JButton btContacto;
 	private JButton btCausa;
 	private JButton btPrescripcion;
 
@@ -934,7 +933,6 @@ public class VentanaPrincipal extends JFrame {
 			pnVerCitas.add(getCbPacientes());
 			pnVerCitas.add(getBtHistorialA());
 			pnVerCitas.add(getBtAtrasA());
-			pnVerCitas.add(getBtContacto());
 		}
 		return pnVerCitas;
 	}
@@ -1037,27 +1035,6 @@ public class VentanaPrincipal extends JFrame {
 			btAtrasA.setBounds(124, 380, 117, 29);
 		}
 		return btAtrasA;
-	}
-	private JButton getBtContacto() {
-		if (btContacto == null) {
-			btContacto = new JButton("Asignar contacto");
-			btContacto.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					idPaciente=idsPaciente[getCbPacientes().getSelectedIndex()];
-					idCita=idsCita[getCbPacientes().getSelectedIndex()];
-					ventanaContacto();
-				}
-			});
-			btContacto.setBounds(469, 179, 166, 29);
-		}
-		return btContacto;
-	}
-	
-	private void ventanaContacto() {
-		VentanaContacto v = new VentanaContacto(this, idCita, new ListAllCitasByIdAction(idMedico).execute().get(getCbPacientes().getSelectedIndex()).idPaciente);
-		v.setLocationRelativeTo(this);
-		v.setModal(true);
-		v.setVisible(true);
 	}
 	
 	private void ventanaCausas() {

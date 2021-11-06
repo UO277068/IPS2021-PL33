@@ -7,14 +7,13 @@ import java.sql.SQLException;
 import Logica.DataBaseManager;
 
 public class AddContactoCita {
-	 private String id;
+	 private int id;
 	  private String contacto;
 	  
 	  private String SQL = "update public.cita set contacto=? where id=?";
 	  
-	  public AddContactoCita(String id, String contacto) 
+	  public AddContactoCita(int id, String contacto) 
 	  {
-	    if(id==null) {throw new RuntimeException("Cita en capa logica es null");}
 	   this.contacto=contacto;
 	   this.id=id;
 	        
@@ -29,7 +28,7 @@ public class AddContactoCita {
 				
 				pst = c.prepareStatement(SQL);
 				pst.setString(1, contacto);
-				pst.setString(2,id);
+				pst.setInt(2,id);
 				
 				
 				pst.executeUpdate();

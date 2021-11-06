@@ -74,8 +74,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void InsertCita(CitaDto cita) {
-		new InsertCita(cita).execute();
+	public int InsertCita(CitaDto cita) {
+		return new InsertCita(cita).execute();
 		
 	}
 
@@ -113,7 +113,7 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void AddContactoCita(String id, String contacto) {
+	public void AddContactoCita(int id, String contacto) {
 		new AddContactoCita(id,contacto).execute();
 		
 	}

@@ -27,7 +27,7 @@ public interface CitaCrudService {
 	//Rober
 	List<JornadaDto> listJornadaLaboralByMedico(String id);
 	List<CitaDto> ListCitasByMedico(String id);
-	void InsertCita(CitaDto cita);
+	int InsertCita(CitaDto cita);
 	List<CitaDto> listAllCitas();
 	void EnviarEmail(String correo,PacienteDto paciente,CitaDto cita);
 	//fer
@@ -35,7 +35,7 @@ public interface CitaCrudService {
 	List<CitaDto> listAllCausas();
 	void AddPrescripcion(String id, String prescripcion);
 	List<CitaDto> listAllPrescripcion();
-	void AddContactoCita(String id, String contacto);
+	void AddContactoCita(int id, String contacto);
 	String getContactoByIdPaciente(String id);
 	void updateCausasInHistorial(String id, String idPaciente, String causa);
 	void updatePrescripcionInHistorial(String id, String prescripcion);

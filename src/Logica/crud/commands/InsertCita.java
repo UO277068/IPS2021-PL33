@@ -22,7 +22,7 @@ public class InsertCita
         
   }
    
-  public void execute() 
+  public int execute() 
    {
 	   Connection c = null;
 		PreparedStatement pst = null;
@@ -50,12 +50,15 @@ public class InsertCita
 
 			pst.close();
 			
+			return calculateId()+1;
+			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 		finally {
 			if (c!=null) try{c.close();;} catch (SQLException e) {}
 		}
+		
    }
   
   public int calculateId() {

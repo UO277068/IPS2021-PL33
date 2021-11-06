@@ -6,13 +6,13 @@ import Logica.crud.CitaCrudService;
 public class AddContactoCitaAction {
 
 	 private CitaCrudService service = BusinessFactory.forCitaCrudService();
-	 private String id;
+	 private int id;
 	 private String contacto;
 		
-	public AddContactoCitaAction( String id, String contacto) 
+	public AddContactoCitaAction( int idCita, String contacto) 
 	{
 	   this.contacto=contacto;
-	   this.id=id;
+	   this.id=idCita;
 	}
 
 		public void execute(){

@@ -25,7 +25,12 @@
 			<attribute name="maven.pomderived" value="true" />
 		</attributes>
 	</classpathentry>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="lib/hsqldb.jar" />
 	<classpathentry kind="lib" path="Multimedia" />
 	<classpathentry kind="output" path="target/classes" />
+=======
+	<classpathentry kind="lib" path="lib/hsqldb.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+>>>>>>> refs/heads/master
 </classpath>

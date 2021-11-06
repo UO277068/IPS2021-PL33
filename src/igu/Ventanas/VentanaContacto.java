@@ -5,15 +5,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
 import igu.action.AddContactoCitaAction;
 import igu.action.GetContactoByIdPacienteAction;
+import javax.swing.JComboBox;
 
 public class VentanaContacto extends JDialog {
 	
@@ -32,26 +35,24 @@ public class VentanaContacto extends JDialog {
 	private JButton btAceptar;
 	private JButton btSalir;
 	
-	List<PacienteDto> pacientes;
-	List<MedicoDto> medicos;
+	PacienteDto paciente;
+	int idCita;
 	
-	String contacto;
-	String numCita;
-	String idPaciente;
-	
-	private VentanaPrincipal ventanaPrincipal;
-	
-	public VentanaContacto(VentanaPrincipal vRober, String numCita, String idPaciente) {
-		this.ventanaPrincipal = vRober;
-		this.idPaciente = idPaciente;
-		this.numCita=numCita;
-		
-		this.medicos = getVentanaPrincipal().listamedicos;
+	String[] listPrefijos;
 
-		this.pacientes = getVentanaPrincipal().listapacientes;
+	
+	private VentanaCreaCitas ventanaPrincipal;
+	private JComboBox<String> cbPrefijos;
+	
+	public VentanaContacto(VentanaCreaCitas vRober,int idCita, PacienteDto paciente) {
+		this.ventanaPrincipal = vRober;
+		this.paciente = paciente;
+		this.idCita=idCita;
+		
+		listPrefijos = inicializaPrefijos();
 		
 		getContentPane().setLayout(null);
-		setBounds(100,100,450,320);
+		setBounds(100,100,501,340);
 		getContentPane().add(getLbPaciente());
 		getContentPane().add(getTxtPaciente());
 		getContentPane().add(getLbContacto());
@@ -61,8 +62,20 @@ public class VentanaContacto extends JDialog {
 		getContentPane().add(getBtAceptarCambio());
 		getContentPane().add(getBtAceptar());
 		getContentPane().add(getBtSalir());
+		getContentPane().add(getCbPrefijos());
 		
 		
+		
+		
+	}
+	private String[] inicializaPrefijos() {
+		String[] ret = new String[10];
+		ret[0]="+34"; ret[1]="";
+		ret[2]= "+1"; ret[3]= "+49";
+		ret[4]= "+39"; ret[5]= "+44";
+		ret[6]="+7";   ret[7]="+351";
+		
+		return ret;
 	}
 	private JLabel getLbPaciente() {
 		if (lbPaciente == null) {
@@ -72,14 +85,14 @@ public class VentanaContacto extends JDialog {
 		return lbPaciente;
 	}
 	
-	public VentanaPrincipal getVentanaPrincipal() {
+	public VentanaCreaCitas getVentanaPrincipal() {
 		return ventanaPrincipal;
 	}
 	
 	private JTextField getTxtPaciente() {
 		if (txtPaciente == null) {
 			txtPaciente = new JTextField();
-			txtPaciente.setText((String) getVentanaPrincipal().getCbPacientes().getSelectedItem());
+			txtPaciente.setText("" + paciente.name + " " + paciente.surname);
 			txtPaciente.setBackground(Color.WHITE);
 			txtPaciente.setEditable(false);
 			txtPaciente.setBounds(158, 39, 255, 27);
@@ -97,11 +110,11 @@ public class VentanaContacto extends JDialog {
 	private JTextField getTxtContacto() {
 		if (txtContacto == null) {
 			txtContacto = new JTextField();
-			String contacto = new GetContactoByIdPacienteAction(idPaciente).execute();
+			String contacto = paciente.contacto;
 			txtContacto.setText(contacto);
 			txtContacto.setBackground(Color.WHITE);
 			txtContacto.setEditable(false);
-			txtContacto.setBounds(158, 106, 86, 27);
+			txtContacto.setBounds(158, 106, 147, 27);
 			txtContacto.setColumns(10);
 		}
 		return txtContacto;
@@ -118,7 +131,7 @@ public class VentanaContacto extends JDialog {
 			txtNuevoContacto = new JTextField();
 			txtNuevoContacto.setColumns(10);
 			txtNuevoContacto.setBackground(Color.WHITE);
-			txtNuevoContacto.setBounds(158, 159, 97, 27);
+			txtNuevoContacto.setBounds(158, 211, 147, 27);
 		}
 		return txtNuevoContacto;
 	}
@@ -127,11 +140,19 @@ public class VentanaContacto extends JDialog {
 			btAceptarCambio = new JButton("Aceptar cambio");
 			btAceptarCambio.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					new AddContactoCitaAction(numCita, getTxtNuevoContacto().getText()).execute();
-					dispose();
+					String prefijo = getCbPrefijos().getSelectedItem().toString();
+					if(!prefijo.matches("[+-]?\\d{1,5}"))
+						JOptionPane.showMessageDialog(null, "El prefijo seleccionado no es valido.");
+					else if(!getTxtNuevoContacto().getText().matches("\\d*") ||getTxtNuevoContacto().getText().equals("")) 
+						JOptionPane.showMessageDialog(null, "El número de teléfono no es valido.");
+					else {
+						prefijo+= getTxtNuevoContacto().getText();
+						new AddContactoCitaAction(idCita, prefijo).execute();
+						dispose();
+					}
 				}
 			});
-			btAceptarCambio.setBounds(277, 158, 147, 27);
+			btAceptarCambio.setBounds(328, 159, 147, 27);
 		}
 		return btAceptarCambio;
 	}
@@ -140,11 +161,15 @@ public class VentanaContacto extends JDialog {
 			btAceptar = new JButton("Aceptar");
 			btAceptar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					new AddContactoCitaAction(numCita, getTxtContacto().getText());
-					dispose();
+					if(!getTxtContacto().getText().matches("[+-]?\\d*") || getTxtContacto().getText().equals("")) 
+						JOptionPane.showMessageDialog(null, "El número de teléfono del paciente no es valido.");
+					else{
+						new AddContactoCitaAction(idCita, getTxtContacto().getText()).execute();;
+						dispose();
+					}
 				}
 			});
-			btAceptar.setBounds(277, 105, 147, 27);
+			btAceptar.setBounds(328, 106, 147, 27);
 		}
 		return btAceptar;
 	}
@@ -156,8 +181,17 @@ public class VentanaContacto extends JDialog {
 					dispose();
 				}
 			});
-			btSalir.setBounds(315, 228, 97, 27);
+			btSalir.setBounds(378, 251, 97, 27);
 		}
 		return btSalir;
+	}
+	private JComboBox<String> getCbPrefijos() {
+		if (cbPrefijos == null) {
+			cbPrefijos = new JComboBox();
+			cbPrefijos.setEditable(true);
+			cbPrefijos.setBounds(91, 213, 57, 22);
+			cbPrefijos.setModel(new DefaultComboBoxModel<String>((listPrefijos)));
+		}
+		return cbPrefijos;
 	}
 }

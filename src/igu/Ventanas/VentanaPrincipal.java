@@ -52,6 +52,9 @@ import igu.action.ListDiagnosticoByIdAction;
 import igu.action.ListVacunaByIdAction;
 import igu.action.UpdateAcudioCitaAction;
 import igu.action.UpdateHoraEntradaSalidaAction;
+import javax.swing.JCheckBox;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 
 
@@ -138,7 +141,18 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane scInfo;
 	private JTextArea txInfo;
 	List<CitaDto> listaFiltrada;
-
+	private JCheckBox chLunes;
+	private JCheckBox chMartes;
+	private JCheckBox chMiercoles;
+	private JCheckBox chJueves;
+	private JCheckBox chViernes;
+	private JCheckBox chSabado;
+	private JCheckBox chDomingo;
+	
+	private int diaDesde;
+	private int diaHasta;
+	
+	List<Boolean> diasSeleccionados = new ArrayList<>();
 
 
 	
@@ -167,6 +181,9 @@ public class VentanaPrincipal extends JFrame {
 		//Atributos
 		this.listamedicos=new ListAllMedicosAction().execute();
 		this.listapacientes=new ListAllPacientesAction().execute();
+		for (int i = 0; i < 7; i++) {
+			diasSeleccionados.add(false);
+		}
 		//
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 918, 482);
@@ -440,6 +457,13 @@ public class VentanaPrincipal extends JFrame {
 			pnHorario.add(getCbMinutosH());
 			pnHorario.add(getCbOpcion());
 			pnHorario.add(getBtnAtras());
+			pnHorario.add(getChLunes());
+			pnHorario.add(getChMartes());
+			pnHorario.add(getChMiercoles());
+			pnHorario.add(getChJueves());
+			pnHorario.add(getChViernes());
+			pnHorario.add(getChSabado());
+			pnHorario.add(getChDomingo());
 		}
 		return pnHorario;
 	}
@@ -450,14 +474,10 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					Timestamp d1 = new Timestamp(getDcDesde().getDate().getTime());
 					Timestamp d2 = new Timestamp(getDcHasta().getDate().getTime());
-//					d1.setHours((int)getCbHoraD().getSelectedItem());
-//					d1.setMinutes((int)getCbMinutosD().getSelectedItem());
-//					d2.setHours((int)getCbHoraH().getSelectedItem());
-//					d2.setMinutes((int)getCbMinutosH().getSelectedItem());
-					new AddHorarioAction(d1, d2,getCbOpcion().getSelectedIndex(), getList().getSelectedIndices()).execute();
+					new AddHorarioAction(d1, d2,diasSeleccionados, getList().getSelectedIndices()).execute();
 				}
 			});
-			btAsignarHorario.setBounds(344, 276, 143, 29);
+			btAsignarHorario.setBounds(344, 306, 143, 29);
 		}
 		return btAsignarHorario;
 	}
@@ -518,28 +538,187 @@ public class VentanaPrincipal extends JFrame {
 	private JDateChooser getDcDesde() {
 		if (dcDesde == null) {
 			dcDesde = new JDateChooser();
-			dcDesde.setBounds(149, 148, 165, 26);
+			dcDesde.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					if(dcDesde.getDate()!=null) {
+						if(diaDesde==1 && diaHasta!=1) {
+							getChLunes().setSelected(false);
+						}
+						else if(diaDesde==2 && diaHasta!=2) {
+							getChMartes().setSelected(false);
+						}
+						else if(diaDesde==3 && diaHasta!=3) {
+							getChMiercoles().setSelected(false);
+						}
+						else if(diaDesde==4 && diaHasta!=4) {
+							getChJueves().setSelected(false);
+						}
+						else if(diaDesde==5 && diaHasta!=5) {
+							getChViernes().setSelected(false);
+						}
+						else if(diaDesde==6 && diaHasta!=6) {
+							getChSabado().setSelected(false);
+						}
+						else if(diaDesde==0 && diaHasta!=0) {
+							getChDomingo().setSelected(false);
+						}
+						diaDesde=dcDesde.getDate().getDay();
+						if(diaDesde==1) {
+							getChLunes().setSelected(true);
+						}
+						else if(diaDesde==2) {
+							getChMartes().setSelected(true);
+						}
+						else if(diaDesde==3) {
+							getChMiercoles().setSelected(true);
+						}
+						else if(diaDesde==4) {
+							getChJueves().setSelected(true);
+						}
+						else if(diaDesde==5) {
+							getChViernes().setSelected(true);
+						}
+						else if(diaDesde==6) {
+							getChSabado().setSelected(true);
+						}
+						else if(diaDesde==0) {
+							getChDomingo().setSelected(true);
+						}
+					}
+				}
+			});
+			dcDesde.setBounds(149, 178, 165, 26);
 		}
 		return dcDesde;
 	}
 	private JDateChooser getDcHasta() {
 		if (dcHasta == null) {
 			dcHasta = new JDateChooser();
-			dcHasta.setBounds(149, 197, 165, 26);
+			dcHasta.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					if(dcHasta.getDate()!=null) {
+						
+						if(diaHasta==1 && diaDesde!=1) {
+							getChLunes().setSelected(false);
+						}
+						else if(diaHasta==2 && diaDesde!=2) {
+							getChMartes().setSelected(false);
+						}
+						else if(diaHasta==3 && diaDesde!=3) {
+							getChMiercoles().setSelected(false);
+						}
+						else if(diaHasta==4 && diaDesde!=4) {
+							getChJueves().setSelected(false);
+						}
+						else if(diaHasta==5 && diaDesde!=5) {
+							getChViernes().setSelected(false);
+						}
+						else if(diaHasta==6 && diaDesde!=6) {
+							getChSabado().setSelected(false);
+						}
+						else if(diaHasta==0 && diaDesde!=0) {
+							getChDomingo().setSelected(false);
+						}
+						diaHasta=dcHasta.getDate().getDay();
+						if(diaHasta==1) {
+							getChLunes().setSelected(true);
+						}
+						else if(diaHasta==2) {
+							getChMartes().setSelected(true);
+						}
+						else if(diaHasta==3) {
+							getChMiercoles().setSelected(true);
+						}
+						else if(diaHasta==4) {
+							getChJueves().setSelected(true);
+						}
+						else if(diaHasta==5) {
+							getChViernes().setSelected(true);
+						}
+						else if(diaHasta==6) {
+							getChSabado().setSelected(true);
+						}
+						else if(diaHasta==0) {
+							getChDomingo().setSelected(true);
+						}
+						
+						if(getCbOpcion().getSelectedIndex()==0) {
+							actualizarDias(diaDesde, diaHasta);
+						}
+					}
+				}
+			});
+			dcHasta.setBounds(149, 227, 165, 26);
 		}
 		return dcHasta;
+	}
+	
+	void actualizarDias(int desde, int hasta) {
+		
+		getChLunes().setSelected(false);
+		getChMartes().setSelected(false);
+		getChMiercoles().setSelected(false);
+		getChJueves().setSelected(false);
+		getChViernes().setSelected(false);
+		getChSabado().setSelected(false);
+		getChDomingo().setSelected(false);
+		Timestamp d1 = new Timestamp(getDcDesde().getDate().getTime());
+		Timestamp d2 = new Timestamp(getDcHasta().getDate().getTime());
+		d1.setDate(d1.getDate()+7);
+		if(d2.after(d1)) {
+			getChLunes().setSelected(true);
+			getChMartes().setSelected(true);
+			getChMiercoles().setSelected(true);
+			getChJueves().setSelected(true);
+			getChViernes().setSelected(true);
+			getChSabado().setSelected(true);
+			getChDomingo().setSelected(true);
+		}
+		else {
+		
+			for (int i = desde; i <= hasta+7; i++) {
+				int c = i;
+				if(i-7>=0)
+					c=c-7;
+				if(c==1) {
+					getChLunes().setSelected(true);
+				}
+				else if(c==2) {
+					getChMartes().setSelected(true);
+				}
+				else if(c==3) {
+					getChMiercoles().setSelected(true);
+				}
+				else if(c==4) {
+					getChJueves().setSelected(true);
+				}
+				else if(c==5) {
+					getChViernes().setSelected(true);
+				}
+				else if(c==6) {
+					getChSabado().setSelected(true);
+				}
+				else if(c==0) {
+					getChDomingo().setSelected(true);
+				}
+				
+				if(c==hasta)
+					break;
+			}
+	
+		}
 	}
 	private JLabel getLbDesde() {
 		if (lbDesde == null) {
 			lbDesde = new JLabel("Desde:");
-			lbDesde.setBounds(90, 158, 61, 16);
+			lbDesde.setBounds(90, 188, 61, 16);
 		}
 		return lbDesde;
 	}
 	private JLabel getLbHasta() {
 		if (lbHasta == null) {
 			lbHasta = new JLabel("Hasta:");
-			lbHasta.setBounds(90, 207, 61, 16);
+			lbHasta.setBounds(90, 237, 61, 16);
 		}
 		return lbHasta;
 	}
@@ -550,7 +729,7 @@ public class VentanaPrincipal extends JFrame {
 				h[i]=i;
 			}
 			cbHoraD = new JComboBox<Integer>();
-			cbHoraD.setBounds(342, 147, 72, 27);
+			cbHoraD.setBounds(342, 177, 72, 27);
 			cbHoraD.setModel(new DefaultComboBoxModel<Integer>(h));
 		}
 		return cbHoraD;
@@ -562,7 +741,7 @@ public class VentanaPrincipal extends JFrame {
 				m[j]=j;
 			}
 			cbMinutosD = new JComboBox<Integer>();
-			cbMinutosD.setBounds(415, 148, 72, 27);
+			cbMinutosD.setBounds(415, 178, 72, 27);
 			cbMinutosD.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutosD;
@@ -574,7 +753,7 @@ public class VentanaPrincipal extends JFrame {
 				h[i]=i;
 			}
 			cbHoraH = new JComboBox<Integer>();
-			cbHoraH.setBounds(342, 197, 72, 27);
+			cbHoraH.setBounds(342, 227, 72, 27);
 			cbHoraH.setModel(new DefaultComboBoxModel<Integer>(h));
 		}
 		return cbHoraH;
@@ -586,7 +765,7 @@ public class VentanaPrincipal extends JFrame {
 				m[j]=j;
 			}
 			cbMinutosH = new JComboBox<Integer>();
-			cbMinutosH.setBounds(415, 196, 72, 27);
+			cbMinutosH.setBounds(415, 226, 72, 27);
 			cbMinutosH.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutosH;
@@ -594,8 +773,15 @@ public class VentanaPrincipal extends JFrame {
 	private JComboBox<String> getCbOpcion() {
 		if (cbOpcion == null) {
 			cbOpcion = new JComboBox<String>();
-			cbOpcion.setModel(new DefaultComboBoxModel<String>(new String[] {"Seleccionar opcion", "Todos los dias", "Cada 7 dias"}));
-			cbOpcion.setBounds(90, 277, 193, 26);
+			cbOpcion.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(cbOpcion.getSelectedIndex()==0) {
+						actualizarDias(diaDesde, diaHasta);
+					}
+				}
+			});
+			cbOpcion.setModel(new DefaultComboBoxModel<String>(new String[] {"Todos los dias", "Personalizado"}));
+			cbOpcion.setBounds(90, 307, 193, 26);
 		}
 		return cbOpcion;
 	}
@@ -1009,5 +1195,159 @@ public class VentanaPrincipal extends JFrame {
 			txInfo.setBorder(new TitledBorder(null, "Informacion cita:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		}
 		return txInfo;
+	}
+	private JCheckBox getChLunes() {
+		if (chLunes == null) {
+			chLunes = new JCheckBox("Lunes");
+			chLunes.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==1 || diaDesde==1) && !chLunes.isSelected())
+						chLunes.setSelected(true);
+				}
+			});
+			chLunes.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chLunes.isSelected())
+						diasSeleccionados.set(1, true);
+					else
+						diasSeleccionados.set(1, false);
+				}
+			});
+			chLunes.setBounds(90, 120, 78, 23);
+		}
+		return chLunes;
+	}
+	private JCheckBox getChMartes() {
+		if (chMartes == null) {
+			chMartes = new JCheckBox("Martes");
+			chMartes.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==2 || diaDesde==2) && !chMartes.isSelected())
+						chMartes.setSelected(true);
+				}
+			});
+			chMartes.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chMartes.isSelected())
+						diasSeleccionados.set(2, true);
+					else
+						diasSeleccionados.set(2, false);
+				}
+			});
+			chMartes.setBounds(173, 121, 81, 23);
+		}
+		return chMartes;
+	}
+	private JCheckBox getChMiercoles() {
+		if (chMiercoles == null) {
+			chMiercoles = new JCheckBox("Miercoles");
+			chMiercoles.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==3 || diaDesde==3) && !chMiercoles.isSelected())
+						chMiercoles.setSelected(true);
+				}
+			});
+			chMiercoles.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chMiercoles.isSelected())
+						diasSeleccionados.set(3, true);
+					else
+						diasSeleccionados.set(3, false);
+				}
+			});
+			chMiercoles.setBounds(266, 121, 101, 23);
+		}
+		return chMiercoles;
+	}
+	private JCheckBox getChJueves() {
+		if (chJueves == null) {
+			chJueves = new JCheckBox("Jueves");
+			chJueves.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==4 || diaDesde==4) && !chJueves.isSelected())
+						chJueves.setSelected(true);
+				}
+			});
+			chJueves.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chJueves.isSelected())
+						diasSeleccionados.set(4, true);
+					else
+						diasSeleccionados.set(4, false);
+				}
+			});
+			chJueves.setBounds(371, 121, 89, 23);
+		}
+		return chJueves;
+	}
+	private JCheckBox getChViernes() {
+		if (chViernes == null) {
+			chViernes = new JCheckBox("Viernes");
+			chViernes.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==5 || diaDesde==5) && !chViernes.isSelected())
+						chViernes.setSelected(true);
+				}
+			});
+			chViernes.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chViernes.isSelected())
+						diasSeleccionados.set(5, true);
+					else
+						diasSeleccionados.set(5, false);
+				}
+			});
+			chViernes.setBounds(459, 121, 89, 23);
+		}
+		return chViernes;
+	}
+	private JCheckBox getChSabado() {
+		if (chSabado == null) {
+			chSabado = new JCheckBox("Sabado");
+			chSabado.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==6 || diaDesde==6) && !chSabado.isSelected())
+						chSabado.setSelected(true);
+				}
+			});
+			chSabado.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chSabado.isSelected())
+						diasSeleccionados.set(6, true);
+					else
+						diasSeleccionados.set(6, false);
+				}
+			});
+			chSabado.setBounds(549, 121, 89, 23);
+		}
+		return chSabado;
+	}
+	private JCheckBox getChDomingo() {
+		if (chDomingo == null) {
+			chDomingo = new JCheckBox("Domingo");
+			chDomingo.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if((diaHasta==0 || diaDesde==0) && !chDomingo.isSelected())
+						chDomingo.setSelected(true);
+				}
+			});
+			chDomingo.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if(chDomingo.isSelected())
+						diasSeleccionados.set(0, true);
+					else
+						diasSeleccionados.set(0, false);
+				}
+			});
+			chDomingo.setBounds(641, 121, 120, 23);
+		}
+		return chDomingo;
 	}
 }

@@ -57,8 +57,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void addHorario(Timestamp d1, Timestamp d2, int opcion, int[] ids_medicos) throws Exception {
-		new AddHorario(d1, d2, opcion, ids_medicos).execute();
+	public void addHorario(Timestamp d1, Timestamp d2, List<Boolean> dias, int[] ids_medicos) throws Exception {
+		new AddHorario(d1, d2, dias, ids_medicos).execute();
 		
 	}
     //Rober

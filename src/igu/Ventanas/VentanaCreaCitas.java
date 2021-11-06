@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -52,10 +53,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 public class VentanaCreaCitas extends JDialog {
 
@@ -82,7 +79,6 @@ public class VentanaCreaCitas extends JDialog {
 	private JLabel lblPaciente;
 	private JTextField textFieldFiltroPaciente;
 	private JPanel panelMedicos;
-	private JTextField textFieldFiltroMedico;
 	private VentanaPrincipal ventana;
 	private JCheckBox chckbxUrgente;
 	private JPanel panelListado;
@@ -90,12 +86,6 @@ public class VentanaCreaCitas extends JDialog {
 	private JScrollPane scrollPaneMedicosSeleccionados;
 	private JList<String> listMedicos;
 	private JList<String> listSeleccionados;
-	
-	//Atributos
-	List<String> medicosselectModel;
-	List<PacienteDto> pacientes;
-	List<MedicoDto> medicos;
-	List<MedicoDto> medicosSeleccionados;
 	private JPanel panelBotonesMedico;
 	private JButton btnAñadirMedico;
 	private JButton btnEliminarMedico;
@@ -117,16 +107,29 @@ public class VentanaCreaCitas extends JDialog {
 	private JButton btnHorariosMedicos;
 	private JScrollPane scrollPanePacientes;
 	private JList<String> listPaciente;
+	private JPanel panelFiltroEspecialidad;
+	private JTextField textFieldFiltroMedico;
+	private JCheckBox chckbxEspecialidad;
+	
+	//Atributos
+	List<String> medicosselectModel;
+	List<PacienteDto> pacientes;
+	List<MedicoDto> medicos;
+	List<MedicoDto> medicosSeleccionados;
+	String[] especialidades;
+	String SelectedEspecialidad;
+	private JTextField txtEspecialidadSeleccionada;
+	
 
 	/**
 	 * Create the application.
 	 */
-	public VentanaCreaCitas(VentanaPrincipal pedro) 
+	public VentanaCreaCitas(VentanaPrincipal principal) 
 	{ 
 		//setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
 		setTitle("Hospital:Crear Una cita");
 		setModal(true);
-		this.ventana=pedro;
+		this.ventana=principal;
 		initialize();
 	}
 	
@@ -147,6 +150,11 @@ public class VentanaCreaCitas extends JDialog {
 				this.medicosselectModel= new ArrayList<String>();
 				
 				this.medicosSeleccionados = new ArrayList<MedicoDto>();
+				
+				this.especialidades=obtenerEspecialidades();
+				
+				this.SelectedEspecialidad=null;
+				
 		this.setMinimumSize(new Dimension(800, 520));
 		this.setBounds(100, 100, 648, 492);
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -337,34 +345,12 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelMedicos == null) {
 			panelMedicos = new JPanel();
 			panelMedicos.setLayout(new BorderLayout(0, 0));
-			panelMedicos.add(getTextFieldFiltroMedico(), BorderLayout.NORTH);
 			panelMedicos.add(getPanelListado(), BorderLayout.CENTER);
 			panelMedicos.add(getPanelBotonesMedico(), BorderLayout.SOUTH);
 			panelMedicos.add(getLblMedicos(), BorderLayout.WEST);
+			panelMedicos.add(getPanelFiltroEspecialidad(), BorderLayout.NORTH);
 		}
 		return panelMedicos;
-	}
-	private JTextField getTextFieldFiltroMedico() {
-		if (textFieldFiltroMedico == null) {
-			textFieldFiltroMedico = new JTextField();
-			textFieldFiltroMedico.setName("FiltroMedico");
-			textFieldFiltroMedico.setLocale(new Locale("es", "ES"));
-			textFieldFiltroMedico.setActionCommand("");
-			textFieldFiltroMedico.setToolTipText("Busqueda por nombre o dni");
-			textFieldFiltroMedico.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
-			textFieldFiltroMedico.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyReleased(KeyEvent e) 
-				{
-					String[] medicosstr = medicosToString(filtrarListaMedicos(medicos,getTextFieldFiltroMedico().getText()));
-					ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
-					listMedicos.setModel(model);
-				}
-
-			});
-			textFieldFiltroMedico.setColumns(10);
-		}
-		return textFieldFiltroMedico;
 	}
 	
 	private JCheckBox getChckbxUrgente() {
@@ -394,8 +380,53 @@ public class VentanaCreaCitas extends JDialog {
 		{
 			scrollPaneMedicosSeleccionados = new JScrollPane();
 			scrollPaneMedicosSeleccionados.setViewportView(getListSeleccionados());
+			scrollPaneMedicosSeleccionados.setColumnHeaderView(getTxtEspecialidadSeleccionada());
 		}
 		return scrollPaneMedicosSeleccionados;
+	}
+	
+	private JCheckBox getChckbxEspecialidad() {
+		if (chckbxEspecialidad == null) {
+			chckbxEspecialidad = new JCheckBox("Especialidades");
+			chckbxEspecialidad.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					getTextFieldFiltroMedico().setText("");
+					if(chckbxEspecialidad.isSelected()) {
+						getLblMedicos().setText("Especialidades:");
+						ListModel<String> model = new DefaultComboBoxModel<String>(especialidades);
+						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+						listMedicos.setModel(model);
+						
+						btnAñadirMedico.setText("Añadir especialidad");
+						
+						btnEliminarMedico.setText("Eliminar especialidad");
+						
+						if(SelectedEspecialidad==null) 
+						{
+						  btnEliminarMedico.setEnabled(false);
+						}
+						
+						
+					}else {
+						getLblMedicos().setText("Medicos:");
+						String[] medicosstr = medicosToString(medicos);
+						ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+						listMedicos.setModel(model);
+						
+						btnAñadirMedico.setText("Añadir medicos");
+						
+						btnEliminarMedico.setText("Eliminar medico seleccionado");
+						
+						btnEliminarMedico.setEnabled(true);
+
+						
+					}
+				}
+			});
+		}
+		return chckbxEspecialidad;
 	}
 	private JList<String> getListMedicos() {
 		if (listMedicos == null) {
@@ -438,6 +469,8 @@ public class VentanaCreaCitas extends JDialog {
 			btnAñadirMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
+				  if(!chckbxEspecialidad.isSelected()) {
+				  
 				   List<MedicoDto> l = obtenMedicosSeleccionados();
 				   for(MedicoDto medico : l) 
 				   {
@@ -449,10 +482,11 @@ public class VentanaCreaCitas extends JDialog {
 				   //Actualiza la lista de medicos seleccionados
 				   String[] mstr = medicosToString(medicosSeleccionados) ;
 				   getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
-				   
-				   
 				   //Actualiza la lista de medicos normal
 				   //for(Medico)
+				}else {
+					insertarEspecialidad(listMedicos.getSelectedValue());
+				}
 				}
 			});
 		}
@@ -465,12 +499,16 @@ public class VentanaCreaCitas extends JDialog {
 			btnEliminarMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
+					if(!chckbxEspecialidad.isSelected()) {
 					int i=getListSeleccionados().getSelectedIndex();
 					if(i>=0) {
 					medicosSeleccionados.remove(i);
 					String[] mstr = medicosToString(medicosSeleccionados)  ;
 					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
 					}
+				 }else {
+					 eliminarEspecialidad();
+				 }
 				}
 			});
 			
@@ -487,6 +525,8 @@ public class VentanaCreaCitas extends JDialog {
 					medicosSeleccionados.clear();
 					String[] mstr = medicosToString(medicosSeleccionados)  ;
 					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
+					eliminarEspecialidad();
+					
 				}
 			});
 		}
@@ -682,6 +722,44 @@ public class VentanaCreaCitas extends JDialog {
 		return listPaciente;
 	}
 	
+	private JPanel getPanelFiltroEspecialidad() {
+		if (panelFiltroEspecialidad == null) {
+			panelFiltroEspecialidad = new JPanel();
+			panelFiltroEspecialidad.setLayout(new BorderLayout(0, 0));
+			panelFiltroEspecialidad.add(getTextFieldFiltroMedico(), BorderLayout.CENTER);
+			panelFiltroEspecialidad.add(getChckbxEspecialidad(), BorderLayout.WEST);
+		}
+		return panelFiltroEspecialidad;
+	}
+	private JTextField getTextFieldFiltroMedico() {
+		if (textFieldFiltroMedico == null) {
+			textFieldFiltroMedico = new JTextField();
+			textFieldFiltroMedico.setName("FiltroMedico");
+			textFieldFiltroMedico.setLocale(new Locale("es", "ES"));
+			textFieldFiltroMedico.setActionCommand("");
+			textFieldFiltroMedico.setToolTipText("Busqueda por nombre o dni");
+			textFieldFiltroMedico.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			textFieldFiltroMedico.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) 
+				{
+					if(!chckbxEspecialidad.isSelected()) {
+					  String[] medicosstr = medicosToString(filtrarListaMedicos(medicos,getTextFieldFiltroMedico().getText()));
+					  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+					  listMedicos.setModel(model);
+					}else {
+					  String[] especialidadesFiltradas = filtrarEspecialidades(especialidades,getTextFieldFiltroMedico().getText());
+					  ListModel<String> model = new DefaultComboBoxModel<String>(especialidadesFiltradas);
+					  listMedicos.setModel(model);
+					}
+				}
+
+			});
+			textFieldFiltroMedico.setColumns(10);
+		}
+		return textFieldFiltroMedico;
+	}
+	
 	//Metodos privados
 	public void crearCita() 
 	{
@@ -695,11 +773,11 @@ public class VentanaCreaCitas extends JDialog {
 		
 		//Comprueba que la cita se establece dentro de la jornada laboral
 	    if(!compruebaJornada(medico.id)) {
-		 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" no puede atenderle a esa hora(Jornada Laboral)");
+		 respuesta=JOptionPane.showConfirmDialog(null,"El horario de la cita no forma parte de la jornada laboral del medico "+medico.name+" "+medico.surname+".","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 	    }
 		//Comprobacion de que el medico no tiene citas a esa hora
 		if(respuesta==JOptionPane.YES_OPTION && !compruebaHora(medico.id)) {
-			 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" tiene otra cita a esa hora");
+			 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" tiene otra cita a esa hora","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 		}
 		
 		if(respuesta==JOptionPane.YES_OPTION) {	
@@ -731,7 +809,12 @@ public class VentanaCreaCitas extends JDialog {
 		cita.preescripcion="";
 		cita.contacto=paciente.contacto; //Por defecto F.E.R
 		cita.acude="INDEFINIDO";
-		cita.Especialidad="NO DEFINIDA";
+		if(this.SelectedEspecialidad==null) 
+		{
+			cita.Especialidad="NO DEFINIDA";
+		}else {
+			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
+		}
 
 		new InsertCitaAction(cita).execute();
 		
@@ -871,7 +954,7 @@ public class VentanaCreaCitas extends JDialog {
 		String[] strMedicos = new String[medico.size()];
 		for(int i=0;i<medico.size();i++) 
 		{
-			strMedicos[i] =medico.get(i).name+"-"+medico.get(i).surname+"-"+medico.get(i).dni;
+			strMedicos[i] =medico.get(i).name+"-"+medico.get(i).surname+"-"+medico.get(i).dni+"-"+medico.get(i).especialidad;
 		}
 		return strMedicos;
 	}
@@ -934,7 +1017,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private boolean checkCamposVacios() {
 		//Compruba que se han seleccionado medicos
-		if(getListMedicos().isSelectionEmpty()) 
+		if(getListSeleccionados().getModel().getSize()==0) 
 		{
 			return false;
 		}
@@ -981,12 +1064,31 @@ public class VentanaCreaCitas extends JDialog {
 				listaFiltrada.add(m);
 			}
 			//Filtro por documento de identficacion
-			else if(m.dni.toUpperCase().startsWith(start)) 
+			else if(m.dni.toUpperCase().startsWith(start.toUpperCase())) 
 			{
+			    listaFiltrada.add(m);
+			}
+			else if(m.especialidad.toUpperCase().startsWith(start.toUpperCase())) {
 			    listaFiltrada.add(m);
 			}
 		}
 		return listaFiltrada;
+	}
+	
+	private String[] filtrarEspecialidades(String[] especialidades,String start) 
+	{
+	   String[] filtrostr;
+	   List<String> especialidad =  new ArrayList<String>(Arrays.asList(especialidades));
+	   List<String> filtro =  new ArrayList<String>();
+	   for(String ep :especialidad) 
+	   {
+		   if(ep.toUpperCase().startsWith(start.toUpperCase())) 
+		   {
+			  filtro.add(ep); 
+		   }
+	   }
+	   filtrostr = new String[filtro.size()];
+	   return filtro.toArray(filtrostr);
 	}
 	
 	private List<PacienteDto> filtrarListaPacientes(List<PacienteDto> paci, String start) 
@@ -1005,5 +1107,84 @@ public class VentanaCreaCitas extends JDialog {
 			}
 		}
 		return listaFiltrada;
+	}
+	
+	private String[] obtenerEspecialidades() 
+	{
+		String[] especialidades=new String[48];
+		especialidades[0]="Alergologia";
+		especialidades[1]="Anestesiologia";
+		especialidades[2]="Angiologia";
+		especialidades[3]="Analisis clinico";
+		especialidades[4]="Anatomia patologica";
+		especialidades[5]="Bioquimica clinica";
+		especialidades[6]="Cardiologia";
+		especialidades[7]="Cirugia Cardiaca";
+		especialidades[8]="Cirugia general";
+		especialidades[9]="Cirugia oral y maxilofacial";
+		especialidades[10]="Cirugia ortopedica";
+		especialidades[11]="Cirugia pediatrica";
+		especialidades[12]="Cirugia plastica";
+		especialidades[13]="Cirugia toracica";
+		especialidades[14]="Cirugia vascular";
+		especialidades[15]="Dermatologia";
+		especialidades[16]="Endocrinologia";
+		especialidades[17]="Estomatologia";
+		especialidades[18]="Farmacologia";
+		especialidades[19]="Gastroenterologia";
+		especialidades[20]="Genetica";
+		especialidades[21]="Geriatria";
+		especialidades[22]="Ginecologia";
+		especialidades[23]="Hematologia";
+		especialidades[24]="Hepatologia";
+		especialidades[25]="Infectologia";
+		especialidades[26]="Inmunologia";
+		especialidades[27]="Nefrologia";
+		especialidades[28]="Neumologia";
+		especialidades[29]="Neurologia";
+		especialidades[30]="Neurocirugia";
+		especialidades[31]="Nutriologia";
+		especialidades[32]="Medicina de emergencia";
+		especialidades[33]="Medicina familiar";
+		especialidades[34]="Medicina fisica";
+		especialidades[35]="Medicina intensiva";
+		especialidades[36]="Microbilogia";
+		especialidades[37]="Oncología Medica";
+		especialidades[38]="Oncología Radioterápica";
+		especialidades[39]="Oftalmologia";
+		especialidades[40]="Otorriolaringologia";
+		especialidades[41]="Pediatria";
+		especialidades[42]="Psiquiatria";
+		especialidades[43]="Reumatologia";
+		especialidades[44]="Toxicologia";
+		especialidades[45]="Traumatologia";
+		especialidades[46]="Urologia";
+		especialidades[47]="Radiologia";
+		
+		return especialidades;
+	}
+	
+	private void insertarEspecialidad(String e) 
+	{
+		this.SelectedEspecialidad=e;
+		getBtnEliminarMedico().setEnabled(true);
+	    getTxtEspecialidadSeleccionada().setText("Especialidad: "+e);
+	}
+	
+	private void eliminarEspecialidad() 
+	{
+		this.SelectedEspecialidad=null;
+		getBtnEliminarMedico().setEnabled(false);
+	    getTxtEspecialidadSeleccionada().setText("Especialidad: No determinada");
+
+ 	}
+
+	private JTextField getTxtEspecialidadSeleccionada() {
+		if (txtEspecialidadSeleccionada == null) {
+			txtEspecialidadSeleccionada = new JTextField();
+			txtEspecialidadSeleccionada.setText("Especialidad: No determinada");
+			txtEspecialidadSeleccionada.setColumns(10);
+		}
+		return txtEspecialidadSeleccionada;
 	}
 }

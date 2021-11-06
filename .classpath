@@ -21,6 +21,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/hsqldb.jar"/>
-	<classpathentry kind="lib" path="Multimedia"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

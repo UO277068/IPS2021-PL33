@@ -140,6 +140,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new UpdateAcudioCita(id, acude).execute();
 		
 	}
+
+	@Override
+	public void updateCita(String idMedico, Timestamp horaInicio, Timestamp horaFin, String idSala, String idCita) {
+		new UpdateCita(idMedico, horaInicio, horaFin, idSala, idCita).execute();
+		
+	}
 	
 	
 

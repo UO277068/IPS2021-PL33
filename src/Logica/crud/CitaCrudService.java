@@ -24,6 +24,7 @@ public interface CitaCrudService {
 	String listVacunaById(String id) throws Exception;
 	List<MedicoDto> listAllMedicos() throws Exception;
 	void addHorario(Timestamp d1, Timestamp d2, List<Boolean> dias, int[] ids_medicos) throws Exception;
+	void updateCita(String idMedico, Timestamp horaInicio, Timestamp horaFin, String idSala, String idCita);
 	//Rober
 	List<JornadaDto> listJornadaLaboralByMedico(String id);
 	List<CitaDto> ListCitasByMedico(String id);

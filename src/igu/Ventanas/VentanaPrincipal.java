@@ -13,9 +13,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
@@ -26,6 +26,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -41,20 +42,29 @@ import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.JornadaDto;
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
 import igu.action.AddHorarioAction;
+import igu.action.InsertCitaAction;
+import igu.action.ListAllCitasAction;
 import igu.action.ListAllCitasByIdAction;
 import igu.action.ListAllMedicosAction;
 import igu.action.ListAllPacientesAction;
+import igu.action.ListCitasByMedicoAction;
 import igu.action.ListDiagnosticoByIdAction;
+import igu.action.ListJornadaLaboralByMedicoAction;
 import igu.action.ListVacunaByIdAction;
 import igu.action.UpdateAcudioCitaAction;
+import igu.action.UpdateCitaAction;
 import igu.action.UpdateHoraEntradaSalidaAction;
 import javax.swing.JCheckBox;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 
 
@@ -152,6 +162,31 @@ public class VentanaPrincipal extends JFrame {
 	private int diaHasta;
 	
 	List<Boolean> diasSeleccionados = new ArrayList<>();
+	private JButton btnModificarCita;
+	private JPanel pnElegirMCita;
+	private JButton btModificar;
+	private JButton btnAtrasMC;
+	private JDateChooser dcCitaModifcar;
+	private JLabel lbFechaCitaModifcar;
+	private JScrollPane scCitasModifcar;
+	private JScrollPane scInfoModificar;
+	private JList<String> listModificarCita;
+	private JTextArea txInfoModificar;
+	private JPanel pnModificarCita;
+	private JScrollPane scInfoCita;
+	private JTextArea txInfoCita;
+	private JScrollPane scElegirMedico;
+	private JList<String> listaElegirMedico;
+	private JButton btElegirMedico;
+	private JLabel lbMHoraInicio;
+	private JLabel lbMHoraFin;
+	private JComboBox<Integer> cbMHoraInicio;
+	private JComboBox<Integer> cbMMinutosInicio;
+	private JComboBox<Integer> cbMHoraFin;
+	private JComboBox<Integer> cbMMinutosFin;
+	private JLabel lbMSala;
+	private JComboBox<Integer> cbMSala;
+	private JDateChooser dcModificarFecha;
 
 
 	
@@ -278,6 +313,17 @@ public class VentanaPrincipal extends JFrame {
 		
 	}
 	
+	private void mostrarPnModificarCita() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnModificarCita");	
+		
+	}
+	private void mostrarPnElegirMCita() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnElegirMCita");	
+		
+	}
+	
 	private void mostrarPnHistorial(){
 		CardLayout c = (CardLayout)getPnContenidos().getLayout();
 		c.show(getPnContenidos(), "PnHistorial");
@@ -327,6 +373,8 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnHorario(), "PnHorario");
 			pnContenidos.add(getPnAdministrador(), "PnAdministrador");
 			pnContenidos.add(getPnVerCitas(), "PnVerCitas");
+			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
+			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
 		}
 		return pnContenidos;
 	}
@@ -473,7 +521,11 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					Timestamp d1 = new Timestamp(getDcDesde().getDate().getTime());
 					Timestamp d2 = new Timestamp(getDcHasta().getDate().getTime());
-					new AddHorarioAction(d1, d2,diasSeleccionados, getList().getSelectedIndices()).execute();
+					String i = d1.toString().split(" ")[0]+" "+getCbHoraD().getSelectedIndex()+":"+getCbMinutosD().getSelectedIndex()+":00";
+					String f = d2.toString().split(" ")[0]+" "+getCbHoraH().getSelectedIndex()+":"+getCbMinutosH().getSelectedIndex()+":00";
+					Timestamp inicio = Timestamp.valueOf(i);
+					Timestamp fin = Timestamp.valueOf(f);
+					new AddHorarioAction(inicio, fin,diasSeleccionados, getList().getSelectedIndices()).execute();
 				}
 			});
 			btAsignarHorario.setBounds(344, 306, 143, 29);
@@ -796,10 +848,11 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPanelBotonesPrincipal() {
 		if (panelBotonesPrincipal == null) {
 			panelBotonesPrincipal = new JPanel();
-			panelBotonesPrincipal.setLayout(new GridLayout(0, 3, 0, 0));
+			panelBotonesPrincipal.setLayout(new GridLayout(0, 4, 0, 0));
 			panelBotonesPrincipal.add(getBtnHistorial());
 			panelBotonesPrincipal.add(getBtnCrearCita());
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
+			panelBotonesPrincipal.add(getBtnModificarCita());
 		}
 		return panelBotonesPrincipal;
 	}
@@ -1018,7 +1071,8 @@ public class VentanaPrincipal extends JFrame {
 		idsCita = new String[lista.size()];
 		idsPaciente = new String[lista.size()];
 		for (int i = 0; i < pacientes.length; i++) {
-			pacientes[i]=lista.get(i).namePaciente+" "+lista.get(i).surnamePaciente+" "+lista.get(i).horaInicio.split(":00.000")[0];
+			PacienteDto paciente = new ListPacienteById(lista.get(i).idPaciente).execute();
+			pacientes[i]=paciente.name+" "+paciente.surname+" "+lista.get(i).horaInicio.split(":00.000")[0];
 			idsCita[i]=lista.get(i).id;
 			idsPaciente[i]=lista.get(i).idPaciente;
 		}
@@ -1327,4 +1381,469 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return chDomingo;
 	}
+	private JButton getBtnModificarCita() {
+		if (btnModificarCita == null) {
+			btnModificarCita = new JButton("Modificar Cita");
+			btnModificarCita.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnElegirMCita();
+				}
+			});
+		}
+		return btnModificarCita;
+	}
+	private JPanel getPnElegirMCita() {
+		if (pnElegirMCita == null) {
+			pnElegirMCita = new JPanel();
+			pnElegirMCita.setLayout(null);
+			pnElegirMCita.add(getBtModificar());
+			pnElegirMCita.add(getBtnAtrasMC());
+			pnElegirMCita.add(getDcCitaModifcar());
+			pnElegirMCita.add(getLbFechaCitaModifcar());
+			pnElegirMCita.add(getScCitasModifcar());
+			pnElegirMCita.add(getScInfoModificar());
+		}
+		return pnElegirMCita;
+	}
+	private JButton getBtModificar() {
+		if (btModificar == null) {
+			btModificar = new JButton("Modificar");
+			btModificar.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnModificarCita();
+				}
+			});
+			btModificar.setBounds(393, 50, 117, 29);
+		}
+		return btModificar;
+	}
+	private JButton getBtnAtrasMC() {
+		if (btnAtrasMC == null) {
+			btnAtrasMC = new JButton("Atras");
+			btnAtrasMC.setBounds(155, 400, 89, 23);
+		}
+		return btnAtrasMC;
+	}
+	private JDateChooser getDcCitaModifcar() {
+		if (dcCitaModifcar == null) {
+			dcCitaModifcar = new JDateChooser();
+			dcCitaModifcar.setBounds(133, 50, 224, 26);
+			dcCitaModifcar.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+					lista = new ListAllCitasAction().execute();
+					listaFiltrada = new ArrayList<CitaDto>();
+					for (CitaDto cita : lista) {
+						if(getDcCitaModifcar().getDate()!=null) {
+							Timestamp m = Timestamp.from(getDcCitaModifcar().getDate().toInstant());
+							String string = m.toString().split(" ")[0];
+							if(Date.valueOf(string).compareTo(Date.valueOf(cita.horaInicio.split(" ")[0]))==0)
+									listaFiltrada.add(cita);
+						}
+					}
+					String[] pacientes= getPacientesCita(listaFiltrada);
+					ListModel<String> model = new DefaultComboBoxModel<String>(pacientes);
+					getListModificarCita().setModel(model);
+				}
+			});
+		}
+		return dcCitaModifcar;
+	}
+	private JLabel getLbFechaCitaModifcar() {
+		if (lbFechaCitaModifcar == null) {
+			lbFechaCitaModifcar = new JLabel("Fecha de la cita:");
+			lbFechaCitaModifcar.setBounds(29, 50, 101, 16);
+		}
+		return lbFechaCitaModifcar;
+	}
+	private JScrollPane getScCitasModifcar() {
+		if (scCitasModifcar == null) {
+			scCitasModifcar = new JScrollPane();
+			scCitasModifcar.setBounds(29, 109, 292, 110);
+			scCitasModifcar.setViewportView(getListModificarCita());
+		}
+		return scCitasModifcar;
+	}
+	private JScrollPane getScInfoModificar() {
+		if (scInfoModificar == null) {
+			scInfoModificar = new JScrollPane();
+			scInfoModificar.setBounds(333, 109, 273, 110);
+			scInfoModificar.setViewportView(getTxInfoModificar());
+		}
+		return scInfoModificar;
+	}
+	private JList<String> getListModificarCita() {
+		if (listModificarCita == null) {
+			listModificarCita = new JList<String>();
+			listModificarCita.addHierarchyListener(new HierarchyListener() {
+				public void hierarchyChanged(HierarchyEvent e) {
+					if(getListModificarCita().getSelectedIndex()!=-1) {
+						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+						getListaElegirMedico().setSelectedIndex(Integer.parseInt(cita.idMedico)-1);
+						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
+						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
+						getCbMHoraInicio().setSelectedIndex(Integer.parseInt(inicio.substring(0,2)));
+						getCbMHoraFin().setSelectedIndex(Integer.parseInt(salida.substring(0,2)));
+						getCbMMinutosInicio().setSelectedIndex(Integer.parseInt(inicio.substring(3,5)));
+						getCbMMinutosFin().setSelectedIndex(Integer.parseInt(salida.substring(3,5)));
+						getCbMSala().setSelectedIndex(Integer.parseInt(cita.idSala)-1);
+						getDcModificarFecha().setDate(getDcCitaModifcar().getDate());
+						idCita=cita.id;
+
+					}
+				}
+			});
+			listModificarCita.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					if(getListModificarCita().getSelectedIndex()!=-1) {
+						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+						String sala=cita.idSala;
+						int idMedico = Integer.parseInt(cita.idMedico);
+						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
+						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
+						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
+						String motivo = cita.causa;
+						getTxInfoModificar().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+
+					}
+					else {
+						getTxInfoModificar().setText("");
+						getTxInfoCita().setText("");
+
+					}
+				}
+			});
+			lista = new ListAllCitasAction().execute();
+			String[] pacientes= getPacientesCita(lista);
+			if(idsPaciente.length==0) {
+				getBtContinuar().setEnabled(false);
+				getBtHistorial().setEnabled(false);
+			}
+			listModificarCita.setBorder(new TitledBorder(null, "Citas", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			listModificarCita.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			ListModel<String> model = new DefaultComboBoxModel<String>(pacientes);
+			listModificarCita.setModel(model);
+		}
+		return listModificarCita;
+	}
+	private JTextArea getTxInfoModificar() {
+		if (txInfoModificar == null) {
+			txInfoModificar = new JTextArea();
+		}
+		return txInfoModificar;
+	}
+	private JPanel getPnModificarCita() {
+		if (pnModificarCita == null) {
+			pnModificarCita = new JPanel();
+			pnModificarCita.setLayout(null);
+			pnModificarCita.add(getScInfoCita());
+			pnModificarCita.add(getScElegirMedico());
+			pnModificarCita.add(getBtElegirMedico());
+			pnModificarCita.add(getLbMHoraInicio());
+			pnModificarCita.add(getLbMHoraFin());
+			pnModificarCita.add(getCbMHoraInicio());
+			pnModificarCita.add(getCbMMinutosInicio());
+			pnModificarCita.add(getCbMHoraFin());
+			pnModificarCita.add(getCbMMinutosFin());
+			pnModificarCita.add(getLbMSala());
+			pnModificarCita.add(getCbMSala());
+			pnModificarCita.add(getDcModificarFecha());
+		}
+		return pnModificarCita;
+	}
+	private JScrollPane getScInfoCita() {
+		if (scInfoCita == null) {
+			scInfoCita = new JScrollPane();
+			scInfoCita.setBounds(49, 42, 295, 95);
+			scInfoCita.setViewportView(getTxInfoCita());
+		}
+		return scInfoCita;
+	}
+	private JTextArea getTxInfoCita() {
+		if (txInfoCita == null) {
+			txInfoCita = new JTextArea();
+			txInfoCita.setEditable(false);
+		}
+		return txInfoCita;
+	}
+	private JScrollPane getScElegirMedico() {
+		if (scElegirMedico == null) {
+			scElegirMedico = new JScrollPane();
+			scElegirMedico.setBounds(49, 177, 295, 95);
+			scElegirMedico.setViewportView(getListaElegirMedico());
+		}
+		return scElegirMedico;
+	}
+	private JList<String> getListaElegirMedico() {
+		if (listaElegirMedico == null) {
+			//List<MedicoDto> lista = new ListAllMedicosAction().execute();
+			medicos = new DefaultListModel<String>();
+			for (int i = 0; i < listamedicos.size(); i++) {
+				medicos.addElement(listamedicos.get(i).name+" "+listamedicos.get(i).surname);
+			}
+			listaElegirMedico = new JList<String>();
+			listaElegirMedico.setModel(medicos);
+		}
+		return listaElegirMedico;
+	}
+	private JButton getBtElegirMedico() {
+		if (btElegirMedico == null) {
+			btElegirMedico = new JButton("Modificar");
+			btElegirMedico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String id = String.valueOf(getListaElegirMedico().getSelectedIndex()+1);
+//					Timestamp fecha = new Timestamp(getDcModificarFecha().getDate().getTime());
+//					Timestamp fechaInicio = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraInicio().getSelectedIndex()+":"+getCbMMinutosInicio().getSelectedIndex()+":00");
+//					Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
+//					String sala = String.valueOf(getCbMSala().getSelectedItem());
+//					new UpdateCitaAction(id, fechaInicio, fechaFin, sala, idCita).execute();
+//					CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+//					cita.horaInicio=fechaInicio.toString();
+//					cita.horaFinal=fechaFin.toString();
+//					cita.idSala=sala;
+//					String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
+//					String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
+//					String motivo = cita.causa;
+//					String medico = listamedicos.get(Integer.parseInt(id)-1).name + " " +listamedicos.get(Integer.parseInt(id)-1).surname;
+//					getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+					Integer respuesta = JOptionPane.YES_OPTION;
+					MedicoDto medicodto = listamedicos.get(Integer.parseInt(id)-1);
+
+						// Comprueba que la cita se establece dentro de la jornada laboral
+						if (!compruebaJornada(medicodto.id)) {
+							respuesta = JOptionPane.showConfirmDialog(null, "El medico " + medicodto.name + " " + medicodto.surname
+									+ " no puede atenderle a esa hora(Jornada Laboral)");
+						}
+						// Comprobacion de que el medico no tiene citas a esa hora
+						if (respuesta == JOptionPane.YES_OPTION && !compruebaHora(medicodto.id)) {
+							respuesta = JOptionPane.showConfirmDialog(null,
+									"El medico " + medicodto.name + " " + medicodto.surname + " tiene otra cita a esa hora");
+						}
+
+						if (respuesta == JOptionPane.YES_OPTION) {
+//							String id = String.valueOf(getListaElegirMedico().getSelectedIndex()+1);
+							Timestamp fecha = new Timestamp(getDcModificarFecha().getDate().getTime());
+							Timestamp fechaInicio = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraInicio().getSelectedIndex()+":"+getCbMMinutosInicio().getSelectedIndex()+":00");
+							Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
+							String sala = String.valueOf(getCbMSala().getSelectedItem());
+							new UpdateCitaAction(id, fechaInicio, fechaFin, sala, idCita).execute();
+							CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+							cita.horaInicio=fechaInicio.toString();
+							cita.horaFinal=fechaFin.toString();
+							cita.idSala=sala;
+							String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
+							String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
+							String motivo = cita.causa;
+							String medico = listamedicos.get(Integer.parseInt(id)-1).name + " " +listamedicos.get(Integer.parseInt(id)-1).surname;
+							getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+						}
+					
+				}
+			});
+			btElegirMedico.setBounds(129, 285, 117, 29);
+		}
+		return btElegirMedico;
+	}
+	private JLabel getLbMHoraInicio() {
+		if (lbMHoraInicio == null) {
+			lbMHoraInicio = new JLabel("Hora inicio:");
+			lbMHoraInicio.setBounds(425, 44, 79, 16);
+		}
+		return lbMHoraInicio;
+	}
+	private JLabel getLbMHoraFin() {
+		if (lbMHoraFin == null) {
+			lbMHoraFin = new JLabel("Hora fin:");
+			lbMHoraFin.setBounds(425, 84, 61, 16);
+		}
+		return lbMHoraFin;
+	}
+	private JComboBox<Integer> getCbMHoraInicio() {
+		if (cbMHoraInicio == null) {
+			cbMHoraInicio = new JComboBox<Integer>();
+			Integer[] h= new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i]=i;
+			}
+			cbMHoraInicio.setBounds(519, 40, 72, 27);
+			cbMHoraInicio.setModel(new DefaultComboBoxModel<Integer>(h));
+		}
+		return cbMHoraInicio;
+	}
+	private JComboBox<Integer> getCbMMinutosInicio() {
+		if (cbMMinutosInicio == null) {
+			Integer[] m= new Integer[60];
+			for (int j = 0; j < m.length; j++) {
+				m[j]=j;
+			}
+			cbMMinutosInicio = new JComboBox<Integer>();
+			cbMMinutosInicio.setBounds(591, 40, 72, 27);
+			cbMMinutosInicio.setModel(new DefaultComboBoxModel<Integer>(m));
+
+		}
+		return cbMMinutosInicio;
+	}
+	private JComboBox<Integer> getCbMHoraFin() {
+		if (cbMHoraFin == null) {
+			Integer[] h= new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i]=i;
+			}
+			cbMHoraFin = new JComboBox<Integer>();
+			cbMHoraFin.setBounds(519, 80, 72, 27);
+			cbMHoraFin.setModel(new DefaultComboBoxModel<Integer>(h));
+
+		}
+		return cbMHoraFin;
+	}
+	private JComboBox<Integer> getCbMMinutosFin() {
+		if (cbMMinutosFin == null) {
+			Integer[] m= new Integer[60];
+			for (int j = 0; j < m.length; j++) {
+				m[j]=j;
+			}
+			cbMMinutosFin = new JComboBox<Integer>();
+			cbMMinutosFin.setBounds(591, 80, 72, 27);
+			cbMMinutosFin.setModel(new DefaultComboBoxModel<Integer>(m));
+
+		}
+		return cbMMinutosFin;
+	}
+	private JLabel getLbMSala() {
+		if (lbMSala == null) {
+			lbMSala = new JLabel("Sala:");
+			lbMSala.setBounds(425, 121, 61, 16);
+		}
+		return lbMSala;
+	}
+	private JComboBox<Integer> getCbMSala() {
+		if (cbMSala == null) {
+			Integer[] m= new Integer[20];
+			for (int j = 0; j < m.length; j++) {
+				m[j]=j+1;
+			}
+			cbMSala = new JComboBox<Integer>();
+			cbMSala.setBounds(519, 117, 72, 27);
+			cbMSala.setModel(new DefaultComboBoxModel<Integer>(m));
+		}
+		return cbMSala;
+	}
+	private JDateChooser getDcModificarFecha() {
+		if (dcModificarFecha == null) {
+			dcModificarFecha = new JDateChooser();
+			dcModificarFecha.setBounds(425, 177, 166, 26);
+		}
+		return dcModificarFecha;
+	}
+	
+	public boolean compruebaHora(String idMedico) // Comprueba que los medicos no estan ocupados a esa hora y si estan
+	// en su jornada laboral
+	{
+//		//		Date inicio = getDcModificarFecha().getDate();
+//		Date ultima = getDcModificarFecha().getDate();
+		Timestamp m = Timestamp.from(getDcModificarFecha().getDate().toInstant());
+		String fecha = m.toString().split(" ")[0];
+//		Date inicio = Date.valueOf(string);
+		Timestamp m2 = Timestamp.from(getDcModificarFecha().getDate().toInstant());
+		String fechafin = m2.toString().split(" ")[0];
+//		Date ultima = Date.valueOf(string2);
+//		String fecha = formateaFecha(inicio);
+//		String fechafin = formateaFecha(ultima);
+		String horaInicio = getCbMHoraInicio().getSelectedItem().toString() + ":"
+		+ getCbMMinutosInicio().getSelectedItem().toString();
+		String horafin = getCbMHoraFin().getSelectedItem().toString() + ":"
+		+ getCbMMinutosFin().getSelectedItem().toString();
+		String horaInicioUser = fecha + " " + horaInicio + ":00";
+		String horafinUser = fechafin + " " + horafin + ":00";
+		Timestamp horainiciostamp = Timestamp.valueOf(horaInicioUser);
+		Timestamp horafinstamp = Timestamp.valueOf(horafinUser);
+		List<CitaDto> citasmedico = new ListCitasByMedicoAction(idMedico).execute(); // Obtiene las citas para el
+												// medico.
+		
+		for (CitaDto c : citasmedico) {
+		// comprueba la hora de las citas
+		if (!(horainiciostamp.before(Timestamp.valueOf(c.horaInicio))
+		&& horafinstamp.before(Timestamp.valueOf(c.horaFinal))
+		|| horainiciostamp.after(Timestamp.valueOf(c.horaInicio))
+		&& horafinstamp.after(Timestamp.valueOf(c.horaFinal)))) // comprobacion de hora
+		{
+		return false;
+		}
+		}
+		return true;
+	
+	}
+	
+	private boolean compruebaJornada(String idMedico) {
+//		Date inicio = getDcModificarFecha().getDate();
+//		Date ultima = getDcModificarFecha().getDate();
+		Timestamp m = Timestamp.from(getDcModificarFecha().getDate().toInstant());
+		String fecha = m.toString().split(" ")[0];
+//		Date inicio = Date.valueOf(string);
+		Timestamp m2 = Timestamp.from(getDcModificarFecha().getDate().toInstant());
+		String fechafin = m2.toString().split(" ")[0];
+//		Date ultima = Date.valueOf(string2);
+//		String fecha = formateaFecha(inicio);
+//		String fechafin = formateaFecha(ultima);
+		String horaInicio = getCbMHoraInicio().getSelectedItem().toString() + ":"
+		+ getCbMMinutosInicio().getSelectedItem().toString();
+		String horafin = getCbMHoraFin().getSelectedItem().toString() + ":"
+		+ getCbMMinutosFin().getSelectedItem().toString();
+		String horaInicioUser = fecha + " " + horaInicio + ":00";
+		String horafinUser = fechafin + " " + horafin + ":00";
+		Timestamp horainiciostamp = Timestamp.valueOf(horaInicioUser);
+		Timestamp horafinstamp = Timestamp.valueOf(horafinUser);
+		List<JornadaDto> jornadas = new ListJornadaLaboralByMedicoAction(idMedico).execute();
+		
+		for (JornadaDto jornada : jornadas) {
+		Timestamp inicioMedico = Timestamp.valueOf(jornada.diaEntrada);
+		Timestamp finMedico = Timestamp.valueOf(jornada.diasalida);
+		if (horainiciostamp.after(inicioMedico) && horafinstamp.before(finMedico)) {
+		return true;
+		}
+		}
+		return false;
+	}
+	private String formateaFecha(Date fecha) {
+		String[] fechaS = fecha.toString().split(" ");
+		String mes = fechaS[1];
+		String año = fechaS[5];
+		String dia = fechaS[2];
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
+	}
+	
+	private String seleccionaMes(String mes) {
+		switch (mes) {
+		case "Jan":
+			return "01";
+		case "Feb":
+			return "02";
+		case "Mar":
+			return "03";
+		case "Apr":
+			return "04";
+		case "May":
+			return "05";
+		case "Jun":
+			return "06";
+		case "Jul":
+			return "07";
+		case "Aug":
+			return "08";
+		case "Sep":
+			return "09";
+		case "Oct":
+			return "10";
+		case "Nov":
+			return "11";
+		case "Dec":
+			return "12";
+		default:
+			return null;
+
+		}
+	}
+	
+	
 }

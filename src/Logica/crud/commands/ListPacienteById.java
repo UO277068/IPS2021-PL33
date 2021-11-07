@@ -6,13 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import Logica.DataBaseManager;
 import Logica.crud.dto.PacienteDto;
 
 
 
 public class ListPacienteById {
 	
-	private String SQL = "select nombre, apellidos from paciente where id_paciente=?";
+	private String SQL = "select nombre, apellidos from public.paciente where id=?";
 
 	private String id;
 	
@@ -27,14 +28,14 @@ public class ListPacienteById {
 		ResultSet rs = null;
 		PacienteDto result = null;
 		try {
-			c = DriverManager.getConnection("");
+			c = DataBaseManager.getConnection();
 			
 			pst = c.prepareStatement(SQL);
 			pst.setString(1, id);
 			rs = pst.executeQuery();
 			result= new PacienteDto();
 			if(rs.next()) {
-				result.id=rs.getString("id");
+				result.id=id;
 				result.name=rs.getString("nombre");
 				result.surname=rs.getString("apellidos");
 			}

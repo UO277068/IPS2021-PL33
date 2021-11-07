@@ -31,6 +31,7 @@ public class ListAllMedicos
 				medico.dni=rs.getString("dni");
 				medico.name=rs.getString("nombre");
 				medico.surname=rs.getString("apellidos");
+				medico.especialidad=rs.getString("especialidad");
 				medico.correo=rs.getString("correo");
 				medicos.add(medico);
 			}

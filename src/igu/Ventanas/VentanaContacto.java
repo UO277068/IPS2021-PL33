@@ -37,15 +37,14 @@ public class VentanaContacto extends JDialog {
 	
 	PacienteDto paciente;
 	int idCita;
+	VentanaCreaCitas vCitas;
 	
 	String[] listPrefijos;
 
 	
-	private VentanaCreaCitas ventanaPrincipal;
 	private JComboBox<String> cbPrefijos;
 	
-	public VentanaContacto(VentanaCreaCitas vRober,int idCita, PacienteDto paciente) {
-		this.ventanaPrincipal = vRober;
+	public VentanaContacto( int idCita, PacienteDto paciente) {
 		this.paciente = paciente;
 		this.idCita=idCita;
 		
@@ -83,10 +82,6 @@ public class VentanaContacto extends JDialog {
 			lbPaciente.setBounds(34, 45, 86, 21);
 		}
 		return lbPaciente;
-	}
-	
-	public VentanaCreaCitas getVentanaPrincipal() {
-		return ventanaPrincipal;
 	}
 	
 	private JTextField getTxtPaciente() {
@@ -146,7 +141,7 @@ public class VentanaContacto extends JDialog {
 					else if(!getTxtNuevoContacto().getText().matches("\\d*") ||getTxtNuevoContacto().getText().equals("")) 
 						JOptionPane.showMessageDialog(null, "El número de teléfono no es valido.");
 					else {
-						prefijo+= getTxtNuevoContacto().getText();
+						prefijo+= " " + getTxtNuevoContacto().getText();
 						new AddContactoCitaAction(idCita, prefijo).execute();
 						dispose();
 					}

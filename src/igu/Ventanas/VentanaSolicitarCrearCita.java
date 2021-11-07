@@ -1,57 +1,57 @@
 package igu.Ventanas;
 
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import javax.swing.JLabel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
 
+import com.toedter.calendar.JDateChooser;
+import com.toedter.calendar.JTextFieldDateEditor;
+
+import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.JornadaDto;
+import Logica.crud.dto.MedicoDto;
+import Logica.crud.dto.PacienteDto;
+import Logica.crud.dto.SolicitudDto;
+import igu.action.AddSolicitudAction;
 import igu.action.EnviarEmailUrgenteAction;
-import igu.action.InsertCitaAction;
 import igu.action.ListAllMedicosAction;
 import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import java.awt.Cursor;
-import java.awt.Rectangle;
-import javax.swing.JScrollPane;
-import javax.swing.border.BevelBorder;
-import java.awt.FlowLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import javax.swing.border.SoftBevelBorder;
-
-import Logica.crud.dto.*;
-import javax.swing.JCheckBox;
-import javax.swing.ListSelectionModel;
-
-import com.toedter.calendar.JDateChooser;
-import com.toedter.calendar.JTextFieldDateEditor;
-
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-import java.util.Locale;
-
-public class VentanaCreaCitas extends JDialog {
+public class VentanaSolicitarCrearCita extends JDialog {
 
 	/**
 	 * 
@@ -67,7 +67,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JLabel lblHoraInicio;
 	private JLabel lblHoraFinCita;
 	private JPanel panelUrgencia;
-	private JButton btnCrearCita;
+	private JButton btSolicitarCrear;
 	private JPanel panelPaciente;
 	private JTextField textFieldAvisoUsuario;
 	private JLabel lblFechaInicio;
@@ -76,6 +76,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JLabel lblPaciente;
 	private JTextField textFieldFiltroPaciente;
 	private JPanel panelMedicos;
+	private JTextField textFieldFiltroMedico;
 	private VentanaPrincipal ventana;
 	private JCheckBox chckbxUrgente;
 	private JPanel panelListado;
@@ -83,6 +84,16 @@ public class VentanaCreaCitas extends JDialog {
 	private JScrollPane scrollPaneMedicosSeleccionados;
 	private JList<String> listMedicos;
 	private JList<String> listSeleccionados;
+
+	// Atributos
+	List<String> medicosselectModel;
+	List<PacienteDto> pacientes;
+	List<MedicoDto> medicos;
+	List<MedicoDto> medicosSeleccionados;
+	String[] especialidades;
+	String SelectedEspecialidad;
+	private JTextField txtEspecialidadSeleccionada;
+	
 	private JPanel panelBotonesMedico;
 	private JButton btnAñadirMedico;
 	private JButton btnEliminarMedico;
@@ -104,29 +115,17 @@ public class VentanaCreaCitas extends JDialog {
 	private JButton btnHorariosMedicos;
 	private JScrollPane scrollPanePacientes;
 	private JList<String> listPaciente;
-	private JPanel panelFiltroEspecialidad;
-	private JTextField textFieldFiltroMedico;
-	private JCheckBox chckbxEspecialidad;
-	
-	//Atributos
-	List<String> medicosselectModel;
-	List<PacienteDto> pacientes;
-	List<MedicoDto> medicos;
-	List<MedicoDto> medicosSeleccionados;
-	String[] especialidades;
-	String SelectedEspecialidad;
-	private JTextField txtEspecialidadSeleccionada;
+	private JTextField txtObservaciones;
 	
 
 	/**
 	 * Create the application.
 	 */
-	public VentanaCreaCitas(VentanaPrincipal principal) 
-	{ 
-		//setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
-		setTitle("Hospital:Crear Una cita");
+	public VentanaSolicitarCrearCita(VentanaPrincipal pedro) {
+		// setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
+		setTitle("Hospital: Solicitar Crear Una cita");
 		setModal(true);
-		this.ventana=principal;
+		this.ventana = pedro;
 		initialize();
 	}
 
@@ -138,24 +137,19 @@ public class VentanaCreaCitas extends JDialog {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		//Inicializa atributos
+		// Inicializa atributos
 		this.medicos = new ListAllMedicosAction().execute();
 
 		this.pacientes = new ListAllPacientesAction().execute();
-		
-		this.medicosselectModel= new ArrayList<String>();
-		
+
+		this.medicosselectModel = new ArrayList<String>();
+
 		this.medicosSeleccionados = new ArrayList<MedicoDto>();
-		
-		this.especialidades=obtenerEspecialidades();
-		
-		this.SelectedEspecialidad=null;
-		
-        this.setMinimumSize(new Dimension(800, 520));
-        this.setBounds(100, 100, 648, 492);
-        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        this.getContentPane().add(getPanelDatos(), BorderLayout.CENTER);
-        this.getContentPane().add(getPanelBotones(), BorderLayout.SOUTH);
+		this.setMinimumSize(new Dimension(800, 520));
+		this.setBounds(100, 100, 648, 492);
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		this.getContentPane().add(getPanelDatos(), BorderLayout.CENTER);
+		this.getContentPane().add(getPanelBotones(), BorderLayout.SOUTH);
 
 	}
 
@@ -173,7 +167,7 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelBotones == null) {
 			panelBotones = new JPanel();
 			panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-			panelBotones.add(getBtnCrearCita());
+			panelBotones.add(getBtSolicitarCrear());
 		}
 		return panelBotones;
 	}
@@ -211,7 +205,8 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel getPanelAviso() {
 		if (panelAviso == null) {
 			panelAviso = new JPanel();
-			panelAviso.setLayout(new GridLayout(0, 1, 0, 0));
+			panelAviso.setLayout(new GridLayout(2, 1, 0, 0));
+			panelAviso.add(getTxtObservaciones());
 			panelAviso.add(getTextFieldAvisoUsuario());
 		}
 		return panelAviso;
@@ -256,24 +251,24 @@ public class VentanaCreaCitas extends JDialog {
 		return panelUrgencia;
 	}
 
-	private JButton getBtnCrearCita() {
-		if (btnCrearCita == null) {
-			btnCrearCita = new JButton("Crear cita");
-			btnCrearCita.setBounds(new Rectangle(0, 0, 59, 0));
-			btnCrearCita.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-			btnCrearCita.setAlignmentX(Component.RIGHT_ALIGNMENT);
-			btnCrearCita.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-			btnCrearCita.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			btnCrearCita.addActionListener(new ActionListener() {
+	private JButton getBtSolicitarCrear() {
+		if (btSolicitarCrear == null) {
+			btSolicitarCrear = new JButton("Solicitar Crear");
+			btSolicitarCrear.setBounds(new Rectangle(0, 0, 59, 0));
+			btSolicitarCrear.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+			btSolicitarCrear.setAlignmentX(Component.RIGHT_ALIGNMENT);
+			btSolicitarCrear.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			btSolicitarCrear.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			btSolicitarCrear.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					getTextFieldAvisoUsuario().setVisible(true);
-					crearCita();
+					solicitarCrear();
 				}
 			});
 
 		}
-		return btnCrearCita;
+		return btSolicitarCrear;
 	}
 
 	private JPanel getPanelPaciente() {
@@ -353,13 +348,37 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelMedicos == null) {
 			panelMedicos = new JPanel();
 			panelMedicos.setLayout(new BorderLayout(0, 0));
+			panelMedicos.add(getTextFieldFiltroMedico(), BorderLayout.NORTH);
 			panelMedicos.add(getPanelListado(), BorderLayout.CENTER);
 			panelMedicos.add(getPanelBotonesMedico(), BorderLayout.SOUTH);
 			panelMedicos.add(getLblMedicos(), BorderLayout.WEST);
-			panelMedicos.add(getPanelFiltroEspecialidad(), BorderLayout.NORTH);
 		}
 		return panelMedicos;
 	}
+
+	private JTextField getTextFieldFiltroMedico() {
+		if (textFieldFiltroMedico == null) {
+			textFieldFiltroMedico = new JTextField();
+			textFieldFiltroMedico.setName("FiltroMedico");
+			textFieldFiltroMedico.setLocale(new Locale("es", "ES"));
+			textFieldFiltroMedico.setActionCommand("");
+			textFieldFiltroMedico.setToolTipText("Busqueda por nombre o dni");
+			textFieldFiltroMedico.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			textFieldFiltroMedico.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					String[] medicosstr = medicosToString(
+							filtrarListaMedicos(medicos, getTextFieldFiltroMedico().getText()));
+					ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+					listMedicos.setModel(model);
+				}
+
+			});
+			textFieldFiltroMedico.setColumns(10);
+		}
+		return textFieldFiltroMedico;
+	}
+
 	private JCheckBox getChckbxUrgente() {
 		if (chckbxUrgente == null) {
 			chckbxUrgente = new JCheckBox("Es Urgente");
@@ -392,50 +411,6 @@ public class VentanaCreaCitas extends JDialog {
 			scrollPaneMedicosSeleccionados.setColumnHeaderView(getTxtEspecialidadSeleccionada());
 		}
 		return scrollPaneMedicosSeleccionados;
-	}
-	
-	private JCheckBox getChckbxEspecialidad() {
-		if (chckbxEspecialidad == null) {
-			chckbxEspecialidad = new JCheckBox("Especialidades");
-			chckbxEspecialidad.addItemListener(new ItemListener() {
-				public void itemStateChanged(ItemEvent e) 
-				{
-					getTextFieldFiltroMedico().setText("");
-					if(chckbxEspecialidad.isSelected()) {
-						getLblMedicos().setText("Especialidades:");
-						ListModel<String> model = new DefaultComboBoxModel<String>(especialidades);
-						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-						listMedicos.setModel(model);
-						
-						btnAñadirMedico.setText("Añadir especialidad");
-						
-						btnEliminarMedico.setText("Eliminar especialidad");
-						
-						if(SelectedEspecialidad==null) 
-						{
-						  btnEliminarMedico.setEnabled(false);
-						}
-						
-						
-					}else {
-						getLblMedicos().setText("Medicos:");
-						String[] medicosstr = medicosToString(medicos);
-						ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
-						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-						listMedicos.setModel(model);
-						
-						btnAñadirMedico.setText("Añadir medicos");
-						
-						btnEliminarMedico.setText("Eliminar medico seleccionado");
-						
-						btnEliminarMedico.setEnabled(true);
-
-						
-					}
-				}
-			});
-		}
-		return chckbxEspecialidad;
 	}
 
 	private JList<String> getListMedicos() {
@@ -479,26 +454,19 @@ public class VentanaCreaCitas extends JDialog {
 			btnAñadirMedico = new JButton("A\u00F1adir medicos");
 			btnAñadirMedico.setToolTipText("Seleccionar medicos");
 			btnAñadirMedico.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) 
-				{
-				  if(!chckbxEspecialidad.isSelected()) {
-				  
-				   List<MedicoDto> l = obtenMedicosSeleccionados();
-				   for(MedicoDto medico : l) 
-				   {
-					   if(!medicosSeleccionados.contains(medico)) 
-					   {
-					   medicosSeleccionados.add(medico);	
-					   }
-				   }
-				   //Actualiza la lista de medicos seleccionados
-				   String[] mstr = medicosToString(medicosSeleccionados) ;
-				   getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
-				   //Actualiza la lista de medicos normal
-				   //for(Medico)
-				}else {
-					insertarEspecialidad(listMedicos.getSelectedValue());
-				}
+				public void actionPerformed(ActionEvent e) {
+					List<MedicoDto> l = obtenMedicosSeleccionados();
+					for (MedicoDto medico : l) {
+						if (!medicosSeleccionados.contains(medico)) {
+							medicosSeleccionados.add(medico);
+						}
+					}
+					// Actualiza la lista de medicos seleccionados
+					String[] mstr = medicosToString(medicosSeleccionados);
+					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
+
+					// Actualiza la lista de medicos normal
+					// for(Medico)
 				}
 			});
 		}
@@ -510,21 +478,16 @@ public class VentanaCreaCitas extends JDialog {
 			btnEliminarMedico = new JButton("Eliminar medico seleccionado");
 			btnEliminarMedico.setToolTipText("Eliminar medico seleccionado");
 			btnEliminarMedico.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) 
-				{
-					if(!chckbxEspecialidad.isSelected()) {
-					int i=getListSeleccionados().getSelectedIndex();
-					if(i>=0) {
-					medicosSeleccionados.remove(i);
-					String[] mstr = medicosToString(medicosSeleccionados)  ;
-					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
+				public void actionPerformed(ActionEvent e) {
+					int i = getListSeleccionados().getSelectedIndex();
+					if (i >= 0) {
+						medicosSeleccionados.remove(i);
+						String[] mstr = medicosToString(medicosSeleccionados);
+						getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
 					}
-				 }else {
-					 eliminarEspecialidad();
-				 }
 				}
 			});
-			
+
 		}
 		return btnEliminarMedico;
 	}
@@ -538,8 +501,6 @@ public class VentanaCreaCitas extends JDialog {
 					medicosSeleccionados.clear();
 					String[] mstr = medicosToString(medicosSeleccionados);
 					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
-					eliminarEspecialidad();
-					
 				}
 			});
 		}
@@ -747,108 +708,72 @@ public class VentanaCreaCitas extends JDialog {
 		return listPaciente;
 	}
 
-	
-	private JPanel getPanelFiltroEspecialidad() {
-		if (panelFiltroEspecialidad == null) {
-			panelFiltroEspecialidad = new JPanel();
-			panelFiltroEspecialidad.setLayout(new BorderLayout(0, 0));
-			panelFiltroEspecialidad.add(getTextFieldFiltroMedico(), BorderLayout.CENTER);
-			panelFiltroEspecialidad.add(getChckbxEspecialidad(), BorderLayout.WEST);
-		}
-		return panelFiltroEspecialidad;
-	}
-	private JTextField getTextFieldFiltroMedico() {
-		if (textFieldFiltroMedico == null) {
-			textFieldFiltroMedico = new JTextField();
-			textFieldFiltroMedico.setName("FiltroMedico");
-			textFieldFiltroMedico.setLocale(new Locale("es", "ES"));
-			textFieldFiltroMedico.setActionCommand("");
-			textFieldFiltroMedico.setToolTipText("Busqueda por nombre o dni");
-			textFieldFiltroMedico.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
-			textFieldFiltroMedico.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyReleased(KeyEvent e) 
-				{
-					if(!chckbxEspecialidad.isSelected()) {
-					  String[] medicosstr = medicosToString(filtrarListaMedicos(medicos,getTextFieldFiltroMedico().getText()));
-					  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
-					  listMedicos.setModel(model);
-					}else {
-					  String[] especialidadesFiltradas = filtrarEspecialidades(especialidades,getTextFieldFiltroMedico().getText());
-					  ListModel<String> model = new DefaultComboBoxModel<String>(especialidadesFiltradas);
-					  listMedicos.setModel(model);
-					}
+	// Metodos privados
+	public void solicitarCrear() {
+		if (checkValoresVentanaPrincipal()) // Comprueba que se han elegido los valores minimos para crear una cita
+		{
+			SolicitudDto sol = new SolicitudDto();
+			String cuerpoSol ="";
+			PacienteDto paciente = obtenPacienteSeleccionado();
+			Integer respuesta = JOptionPane.YES_OPTION;
+			boolean urge = getChckbxUrgente().isSelected();
+			for (MedicoDto medico : medicosSeleccionados) {
+
+				// Comprueba que la cita se establece dentro de la jornada laboral
+				if (!compruebaJornada(medico.id)) {
+					respuesta = JOptionPane.showConfirmDialog(null, "El medico " + medico.name + " " + medico.surname
+							+ " no puede atenderle a esa hora(Jornada Laboral)");
+				}
+				// Comprobacion de que el medico no tiene citas a esa hora
+				if (respuesta == JOptionPane.YES_OPTION && !compruebaHora(medico.id)) {
+					respuesta = JOptionPane.showConfirmDialog(null,
+							"El medico " + medico.name + " " + medico.surname + " tiene otra cita a esa hora");
 				}
 
-			});
-			textFieldFiltroMedico.setColumns(10);
-		}
-		return textFieldFiltroMedico;
-	}
-	
-	//Metodos privados
-	public void crearCita() 
-	{
-		if(checkValoresVentanaPrincipal()) //Comprueba que se han elegido los valores minimos para crear una cita
-		{
-		
-		PacienteDto paciente =  obtenPacienteSeleccionado();
-		Integer respuesta=JOptionPane.YES_OPTION;
-		boolean urge = getChckbxUrgente().isSelected();
-		for(MedicoDto medico:medicosSeleccionados) {
-		
-		//Comprueba que la cita se establece dentro de la jornada laboral
-	    if(!compruebaJornada(medico.id)) {
-		 respuesta=JOptionPane.showConfirmDialog(null,"El horario de la cita no forma parte de la jornada laboral del medico "+medico.name+" "+medico.surname+".","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
-	    }
-		//Comprobacion de que el medico no tiene citas a esa hora
-		if(respuesta==JOptionPane.YES_OPTION && !compruebaHora(medico.id)) {
-			 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" tiene otra cita a esa hora","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
-		}
-		
-		if(respuesta==JOptionPane.YES_OPTION) {	
-		CitaDto cita = new CitaDto();
-		cita.idMedico=medico.id;
-		cita.idPaciente=paciente.id; //elegir mas de un paciente
-		cita.causa="";
-		//
-		Date inicio = getDcInicio().getDate();
-		Date ultima = getDcFin().getDate();
-		String horaInicio =getComboBoxHoraInicioCita().getSelectedItem().toString()+":"+getComboBoxMinutoInicioCita().getSelectedItem().toString();
-		String horafin =getComboBoxHoraFinCita().getSelectedItem().toString()+":"+getComboBoxMinutoFinCita().getSelectedItem().toString();
-		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";;
-		String fechafin=formateaFecha(ultima)+" "+horafin+":00";;
-		
-		cita.horaInicio=fecha; //fecha +hora inicio
-		cita.horaFinal=fechafin;
-		//
-		
-		if(urge) {
-		cita.urgencia="Si";
-		enviarGmail(medico.correo,paciente,cita);
-		}else {
-		cita.urgencia="No";
-		}
-		cita.horaEntrada=null;
-		cita.horaSalida=null;
-		cita.idSala="1";
-		cita.preescripcion="";
-		cita.contacto=paciente.contacto; //Por defecto F.E.R
-		cita.acude="INDEFINIDO";
-		if(this.SelectedEspecialidad==null) 
-		{
-			cita.Especialidad="NO DEFINIDA";
-		}else {
-			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
-		}
-                     
-		int idcita = new InsertCitaAction(cita).execute();
-		System.out.print(idcita);
-		ventanaContacto(idcita-1, paciente);
+				if (respuesta == JOptionPane.YES_OPTION) {
+					
+					cuerpoSol+= "Medico ID: " + medico.id;
+					cuerpoSol+= "Paciente ID: " + paciente.id; // elegir mas de un paciente
+					cuerpoSol+= "Causa: ";
+					//
+					Date inicio = getDcInicio().getDate();
+					Date ultima = getDcFin().getDate();
+					String horaInicio = getComboBoxHoraInicioCita().getSelectedItem().toString() + ":"
+							+ getComboBoxMinutoInicioCita().getSelectedItem().toString();
+					cuerpoSol += "Hora in: " + horaInicio;
+					String horafin = getComboBoxHoraFinCita().getSelectedItem().toString() + ":"
+							+ getComboBoxMinutoFinCita().getSelectedItem().toString();
+					cuerpoSol += "Hora fin: " + horafin;
+					String fecha = formateaFecha(inicio) + " " + horaInicio + ":00";
+					;
+					cuerpoSol += "Fecha in: " + fecha;
+					String fechafin = formateaFecha(ultima) + " " + horafin + ":00";
+					;
+					cuerpoSol += "Fecha fin: " + fechafin;
+					
+					//
 
-		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
-		
-		}}}
+					if (urge) {
+						cuerpoSol += "Urgente: Si";
+						//TODO: enviarGmail(medico.correo, paciente, cita);
+					} else {
+						cuerpoSol += "Urgente: No";
+					}
+					cuerpoSol += "Sala ID: 1";
+					cuerpoSol += "Prescripcion: ";
+					cuerpoSol += "Contacto: " + paciente.contacto;
+					cuerpoSol += "Especialidad: NO DEFINIDA";
+					
+					sol.tipo="CREAR";
+					sol.cuerpo=cuerpoSol;
+					sol.observaciones= getTxtObservaciones().getText();
+					
+					new AddSolicitudAction(sol).execute();
+
+					getTextFieldAvisoUsuario().setText("La solicitud de cita se ha enviado correctamente.");
+				}
+			}
+		}
 	}
 
 	private PacienteDto obtenPacienteSeleccionado() {
@@ -1041,9 +966,8 @@ public class VentanaCreaCitas extends JDialog {
 	}
 
 	private boolean checkCamposVacios() {
-		//Compruba que se han seleccionado medicos
-		if(getListSeleccionados().getModel().getSize()==0) 
-		{
+		// Compruba que se han seleccionado medicos
+		if (getListMedicos().isSelectionEmpty()) {
 			return false;
 		}
 		return true;
@@ -1079,35 +1003,15 @@ public class VentanaCreaCitas extends JDialog {
 			if (m.name.toUpperCase().startsWith(start.toUpperCase())) {
 				listaFiltrada.add(m);
 			}
-			//Filtro por documento de identficacion
-			else if(m.dni.toUpperCase().startsWith(start.toUpperCase())) 
-			{
-			    listaFiltrada.add(m);
-			}
-			else if(m.especialidad.toUpperCase().startsWith(start.toUpperCase())) {
-			    listaFiltrada.add(m);
+			// Filtro por documento de identficacion
+			else if (m.dni.toUpperCase().startsWith(start)) {
+				listaFiltrada.add(m);
 			}
 		}
 		return listaFiltrada;
-	}	
-	private String[] filtrarEspecialidades(String[] especialidades,String start) 
-	{
-	   String[] filtrostr;
-	   List<String> especialidad =  new ArrayList<String>(Arrays.asList(especialidades));
-	   List<String> filtro =  new ArrayList<String>();
-	   for(String ep :especialidad) 
-	   {
-		   if(ep.toUpperCase().startsWith(start.toUpperCase())) 
-		   {
-			  filtro.add(ep); 
-		   }
-	   }
-	   filtrostr = new String[filtro.size()];
-	   return filtro.toArray(filtrostr);
 	}
-	
-	private List<PacienteDto> filtrarListaPacientes(List<PacienteDto> paci, String start) 
-	{
+
+	private List<PacienteDto> filtrarListaPacientes(List<PacienteDto> paci, String start) {
 		List<PacienteDto> listaFiltrada = new ArrayList<PacienteDto>();
 		for (PacienteDto p : paci) {
 			if (p.name.toUpperCase().startsWith(start.toUpperCase())) {
@@ -1200,10 +1104,19 @@ public class VentanaCreaCitas extends JDialog {
 		return txtEspecialidadSeleccionada;
 	}
 
-	private void ventanaContacto(int idCita, PacienteDto paciente) {
-		VentanaContacto v = new VentanaContacto(idCita, paciente);
-		v.setLocationRelativeTo(this);
-		v.setModal(true);
-		v.setVisible(true);
+//	private void ventanaContacto(int idCita, PacienteDto paciente) {
+//		VentanaContacto v = new VentanaContacto( idCita, paciente);
+//		v.setLocationRelativeTo(this);
+//		v.setModal(true);
+//		v.setVisible(true);
+//	}
+
+	private JTextField getTxtObservaciones() {
+		if (txtObservaciones == null) {
+			txtObservaciones = new JTextField();
+			txtObservaciones.setText("Observaciones: ");
+			txtObservaciones.setColumns(10);
+		}
+		return txtObservaciones;
 	}
 }

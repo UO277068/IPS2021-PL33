@@ -8,5 +8,7 @@ public class MedicoDto {
 	public String dni;
 	public String name;
 	public String surname;
+	public String especialidad;
 	public String correo;
+
 }

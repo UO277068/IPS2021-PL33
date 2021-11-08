@@ -65,6 +65,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.event.HierarchyEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 
 
@@ -82,9 +84,7 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btContinuar;
 	private JPanel pnCita;
 	private JLabel lbEntrada;
-	private JTextField txEntrada;
 	private JLabel lbSalida;
-	private JTextField txSalida;
 	private JPanel pnContenidos;
 	private JButton btHistorial;
 	private JPanel pnHistorial;
@@ -187,6 +187,12 @@ public class VentanaPrincipal extends JFrame {
 	private JLabel lbMSala;
 	private JComboBox<Integer> cbMSala;
 	private JDateChooser dcModificarFecha;
+	private JComboBox<Integer> cbHoraEntrada;
+	private JComboBox<Integer> cbMinutosEntrada;
+	private JComboBox<Integer> cbHoraSalida;
+	private JComboBox<Integer> cbMinutosSalida;
+	private CitaDto cita;
+	private JTextField textField;
 
 
 	
@@ -264,9 +270,7 @@ public class VentanaPrincipal extends JFrame {
 			pnCita = new JPanel();
 			pnCita.setLayout(null);
 			pnCita.add(getLbEntrada());
-			pnCita.add(getTxEntrada());
 			pnCita.add(getLbSalida());
-			pnCita.add(getTxSalida());
 			pnCita.add(getBtAsignar());
 			pnCita.add(getBtnAtrasM());
 			pnCita.add(getBtCausa());
@@ -299,6 +303,10 @@ public class VentanaPrincipal extends JFrame {
 			rbNoAcude.setBounds(90, 38, 63, 23);
 			pnAcudeCita.add(rbNoAcude);
 			pnAcudeCita.add(getBtAsignarAcude());
+			pnCita.add(getCbHoraEntrada());
+			pnCita.add(getCbMinutosEntrada());
+			pnCita.add(getCbHoraSalida());
+			pnCita.add(getCbMinutosSalida());
 		}
 		return pnCita;
 	}
@@ -339,28 +347,12 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return lbEntrada;
 	}
-	private JTextField getTxEntrada() {
-		if (txEntrada == null) {
-			txEntrada = new JTextField();
-			txEntrada.setBounds(146, 52, 130, 26);
-			txEntrada.setColumns(10);
-		}
-		return txEntrada;
-	}
 	private JLabel getLbSalida() {
 		if (lbSalida == null) {
 			lbSalida = new JLabel("Hora de salida");
 			lbSalida.setBounds(41, 100, 106, 16);
 		}
 		return lbSalida;
-	}
-	private JTextField getTxSalida() {
-		if (txSalida == null) {
-			txSalida = new JTextField();
-			txSalida.setBounds(146, 100, 130, 26);
-			txSalida.setColumns(10);
-		}
-		return txSalida;
 	}
 	private JPanel getPnContenidos() {
 		if (pnContenidos == null) {
@@ -433,8 +425,11 @@ public class VentanaPrincipal extends JFrame {
 			btAsignar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
-					String horaInicio=listaFiltrada.get(getListCitas().getSelectedIndex()).horaInicio;
-					new UpdateHoraEntradaSalidaAction(idCita, getTxEntrada().getText(),getTxSalida().getText(),horaInicio).execute();
+					//String horaInicio=listaFiltrada.get(getListCitas().getSelectedIndex()).horaInicio;
+					String horaInicio = cita.horaInicio;
+//					new UpdateHoraEntradaSalidaAction(idCita, getTxEntrada().getText(),getTxSalida().getText(),horaInicio).execute();
+					new UpdateHoraEntradaSalidaAction(idCita, getCbHoraEntrada().getSelectedIndex()+":"+getCbMinutosEntrada().getSelectedIndex(),getCbHoraSalida().getSelectedIndex()+":"+getCbMinutosSalida().getSelectedIndex(),horaInicio).execute();
+
 				}
 			});
 			btAsignar.setBounds(30, 140, 117, 29);
@@ -511,6 +506,7 @@ public class VentanaPrincipal extends JFrame {
 			pnHorario.add(getChViernes());
 			pnHorario.add(getChSabado());
 			pnHorario.add(getChDomingo());
+			pnHorario.add(getTextField());
 		}
 		return pnHorario;
 	}
@@ -547,8 +543,11 @@ public class VentanaPrincipal extends JFrame {
 			for (int i = 0; i < lista.size(); i++) {
 				medicos.addElement(lista.get(i).name+" "+lista.get(i).surname);
 			}
+			String[] medicosstr = medicosToString(lista);
+			ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
 			list = new JList<String>(medicos);
-			list.setModel(medicos);
+			list.setModel(model);
+			//list.setModel(medicos);
 		}
 		return list;
 	}
@@ -915,6 +914,7 @@ public class VentanaPrincipal extends JFrame {
 	{
 		CardLayout c = (CardLayout)getPnContenidos().getLayout();
 		c.show(getPnContenidos(), "PnEleccion");
+		cita=null;
 		
 	}
 	
@@ -1187,14 +1187,15 @@ public class VentanaPrincipal extends JFrame {
 			listCitas.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					if(getListCitas().getSelectedIndex()!=-1) {
-						CitaDto cita = listaFiltrada.get(getListCitas().getSelectedIndex());
+						cita = listaFiltrada.get(getListCitas().getSelectedIndex());
 						String sala=cita.idSala;
 						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
 						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
 						String motivo = cita.causa;
 						getTxInfo().setText("Sala de la cita: "+sala+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+						//cita=listaFiltrada.get(getListCitas().getSelectedIndex());
 					}
-					else
+					else if(getListCitas().getSelectedIndex()==-1&& cita==null)
 						getTxInfo().setText("");
 				}
 			});
@@ -1478,7 +1479,7 @@ public class VentanaPrincipal extends JFrame {
 			listModificarCita.addHierarchyListener(new HierarchyListener() {
 				public void hierarchyChanged(HierarchyEvent e) {
 					if(getListModificarCita().getSelectedIndex()!=-1) {
-						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+						//CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
 						getListaElegirMedico().setSelectedIndex(Integer.parseInt(cita.idMedico)-1);
 						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
 						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
@@ -1496,7 +1497,7 @@ public class VentanaPrincipal extends JFrame {
 			listModificarCita.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					if(getListModificarCita().getSelectedIndex()!=-1) {
-						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+						cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
 						String sala=cita.idSala;
 						int idMedico = Integer.parseInt(cita.idMedico);
 						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
@@ -1505,9 +1506,9 @@ public class VentanaPrincipal extends JFrame {
 						String motivo = cita.causa;
 						getTxInfoModificar().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
 						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
-
+						//cita=listaFiltrada.get(getListCitas().getSelectedIndex());
 					}
-					else {
+					else if(getListModificarCita().getSelectedIndex()==-1&& cita==null){
 						getTxInfoModificar().setText("");
 						getTxInfoCita().setText("");
 
@@ -1582,8 +1583,11 @@ public class VentanaPrincipal extends JFrame {
 			for (int i = 0; i < listamedicos.size(); i++) {
 				medicos.addElement(listamedicos.get(i).name+" "+listamedicos.get(i).surname);
 			}
+			String[] medicosstr = medicosToString(listamedicos);
+			ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
 			listaElegirMedico = new JList<String>();
-			listaElegirMedico.setModel(medicos);
+			listaElegirMedico.setModel(model);
+			//listaElegirMedico.setModel(medicos);
 		}
 		return listaElegirMedico;
 	}
@@ -1628,7 +1632,7 @@ public class VentanaPrincipal extends JFrame {
 							Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
 							String sala = String.valueOf(getCbMSala().getSelectedItem());
 							new UpdateCitaAction(id, fechaInicio, fechaFin, sala, idCita).execute();
-							CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+							//CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
 							cita.horaInicio=fechaInicio.toString();
 							cita.horaFinal=fechaFin.toString();
 							cita.idSala=sala;
@@ -1846,4 +1850,95 @@ public class VentanaPrincipal extends JFrame {
 	}
 	
 	
+	private JComboBox<Integer> getCbHoraEntrada() {
+		if (cbHoraEntrada == null) {
+			cbHoraEntrada = new JComboBox<Integer>();
+			Integer[] h= new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i]=i;
+			}
+			cbHoraEntrada.setBounds(159, 57, 76, 26);
+			cbHoraEntrada.setModel(new DefaultComboBoxModel<Integer>(h));
+		}
+		return cbHoraEntrada;
+	}
+	private JComboBox<Integer> getCbMinutosEntrada() {
+		if (cbMinutosEntrada == null) {
+			cbMinutosEntrada = new JComboBox<Integer>();
+			Integer[] m= new Integer[60];
+			for (int j = 0; j < m.length; j++) {
+				m[j]=j;
+			}
+			cbMinutosEntrada.setBounds(234, 57, 76, 27);
+			cbMinutosEntrada.setModel(new DefaultComboBoxModel<Integer>(m));
+		}
+		return cbMinutosEntrada;
+	}
+	private JComboBox<Integer> getCbHoraSalida() {
+		if (cbHoraSalida == null) {
+			cbHoraSalida = new JComboBox<Integer>();
+			Integer[] h= new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i]=i;
+			}
+			cbHoraSalida.setBounds(159, 96, 76, 27);
+			cbHoraSalida.setModel(new DefaultComboBoxModel<Integer>(h));
+		}
+		return cbHoraSalida;
+	}
+	private JComboBox<Integer> getCbMinutosSalida() {
+		if (cbMinutosSalida == null) {
+			cbMinutosSalida = new JComboBox<Integer>();
+			Integer[] m= new Integer[60];
+			for (int j = 0; j < m.length; j++) {
+				m[j]=j;
+			}
+			cbMinutosSalida.setBounds(234, 95, 76, 29);
+			cbMinutosSalida.setModel(new DefaultComboBoxModel<Integer>(m));
+		}
+		return cbMinutosSalida;
+	}
+	private JTextField getTextField() {
+		if (textField == null) {
+			textField = new JTextField();
+			textField.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					 String[] medicosstr = medicosToString(filtrarListaMedicos(listamedicos,getTextField().getText()));
+					  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+					  list.setModel(model);
+				}
+			});
+			textField.setBounds(90, 6, 304, 26);
+			textField.setColumns(10);
+		}
+		return textField;
+	}
+	
+	private List<MedicoDto> filtrarListaMedicos(List<MedicoDto> medi, String start) {
+		List<MedicoDto> listaFiltrada = new ArrayList<MedicoDto>();
+		for (MedicoDto m : medi) {
+			// Filtro por nombre
+			if (m.name.toUpperCase().startsWith(start.toUpperCase())) {
+				listaFiltrada.add(m);
+			}
+			//Filtro por documento de identficacion
+			else if(m.dni.toUpperCase().startsWith(start.toUpperCase())) 
+			{
+			    listaFiltrada.add(m);
+			}
+			else if(m.especialidad.toUpperCase().startsWith(start.toUpperCase())) {
+			    listaFiltrada.add(m);
+			}
+		}
+		return listaFiltrada;
+	}
+	
+	private String[] medicosToString(List<MedicoDto> medico) {
+		String[] strMedicos = new String[medico.size()];
+		for (int i = 0; i < medico.size(); i++) {
+			strMedicos[i] = medico.get(i).name + "-" + medico.get(i).surname + "-" + medico.get(i).dni;
+		}
+		return strMedicos;
+	}
 }

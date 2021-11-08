@@ -86,7 +86,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JList<String> listMedicos;
 	private JList<String> listSeleccionados;
 	private JPanel panelBotonesMedico;
-	private JButton btnAÃ±adirMedico;
+	private JButton btnAñadirMedico;
 	private JButton btnEliminarMedico;
 	private JButton btnLimpiarListaSeleccionados;
 	private JLabel lblNewLabel;
@@ -478,7 +478,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAÃ±adirMedico.setText("Aï¿½adir especialidad");
+						btnAñadirMedico.setText("Aï¿½adir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						
@@ -495,7 +495,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAÃ±adirMedico.setText("Aï¿½adir medicos");
+						btnAñadirMedico.setText("Aï¿½adir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
@@ -537,7 +537,7 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelBotonesMedico == null) {
 			panelBotonesMedico = new JPanel();
 			panelBotonesMedico.setLayout(new GridLayout(0, 4, 0, 0));
-			panelBotonesMedico.add(getBtnAÃ±adirMedico());
+			panelBotonesMedico.add(getBtnAñadirMedico());
 			panelBotonesMedico.add(getBtnEliminarMedico());
 			panelBotonesMedico.add(getBtnHorariosMedicos());
 			panelBotonesMedico.add(getBtnLimpiarListaSeleccionados());
@@ -545,11 +545,11 @@ public class VentanaCreaCitas extends JDialog {
 		return panelBotonesMedico;
 	}
 
-	private JButton getBtnAÃ±adirMedico() {
-		if (btnAÃ±adirMedico == null) {
-			btnAÃ±adirMedico = new JButton("A\u00F1adir medicos");
-			btnAÃ±adirMedico.setToolTipText("Seleccionar medicos");
-			btnAÃ±adirMedico.addActionListener(new ActionListener() {
+	private JButton getBtnAñadirMedico() {
+		if (btnAñadirMedico == null) {
+			btnAñadirMedico = new JButton("A\u00F1adir medicos");
+			btnAñadirMedico.setToolTipText("Seleccionar medicos");
+			btnAñadirMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
 				  if(!chckbxEspecialidad.isSelected()) {
@@ -573,7 +573,7 @@ public class VentanaCreaCitas extends JDialog {
 				}
 			});
 		}
-		return btnAÃ±adirMedico;
+		return btnAñadirMedico;
 	}
 
 	private JButton getBtnEliminarMedico() {
@@ -1054,9 +1054,9 @@ public class VentanaCreaCitas extends JDialog {
 	private String formateaFecha(Date fecha) {
 		String[] fechaS = fecha.toString().split(" ");
 		String mes = fechaS[1];
-		String aÃ±o = fechaS[5];
+		String año = fechaS[5];
 		String dia = fechaS[2];
-		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 
 	private String seleccionaMes(String mes) {

@@ -21,7 +21,5 @@ public class CitaDto
 	public String contacto;
 	public String namePaciente;
 	public String surnamePaciente;
-	
-	
 
 }

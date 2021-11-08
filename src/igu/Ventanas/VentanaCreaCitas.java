@@ -478,7 +478,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Añadir especialidad");
+						btnAñadirMedico.setText("Aï¿½adir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						
@@ -495,7 +495,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Añadir medicos");
+						btnAñadirMedico.setText("Aï¿½adir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
@@ -1720,7 +1720,7 @@ public class VentanaCreaCitas extends JDialog {
 						ListModel<String> model = new DefaultComboBoxModel<String>(s);
 						listHorariosDisponibles.setModel(model);
 					}else {
-						JOptionPane.showInternalMessageDialog(null,"Añada la fecha y hora de entrada y de salida por la que desea buscar horarios");
+						JOptionPane.showInternalMessageDialog(null,"Aï¿½ada la fecha y hora de entrada y de salida por la que desea buscar horarios");
 					}
 					
 				}

@@ -132,10 +132,6 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btnAtrasM;
 	private JButton btnAtrasE;
 	private JPanel pnVerCitas;
-	private JComboBox<String> cbMedicos;
-	private JLabel lbMedicos;
-	private JLabel lbPacientes;
-	private JComboBox<String> cbPacientes;
 	private JButton btHistorialA;
 	private JButton btAtrasA;
 	private JButton btCausa;
@@ -206,7 +202,36 @@ public class VentanaPrincipal extends JFrame {
 
 	private boolean derechos;
 	private JButton btSolicitudMod;
-
+	List<MedicoDto> medicosSeleccionados = null;
+	private JTextField txMedicos;
+	private JButton btMAtras;
+	private JPanel pnEMCNorte;
+	private JPanel pnEMCModificar;
+	private JPanel pnEMCFecha;
+	private JPanel pnEMCCentro;
+	private JPanel pnEMCSur;
+	private JScrollPane scVCitaMedico;
+	private JList<String> listaVCitaMedico;
+	private JScrollPane scVCitaPaciente;
+	private JList<String> listaVCitaPaciente;
+	private JPanel pnVCCentro;
+	private JPanel pnVCSur;
+	private JPanel pnVCAtras;
+	private JPanel pnVCVer;
+	private JPanel pnVCNorte;
+	private JDateChooser dcFechaCita;
+	private JLabel lbVCFechaCita;
+	private JPanel pnHNorte;
+	private JPanel pnHTexto;
+	private JPanel pnHCheck;
+	private JPanel pnHCFechas;
+	private JLabel lbPuntos;
+	private JPanel pnCHoras;
+	private JLabel pbPuntos2;
+	private JPanel pnFecha;
+	private JPanel pnHCBotones;
+	private JPanel pnHCentro;
+	private JPanel panel_1;
 	
 
 	/**
@@ -266,9 +291,10 @@ public class VentanaPrincipal extends JFrame {
 			btContinuar = new JButton("Continuar");
 			btContinuar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					idPaciente=listaFiltrada.get(getListCitas().getSelectedIndex()).idPaciente;
-					idCita=listaFiltrada.get(getListCitas().getSelectedIndex()).id;
-
+					if(getListCitas().getSelectedIndex()!=-1) {
+						idPaciente=listaFiltrada.get(getListCitas().getSelectedIndex()).idPaciente;
+						idCita=listaFiltrada.get(getListCitas().getSelectedIndex()).id;
+					}
 					acude = "INDEFINIDO";
 			
 					mostrarPnCita();
@@ -499,27 +525,10 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPnHorario() {
 		if (pnHorario == null) {
 			pnHorario = new JPanel();
-			pnHorario.setLayout(null);
-			pnHorario.add(getBtAsignarHorario());
-			pnHorario.add(getScrollPane());
-			pnHorario.add(getDcDesde());
-			pnHorario.add(getDcHasta());
-			pnHorario.add(getLbDesde());
-			pnHorario.add(getLbHasta());
-			pnHorario.add(getCbHoraD());
-			pnHorario.add(getCbMinutosD());
-			pnHorario.add(getCbHoraH());
-			pnHorario.add(getCbMinutosH());
-			pnHorario.add(getCbOpcion());
-			pnHorario.add(getBtnAtras());
-			pnHorario.add(getChLunes());
-			pnHorario.add(getChMartes());
-			pnHorario.add(getChMiercoles());
-			pnHorario.add(getChJueves());
-			pnHorario.add(getChViernes());
-			pnHorario.add(getChSabado());
-			pnHorario.add(getChDomingo());
-			pnHorario.add(getTextField());
+			pnHorario.setLayout(new GridLayout(3, 1, 0, 0));
+			pnHorario.add(getPnHNorte());
+			pnHorario.add(getPnHCentro());
+			pnHorario.add(getPanel_1());
 		}
 		return pnHorario;
 	}
@@ -534,17 +543,29 @@ public class VentanaPrincipal extends JFrame {
 					String f = d2.toString().split(" ")[0]+" "+getCbHoraH().getSelectedIndex()+":"+getCbMinutosH().getSelectedIndex()+":00";
 					Timestamp inicio = Timestamp.valueOf(i);
 					Timestamp fin = Timestamp.valueOf(f);
-					new AddHorarioAction(inicio, fin,diasSeleccionados, getList().getSelectedIndices()).execute();
+					int[] idsmedicos = new int[getList().getSelectedValuesList().size()];
+					int[] medicos = getList().getSelectedIndices();
+					if(medicosSeleccionados!=null) {
+						for (int j = 0; j < medicos.length; j++) {
+								idsmedicos[j]=Integer.parseInt(medicosSeleccionados.get(medicos[j]).id);
+						}
+					}
+					else {
+						for (int j = 0; j < medicos.length; j++) {
+							idsmedicos[j]=medicos[j]+1;
+					}
+					}
+	
+					
+					new AddHorarioAction(inicio, fin,diasSeleccionados, idsmedicos).execute();
 				}
 			});
-			btAsignarHorario.setBounds(344, 306, 143, 29);
 		}
 		return btAsignarHorario;
 	}
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
-			scrollPane.setBounds(90, 35, 304, 73);
 			scrollPane.setViewportView(getList());
 		}
 		return scrollPane;
@@ -650,7 +671,6 @@ public class VentanaPrincipal extends JFrame {
 					}
 				}
 			});
-			dcDesde.setBounds(149, 178, 165, 26);
 		}
 		return dcDesde;
 	}
@@ -711,7 +731,6 @@ public class VentanaPrincipal extends JFrame {
 					}
 				}
 			});
-			dcHasta.setBounds(149, 227, 165, 26);
 		}
 		return dcHasta;
 	}
@@ -774,14 +793,12 @@ public class VentanaPrincipal extends JFrame {
 	private JLabel getLbDesde() {
 		if (lbDesde == null) {
 			lbDesde = new JLabel("Desde:");
-			lbDesde.setBounds(90, 188, 61, 16);
 		}
 		return lbDesde;
 	}
 	private JLabel getLbHasta() {
 		if (lbHasta == null) {
 			lbHasta = new JLabel("Hasta:");
-			lbHasta.setBounds(90, 237, 61, 16);
 		}
 		return lbHasta;
 	}
@@ -792,7 +809,6 @@ public class VentanaPrincipal extends JFrame {
 				h[i]=i;
 			}
 			cbHoraD = new JComboBox<Integer>();
-			cbHoraD.setBounds(342, 177, 72, 27);
 			cbHoraD.setModel(new DefaultComboBoxModel<Integer>(h));
 		}
 		return cbHoraD;
@@ -804,7 +820,6 @@ public class VentanaPrincipal extends JFrame {
 				m[j]=j;
 			}
 			cbMinutosD = new JComboBox<Integer>();
-			cbMinutosD.setBounds(415, 178, 72, 27);
 			cbMinutosD.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutosD;
@@ -816,7 +831,6 @@ public class VentanaPrincipal extends JFrame {
 				h[i]=i;
 			}
 			cbHoraH = new JComboBox<Integer>();
-			cbHoraH.setBounds(342, 227, 72, 27);
 			cbHoraH.setModel(new DefaultComboBoxModel<Integer>(h));
 		}
 		return cbHoraH;
@@ -828,7 +842,6 @@ public class VentanaPrincipal extends JFrame {
 				m[j]=j;
 			}
 			cbMinutosH = new JComboBox<Integer>();
-			cbMinutosH.setBounds(415, 226, 72, 27);
 			cbMinutosH.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutosH;
@@ -844,7 +857,6 @@ public class VentanaPrincipal extends JFrame {
 				}
 			});
 			cbOpcion.setModel(new DefaultComboBoxModel<String>(new String[] {"Todos los dias", "Personalizado"}));
-			cbOpcion.setBounds(90, 307, 193, 26);
 		}
 		return cbOpcion;
 	}
@@ -940,7 +952,6 @@ public class VentanaPrincipal extends JFrame {
 					mostrarPanelAdministrador();
 				}
 			});
-			btnAtras.setBounds(45, 399, 89, 23);
 		}
 		return btnAtras;
 	}
@@ -992,58 +1003,12 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPnVerCitas() {
 		if (pnVerCitas == null) {
 			pnVerCitas = new JPanel();
-			pnVerCitas.setLayout(null);
-			pnVerCitas.add(getCbMedicos());
-			pnVerCitas.add(getLbMedicos());
-			pnVerCitas.add(getLbPacientes());
-			pnVerCitas.add(getCbPacientes());
-			pnVerCitas.add(getBtHistorialA());
-			pnVerCitas.add(getBtAtrasA());
+			pnVerCitas.setLayout(new BorderLayout(0, 0));
+			pnVerCitas.add(getPnVCCentro());
+			pnVerCitas.add(getPnVCSur(), BorderLayout.SOUTH);
+			pnVerCitas.add(getPnVCNorte(), BorderLayout.NORTH);
 		}
 		return pnVerCitas;
-	}
-	private JComboBox<String> getCbMedicos() {
-		if (cbMedicos == null) {
-			String[] medicos = new String[listamedicos.size()];
-			for (int i = 0; i < medicos.length; i++) {
-				
-				medicos[i]=listamedicos.get(i).name+" "+listamedicos.get(i).surname;
-			}
-			cbMedicos = new JComboBox<String>();
-			cbMedicos.addItemListener(new ItemListener() {
-				public void itemStateChanged(ItemEvent e) {
-					idMedico=cbMedicos.getSelectedIndex()+1;
-					getCbPacientes().setModel(new DefaultComboBoxModel<String>(getPacientesCita(new ListAllCitasByIdAction(idMedico).execute())));
-				}
-			});
-			idMedico=cbMedicos.getSelectedIndex()+1;
-			cbMedicos.setBounds(139, 113, 225, 27);
-			cbMedicos.setModel(new DefaultComboBoxModel<String>((medicos)));
-		}
-		return cbMedicos;
-	}
-	private JLabel getLbMedicos() {
-		if (lbMedicos == null) {
-			lbMedicos = new JLabel("Medicos:");
-			lbMedicos.setBounds(68, 117, 61, 16);
-		}
-		return lbMedicos;
-	}
-	private JLabel getLbPacientes() {
-		if (lbPacientes == null) {
-			lbPacientes = new JLabel("Pacientes:");
-			lbPacientes.setBounds(408, 117, 77, 16);
-		}
-		return lbPacientes;
-	}
-	public JComboBox<String> getCbPacientes() {
-		if (cbPacientes == null) {
-			cbPacientes = new JComboBox<String>();
-			cbPacientes.setBounds(497, 113, 225, 27);
-			idMedico=cbMedicos.getSelectedIndex()+1;
-			cbPacientes.setModel(new DefaultComboBoxModel<String>(getPacientesCita(new ListAllCitasByIdAction(idMedico).execute())));
-		}
-		return cbPacientes;
 	}
 	
 	private void mostrarPnVerCitas() {
@@ -1055,12 +1020,11 @@ public class VentanaPrincipal extends JFrame {
 			btHistorialA = new JButton("Ver Historial");
 			btHistorialA.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					idPaciente=idsPaciente[getCbPacientes().getSelectedIndex()];
-					if(getCbPacientes().getSelectedItem()!=null)
+					idPaciente=idsPaciente[getListaVCitaPaciente().getSelectedIndex()];
+					if(getListaVCitaPaciente().getSelectedIndex()!=-1)
 						mostrarPnHistorial();
 				}
 			});
-			btHistorialA.setBounds(325, 179, 117, 29);
 		}
 		return btHistorialA;
 	}
@@ -1099,13 +1063,12 @@ public class VentanaPrincipal extends JFrame {
 					mostrarPanelAdministrador();
 				}
 			});
-			btAtrasA.setBounds(124, 380, 117, 29);
 		}
 		return btAtrasA;
 	}
 	
 	private void ventanaCausas() {
-		VentanaCausas v = new VentanaCausas(new ListAllCitasByIdAction(idMedico).execute().get(getCbPacientes().getSelectedIndex()).idPaciente, idCita);
+		VentanaCausas v = new VentanaCausas(new ListAllCitasByIdAction(idMedico).execute().get(getListaVCitaPaciente().getSelectedIndex()).idPaciente, idCita);
 		v.setLocationRelativeTo(this);
 		v.setModal(true);
 		v.setVisible(true);
@@ -1160,7 +1123,9 @@ public class VentanaPrincipal extends JFrame {
 			dateChooser = new JDateChooser();
 			dateChooser.addPropertyChangeListener(new PropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent evt) {
-					//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+					//idMedico=1;
+					//lista = new ListAllCitasByIdAction(idMedico).execute();
+					//lista = new ListAllCitasAction().execute();
 					listaFiltrada = new ArrayList<CitaDto>();
 					for (CitaDto cita : lista) {
 						if(getDateChooser().getDate()!=null) {
@@ -1197,9 +1162,11 @@ public class VentanaPrincipal extends JFrame {
 	private JList<String> getListCitas() {
 		if (listCitas == null) {
 			listCitas = new JList<String>();
+			idMedico=1;
 			listCitas.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					if(getListCitas().getSelectedIndex()!=-1) {
+						idMedico=1;
 						cita = listaFiltrada.get(getListCitas().getSelectedIndex());
 						String sala=cita.idSala;
 						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
@@ -1207,7 +1174,6 @@ public class VentanaPrincipal extends JFrame {
 						String motivo = cita.causa;
 						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
 						getTxInfo().setText("Sala de la cita: "+sala+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
-
 						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+ "Medico de la cita: " + medico +"\n"+ "Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
 
 					}
@@ -1215,7 +1181,6 @@ public class VentanaPrincipal extends JFrame {
 						getTxInfo().setText("");
 				}
 			});
-			idMedico=1;
 			lista = new ListAllCitasByIdAction(idMedico).execute();
 			String[] pacientes= getPacientesCita(lista);
 			if(idsPaciente.length==0) {
@@ -1227,19 +1192,19 @@ public class VentanaPrincipal extends JFrame {
 			ListModel<String> model = new DefaultComboBoxModel<String>(pacientes);
 			listCitas.setModel(model);
 			
-			listCitas.addListSelectionListener(new ListSelectionListener() {
-				public void valueChanged(ListSelectionEvent e) {
-					if(getListModificarCita().getSelectedIndex()!=-1) {
-						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
-						String sala=cita.idSala;
-						int idMedico = Integer.parseInt(cita.idMedico);
-						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
-						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
-						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
-						String motivo = cita.causa;
-						getTxInfoModificar().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
-						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
-					}}});
+//			listCitas.addListSelectionListener(new ListSelectionListener() {
+//				public void valueChanged(ListSelectionEvent e) {
+//					if(getListModificarCita().getSelectedIndex()!=-1) {
+//						CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
+//						String sala=cita.idSala;
+//						int idMedico = Integer.parseInt(cita.idMedico);
+//						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
+//						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
+//						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
+//						String motivo = cita.causa;
+//						getTxInfoModificar().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+//						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+//					}}});
 		}
 		return listCitas;
 	}
@@ -1276,7 +1241,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(1, false);
 				}
 			});
-			chLunes.setBounds(90, 120, 78, 23);
 		}
 		return chLunes;
 	}
@@ -1298,7 +1262,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(2, false);
 				}
 			});
-			chMartes.setBounds(173, 121, 81, 23);
 		}
 		return chMartes;
 	}
@@ -1320,7 +1283,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(3, false);
 				}
 			});
-			chMiercoles.setBounds(266, 121, 101, 23);
 		}
 		return chMiercoles;
 	}
@@ -1342,7 +1304,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(4, false);
 				}
 			});
-			chJueves.setBounds(371, 121, 89, 23);
 		}
 		return chJueves;
 	}
@@ -1364,7 +1325,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(5, false);
 				}
 			});
-			chViernes.setBounds(459, 121, 89, 23);
 		}
 		return chViernes;
 	}
@@ -1386,7 +1346,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(6, false);
 				}
 			});
-			chSabado.setBounds(549, 121, 89, 23);
 		}
 		return chSabado;
 	}
@@ -1408,7 +1367,6 @@ public class VentanaPrincipal extends JFrame {
 						diasSeleccionados.set(0, false);
 				}
 			});
-			chDomingo.setBounds(641, 121, 120, 23);
 		}
 		return chDomingo;
 	}
@@ -1427,13 +1385,10 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPnElegirMCita() {
 		if (pnElegirMCita == null) {
 			pnElegirMCita = new JPanel();
-			pnElegirMCita.setLayout(null);
-			pnElegirMCita.add(getBtModificar());
-			pnElegirMCita.add(getBtnAtrasMC());
-			pnElegirMCita.add(getDcCitaModifcar());
-			pnElegirMCita.add(getLbFechaCitaModifcar());
-			pnElegirMCita.add(getScCitasModifcar());
-			pnElegirMCita.add(getScInfoModificar());
+			pnElegirMCita.setLayout(new BorderLayout(0, 0));
+			pnElegirMCita.add(getPnEMCNorte(), BorderLayout.NORTH);
+			pnElegirMCita.add(getPnEMCCentro(), BorderLayout.CENTER);
+			pnElegirMCita.add(getPnEMCSur(), BorderLayout.SOUTH);
 		}
 		return pnElegirMCita;
 	}
@@ -1445,21 +1400,23 @@ public class VentanaPrincipal extends JFrame {
 					mostrarPnModificarCita();
 				}
 			});
-			btModificar.setBounds(393, 50, 117, 29);
 		}
 		return btModificar;
 	}
 	private JButton getBtnAtrasMC() {
 		if (btnAtrasMC == null) {
 			btnAtrasMC = new JButton("Atras");
-			btnAtrasMC.setBounds(155, 400, 89, 23);
+			btnAtrasMC.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPanelAdministrador();
+				}
+			});
 		}
 		return btnAtrasMC;
 	}
 	private JDateChooser getDcCitaModifcar() {
 		if (dcCitaModifcar == null) {
 			dcCitaModifcar = new JDateChooser();
-			dcCitaModifcar.setBounds(133, 50, 224, 26);
 			dcCitaModifcar.addPropertyChangeListener(new PropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent evt) {
 					//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
@@ -1484,14 +1441,12 @@ public class VentanaPrincipal extends JFrame {
 	private JLabel getLbFechaCitaModifcar() {
 		if (lbFechaCitaModifcar == null) {
 			lbFechaCitaModifcar = new JLabel("Fecha de la cita:");
-			lbFechaCitaModifcar.setBounds(29, 50, 101, 16);
 		}
 		return lbFechaCitaModifcar;
 	}
 	private JScrollPane getScCitasModifcar() {
 		if (scCitasModifcar == null) {
 			scCitasModifcar = new JScrollPane();
-			scCitasModifcar.setBounds(29, 109, 292, 110);
 			scCitasModifcar.setViewportView(getListModificarCita());
 		}
 		return scCitasModifcar;
@@ -1499,7 +1454,6 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane getScInfoModificar() {
 		if (scInfoModificar == null) {
 			scInfoModificar = new JScrollPane();
-			scInfoModificar.setBounds(333, 109, 273, 110);
 			scInfoModificar.setViewportView(getTxInfoModificar());
 		}
 		return scInfoModificar;
@@ -1562,6 +1516,7 @@ public class VentanaPrincipal extends JFrame {
 	private JTextArea getTxInfoModificar() {
 		if (txInfoModificar == null) {
 			txInfoModificar = new JTextArea();
+			txInfoModificar.setBorder(new TitledBorder(null, "Info:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		}
 		return txInfoModificar;
 	}
@@ -1582,6 +1537,8 @@ public class VentanaPrincipal extends JFrame {
 			pnModificarCita.add(getCbMSala());
 			pnModificarCita.add(getDcModificarFecha());
 			pnModificarCita.add(getBtSolicitudMod());
+			pnModificarCita.add(getTxMedicos());
+			pnModificarCita.add(getBtMAtras());
 		}
 		return pnModificarCita;
 	}
@@ -1603,7 +1560,7 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane getScElegirMedico() {
 		if (scElegirMedico == null) {
 			scElegirMedico = new JScrollPane();
-			scElegirMedico.setBounds(49, 177, 295, 95);
+			scElegirMedico.setBounds(49, 197, 295, 95);
 			scElegirMedico.setViewportView(getListaElegirMedico());
 		}
 		return scElegirMedico;
@@ -1633,23 +1590,15 @@ public class VentanaPrincipal extends JFrame {
 			btElegirMedico.addActionListener(new ActionListener() {
 			
 				public void actionPerformed(ActionEvent e) {
-					String id = String.valueOf(getListaElegirMedico().getSelectedIndex()+1);
-//					Timestamp fecha = new Timestamp(getDcModificarFecha().getDate().getTime());
-//					Timestamp fechaInicio = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraInicio().getSelectedIndex()+":"+getCbMMinutosInicio().getSelectedIndex()+":00");
-//					Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
-//					String sala = String.valueOf(getCbMSala().getSelectedItem());
-//					new UpdateCitaAction(id, fechaInicio, fechaFin, sala, idCita).execute();
-//					CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
-//					cita.horaInicio=fechaInicio.toString();
-//					cita.horaFinal=fechaFin.toString();
-//					cita.idSala=sala;
-//					String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
-//					String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
-//					String motivo = cita.causa;
-//					String medico = listamedicos.get(Integer.parseInt(id)-1).name + " " +listamedicos.get(Integer.parseInt(id)-1).surname;
-//					getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
+					//String id = String.valueOf(getListaElegirMedico().getSelectedIndex()+1);
 					Integer respuesta = JOptionPane.YES_OPTION;
-					MedicoDto medicodto = listamedicos.get(Integer.parseInt(id)-1);
+					//MedicoDto medicodto = listamedicos.get(Integer.parseInt(id)-1);
+					int medicoid = getListaElegirMedico().getSelectedIndex();
+//					int[] idsmedicos = new int[getList().getSelectedValuesList().size()];
+//					for (int j = 0; j < medicos.length; j++) {
+//							idsmedicos[j]=Integer.parseInt(medicosSeleccionados.get(medicos[j]).id);
+//					}
+					MedicoDto medicodto = medicosSeleccionados.get(medicoid);
 
 						// Comprueba que la cita se establece dentro de la jornada laboral
 						if (!compruebaJornada(medicodto.id)) {
@@ -1668,7 +1617,7 @@ public class VentanaPrincipal extends JFrame {
 							Timestamp fechaInicio = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraInicio().getSelectedIndex()+":"+getCbMMinutosInicio().getSelectedIndex()+":00");
 							Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
 							String sala = String.valueOf(getCbMSala().getSelectedItem());
-							new UpdateCitaAction(id, fechaInicio, fechaFin, sala, idCita).execute();
+							new UpdateCitaAction(medicodto.id, fechaInicio, fechaFin, sala, idCita).execute();
 							//CitaDto cita = listaFiltrada.get(getListModificarCita().getSelectedIndex());
 							cita.horaInicio=fechaInicio.toString();
 							cita.horaFinal=fechaFin.toString();
@@ -1676,13 +1625,14 @@ public class VentanaPrincipal extends JFrame {
 							String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
 							String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
 							String motivo = cita.causa;
-							String medico = listamedicos.get(Integer.parseInt(id)-1).name + " " +listamedicos.get(Integer.parseInt(id)-1).surname;
+							//String medico = listamedicos.get(Integer.parseInt(id)-1).name + " " +listamedicos.get(Integer.parseInt(id)-1).surname;
+							String medico = medicodto.name+ " " +medicodto.surname;
 							getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+"Medico de la cita: "+medico+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
 						}
 					
 				}
 			});
-			btElegirMedico.setBounds(59, 287, 117, 29);
+			btElegirMedico.setBounds(59, 307, 117, 29);
 		}
 		return btElegirMedico;
 	}
@@ -1976,7 +1926,6 @@ public class VentanaPrincipal extends JFrame {
 					  list.setModel(model);
 				}
 			});
-			textField.setBounds(90, 6, 304, 26);
 			textField.setColumns(10);
 		}
 		return textField;
@@ -1984,10 +1933,12 @@ public class VentanaPrincipal extends JFrame {
 	
 	private List<MedicoDto> filtrarListaMedicos(List<MedicoDto> medi, String start) {
 		List<MedicoDto> listaFiltrada = new ArrayList<MedicoDto>();
+		medicosSeleccionados = new ArrayList<MedicoDto>();
 		for (MedicoDto m : medi) {
 			// Filtro por nombre
 			if (m.name.toUpperCase().startsWith(start.toUpperCase())) {
 				listaFiltrada.add(m);
+				medicosSeleccionados.add(m);
 			}
 			//Filtro por documento de identficacion
 			else if(m.dni.toUpperCase().startsWith(start.toUpperCase())) 
@@ -2052,7 +2003,7 @@ public class VentanaPrincipal extends JFrame {
 	private JButton getBtSolicitudMod() {
 		if (btSolicitudMod == null) {
 			btSolicitudMod = new JButton("Solicitar Modificar");
-			btSolicitudMod.setBounds(227, 290, 117, 29);
+			btSolicitudMod.setBounds(227, 310, 117, 29);
 			if(derechos) {
 				btSolicitudMod.setVisible(false);
 				btSolicitudMod.setEnabled(false);
@@ -2099,4 +2050,298 @@ public class VentanaPrincipal extends JFrame {
 		return btSolicitudMod;
 		}
 
+	private JTextField getTxMedicos() {
+		if (txMedicos == null) {
+			txMedicos = new JTextField();
+			txMedicos.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					 String[] medicosstr = medicosToString(filtrarListaMedicos(listamedicos,getTxMedicos().getText()));
+					  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+					  listaElegirMedico.setModel(model);
+				}
+			});
+			txMedicos.setBounds(49, 166, 295, 26);
+			txMedicos.setColumns(10);
+		}
+		return txMedicos;
+	}
+	private JButton getBtMAtras() {
+		if (btMAtras == null) {
+			btMAtras = new JButton("Atras");
+			btMAtras.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnElegirMCita();
+				}
+			});
+			btMAtras.setBounds(22, 398, 117, 29);
+		}
+		return btMAtras;
+	}
+	private JPanel getPnEMCNorte() {
+		if (pnEMCNorte == null) {
+			pnEMCNorte = new JPanel();
+			pnEMCNorte.setLayout(new GridLayout(0, 2, 0, 0));
+			pnEMCNorte.add(getPnEMCFecha());
+			pnEMCNorte.add(getPnEMCModificar());
+		}
+		return pnEMCNorte;
+	}
+	private JPanel getPnEMCModificar() {
+		if (pnEMCModificar == null) {
+			pnEMCModificar = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnEMCModificar.getLayout();
+			flowLayout.setVgap(10);
+			pnEMCModificar.add(getBtModificar());
+		}
+		return pnEMCModificar;
+	}
+	private JPanel getPnEMCFecha() {
+		if (pnEMCFecha == null) {
+			pnEMCFecha = new JPanel();
+			pnEMCFecha.setLayout(new BorderLayout(0, 0));
+			pnEMCFecha.add(getLbFechaCitaModifcar(), BorderLayout.WEST);
+			pnEMCFecha.add(getDcCitaModifcar());
+		}
+		return pnEMCFecha;
+	}
+	private JPanel getPnEMCCentro() {
+		if (pnEMCCentro == null) {
+			pnEMCCentro = new JPanel();
+			pnEMCCentro.setLayout(new GridLayout(0, 2, 0, 0));
+			pnEMCCentro.add(getScCitasModifcar());
+			pnEMCCentro.add(getScInfoModificar());
+		}
+		return pnEMCCentro;
+	}
+	private JPanel getPnEMCSur() {
+		if (pnEMCSur == null) {
+			pnEMCSur = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnEMCSur.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			pnEMCSur.add(getBtnAtrasMC());
+		}
+		return pnEMCSur;
+	}
+	private JScrollPane getScVCitaMedico() {
+		if (scVCitaMedico == null) {
+			scVCitaMedico = new JScrollPane();
+			scVCitaMedico.setViewportView(getListaVCitaMedico());
+		}
+		return scVCitaMedico;
+	}
+	private JList<String> getListaVCitaMedico() {
+		if (listaVCitaMedico == null) {
+			listaVCitaMedico = new JList<>();
+			listaVCitaMedico.setBorder(new TitledBorder(null, "Medicos", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			String[] medicos = new String[listamedicos.size()];
+			for (int i = 0; i < medicos.length; i++) {
+				
+				medicos[i]=listamedicos.get(i).name+" "+listamedicos.get(i).surname;
+			}
+			listaVCitaMedico.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					idMedico=listaVCitaMedico.getSelectedIndex()+1;
+					lista = new ListAllCitasByIdAction(idMedico).execute();
+					getListaVCitaPaciente().setModel(new DefaultComboBoxModel<String>(getPacientesCita(lista)));
+				
+				}
+			});
+			idMedico=listaVCitaMedico.getSelectedIndex()+1;
+			listaVCitaMedico.setModel(new DefaultComboBoxModel<String>((medicos)));
+		}
+		return listaVCitaMedico;
+	}
+	private JScrollPane getScrollPane_1_1() {
+		if (scVCitaPaciente == null) {
+			scVCitaPaciente = new JScrollPane();
+			scVCitaPaciente.setViewportView(getListaVCitaPaciente());
+		}
+		return scVCitaPaciente;
+	}
+	private JList<String> getListaVCitaPaciente() {
+		if (listaVCitaPaciente == null) {
+			listaVCitaPaciente = new JList<String>();
+			listaVCitaPaciente.setBorder(new TitledBorder(null, "Pacientes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		}
+		return listaVCitaPaciente;
+	}
+	private JPanel getPnVCCentro() {
+		if (pnVCCentro == null) {
+			pnVCCentro = new JPanel();
+			pnVCCentro.setLayout(new GridLayout(0, 2, 0, 0));
+			pnVCCentro.add(getScVCitaMedico());
+			pnVCCentro.add(getScrollPane_1_1());
+		}
+		return pnVCCentro;
+	}
+	private JPanel getPnVCSur() {
+		if (pnVCSur == null) {
+			pnVCSur = new JPanel();
+			pnVCSur.setLayout(new GridLayout(0, 2, 0, 0));
+			pnVCSur.add(getPnVCAtras());
+			pnVCSur.add(getPnVCVer());
+		}
+		return pnVCSur;
+	}
+	private JPanel getPnVCAtras() {
+		if (pnVCAtras == null) {
+			pnVCAtras = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnVCAtras.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			pnVCAtras.add(getBtAtrasA());
+		}
+		return pnVCAtras;
+	}
+	private JPanel getPnVCVer() {
+		if (pnVCVer == null) {
+			pnVCVer = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnVCVer.getLayout();
+			flowLayout.setAlignment(FlowLayout.RIGHT);
+			pnVCVer.add(getBtHistorialA());
+		}
+		return pnVCVer;
+	}
+	private JPanel getPnVCNorte() {
+		if (pnVCNorte == null) {
+			pnVCNorte = new JPanel();
+			pnVCNorte.setLayout(new BorderLayout(0, 0));
+			pnVCNorte.add(getLbVCFechaCita(), BorderLayout.WEST);
+			pnVCNorte.add(getDcFechaCita(), BorderLayout.CENTER);
+		}
+		return pnVCNorte;
+	}
+	private JDateChooser getDcFechaCita() {
+		if (dcFechaCita == null) {
+			dcFechaCita = new JDateChooser();
+			dcFechaCita.addPropertyChangeListener(new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent evt) {
+					if(dcFechaCita.getDate()!=null) {
+						listaFiltrada = new ArrayList<CitaDto>();
+						for (CitaDto cita : lista) {
+							Timestamp m = Timestamp.from(getDcFechaCita().getDate().toInstant());
+							String string = m.toString().split(" ")[0];
+							if(Date.valueOf(string).compareTo(Date.valueOf(cita.horaInicio.split(" ")[0]))==0)
+									listaFiltrada.add(cita);
+							
+						}
+						listaVCitaPaciente.setModel((new DefaultComboBoxModel<String>(getPacientesCita(listaFiltrada))));
+					}
+						
+				}
+			});
+		}
+		return dcFechaCita;
+	}
+	private JLabel getLbVCFechaCita() {
+		if (lbVCFechaCita == null) {
+			lbVCFechaCita = new JLabel("Elige fecha de la cita:");
+		}
+		return lbVCFechaCita;
+	}
+	private JPanel getPnHNorte() {
+		if (pnHNorte == null) {
+			pnHNorte = new JPanel();
+			pnHNorte.setLayout(new BorderLayout(0, 0));
+			pnHNorte.add(getPnHTexto());
+			pnHNorte.add(getPanel_1_1(), BorderLayout.SOUTH);
+		}
+		return pnHNorte;
+	}
+	private JPanel getPnHTexto() {
+		if (pnHTexto == null) {
+			pnHTexto = new JPanel();
+			pnHTexto.setLayout(new BorderLayout(0, 0));
+			pnHTexto.add(getScrollPane());
+			pnHTexto.add(getTextField(), BorderLayout.NORTH);
+		}
+		return pnHTexto;
+	}
+	private JPanel getPanel_1_1() {
+		if (pnHCheck == null) {
+			pnHCheck = new JPanel();
+			pnHCheck.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			pnHCheck.add(getChLunes());
+			pnHCheck.add(getChMartes());
+			pnHCheck.add(getChMiercoles());
+			pnHCheck.add(getChJueves());
+			pnHCheck.add(getChViernes());
+			pnHCheck.add(getChSabado());
+			pnHCheck.add(getChDomingo());
+		}
+		return pnHCheck;
+	}
+	private JPanel getPnHCFechas() {
+		if (pnHCFechas == null) {
+			pnHCFechas = new JPanel();
+			pnHCFechas.setAlignmentX(Component.LEFT_ALIGNMENT);
+			pnHCFechas.setLayout(new GridLayout(0, 2, 0, 0));
+			pnHCFechas.add(getPnFecha());
+			pnHCFechas.add(getPnCHoras());
+		}
+		return pnHCFechas;
+	}
+	private JLabel getLbPuntos() {
+		if (lbPuntos == null) {
+			lbPuntos = new JLabel("             :");
+		}
+		return lbPuntos;
+	}
+	private JPanel getPnCHoras() {
+		if (pnCHoras == null) {
+			pnCHoras = new JPanel();
+			pnCHoras.setLayout(new GridLayout(0, 3, 0, 0));
+			pnCHoras.add(getCbHoraD());
+			pnCHoras.add(getLbPuntos());
+			pnCHoras.add(getCbMinutosD());
+			pnCHoras.add(getCbHoraH());
+			pnCHoras.add(getPbPuntos2());
+			pnCHoras.add(getCbMinutosH());
+		}
+		return pnCHoras;
+	}
+	private JLabel getPbPuntos2() {
+		if (pbPuntos2 == null) {
+			pbPuntos2 = new JLabel("             :");
+		}
+		return pbPuntos2;
+	}
+	private JPanel getPnFecha() {
+		if (pnFecha == null) {
+			pnFecha = new JPanel();
+			pnFecha.setLayout(new GridLayout(2, 2, 0, 0));
+			pnFecha.add(getLbDesde());
+			pnFecha.add(getDcDesde());
+			pnFecha.add(getLbHasta());
+			pnFecha.add(getDcHasta());
+		}
+		return pnFecha;
+	}
+	private JPanel getPnHCBotones() {
+		if (pnHCBotones == null) {
+			pnHCBotones = new JPanel();
+			pnHCBotones.add(getCbOpcion());
+			pnHCBotones.add(getBtAsignarHorario());
+		}
+		return pnHCBotones;
+	}
+	private JPanel getPnHCentro() {
+		if (pnHCentro == null) {
+			pnHCentro = new JPanel();
+			pnHCentro.setLayout(new BorderLayout(0, 0));
+			pnHCentro.add(getPnHCFechas());
+			pnHCentro.add(getPnHCBotones(), BorderLayout.SOUTH);
+		}
+		return pnHCentro;
+	}
+	private JPanel getPanel_1() {
+		if (panel_1 == null) {
+			panel_1 = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEFT);
+			flowLayout.setVgap(100);
+			panel_1.add(getBtnAtras());
+		}
+		return panel_1;
+	}
 }

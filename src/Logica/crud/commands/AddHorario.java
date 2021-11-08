@@ -42,7 +42,7 @@ public class AddHorario {
 							pst.setTimestamp(2, d1);
 							pst.setTimestamp(3, d1s);
 							System.out.println(d1.toLocalDateTime().toLocalDate().getDayOfWeek().toString());
-							pst.setInt(4, ids_medicos[i]+1);
+							pst.setInt(4, ids_medicos[i]);
 							pst.executeUpdate();
 							id++;
 							pst.close();

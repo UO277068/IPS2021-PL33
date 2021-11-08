@@ -495,7 +495,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Aï¿½adir medicos");
+						btnAñadirMedico.setText("Añadir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						

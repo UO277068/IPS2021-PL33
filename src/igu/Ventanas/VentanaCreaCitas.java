@@ -25,7 +25,6 @@ import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -40,7 +39,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Array;
 
 import javax.swing.border.SoftBevelBorder;
 
@@ -1165,7 +1163,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private boolean checkCamposVacios() {
 		//Compruba que se han seleccionado medicos
-		if(getListSeleccionados().getModel().getSize()==0) 
+		if(getListSeleccionados().getModel().getSize()==0 || getDcInicio().getDate()==null || getDcFin().getDate()==null ) 
 		{
 			return false;
 		}
@@ -1637,8 +1635,11 @@ public class VentanaCreaCitas extends JDialog {
 				{
 					getTextFieldFiltroMedico().setText("");
 					if(chckbxFiltrarPorHora.isSelected()) {
+					   chckbxEspecialidad.setSelected(false);
+					   chckbxEspecialidad.setEnabled(false);
 					   filtraListaMedicos();
 					}else {
+						chckbxEspecialidad.setEnabled(true);
 						String[] medicosstr = medicosToString(medicos);
 						listMedicos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 						ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
@@ -1819,6 +1820,20 @@ public class VentanaCreaCitas extends JDialog {
 				{
 					if(listHorariosDisponibles.getSelectedIndex()!=-1) 
 					{
+					  String h = listHorariosDisponibles.getSelectedValue();
+					  String[] horarios = h.split("-");
+					  Timestamp inicio = Timestamp.valueOf(horarios[0]);
+					  Timestamp fina = Timestamp.valueOf(horarios[1]);
+//					    Timestamp m = Timestamp.from(getDateChooser().getDate().toInstant());
+//                      String string = inicio.toString().split(" ")[0];
+                     
+					  Date fechaInicio= new Date(inicio.getTime());
+					  Date fechaFin= new Date(fina.getTime());
+					  
+					  getDcInicio().setDate(fechaInicio);
+					  getDcFin().setDate(fechaFin);
+					  
+					  
 					  CardLayout c = (CardLayout)getPanelContenidos().getLayout();
 					  c.show(getPanelContenidos(),"PanelCreaCitas");
 					}

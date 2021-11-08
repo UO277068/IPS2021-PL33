@@ -234,6 +234,7 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel panel_1;
 	private JScrollPane scllSolicitudMod;
 	private JTextArea txtSolicitudMod;
+	private JLabel lbObservacionesMod;
 	
 
 	/**
@@ -2375,6 +2376,7 @@ public class VentanaPrincipal extends JFrame {
 			scllSolicitudMod = new JScrollPane();
 			scllSolicitudMod.setBounds(423, 243, 202, 96);
 			scllSolicitudMod.setViewportView(getTxtSolicitudMod());
+			scllSolicitudMod.setColumnHeaderView(getLbObservacionesMod());
 		}
 		return scllSolicitudMod;
 	}
@@ -2383,5 +2385,12 @@ public class VentanaPrincipal extends JFrame {
 			txtSolicitudMod = new JTextArea();
 		}
 		return txtSolicitudMod;
+	}
+	private JLabel getLbObservacionesMod() {
+		if (lbObservacionesMod == null) {
+			lbObservacionesMod = new JLabel("Observaciones:");
+			lbObservacionesMod.setHorizontalAlignment(SwingConstants.CENTER);
+		}
+		return lbObservacionesMod;
 	}
 }

@@ -700,6 +700,14 @@ public class VentanaCreaCitas extends JDialog {
 	private JComboBox<Integer> getComboBoxMinutoInicioCita() {
 		if (comboBoxMinutoInicioCita == null) {
 			comboBoxMinutoInicioCita = new JComboBox<Integer>();
+			comboBoxMinutoInicioCita.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					if (comboBoxMinutoInicioCita.getSelectedIndex() < 0) {
+						comboBoxMinutoInicioCita.setSelectedIndex(0);
+					}
+				}
+			});
 			comboBoxMinutoInicioCita.setEditable(true);
 			Integer[] h = new Integer[60];
 			for (int i = 0; i < h.length; i++) {
@@ -715,6 +723,14 @@ public class VentanaCreaCitas extends JDialog {
 	private JComboBox<Integer> getComboBoxHoraFinCita() {
 		if (comboBoxHoraFinCita == null) {
 			comboBoxHoraFinCita = new JComboBox<Integer>();
+			comboBoxHoraFinCita.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					if (comboBoxHoraFinCita.getSelectedIndex() < 0) {
+						comboBoxHoraFinCita.setSelectedIndex(0);
+					}
+				}
+			});
 			comboBoxHoraFinCita.setEditable(true);
 			Integer[] h = new Integer[24];
 			for (int i = 0; i < h.length; i++) {
@@ -736,6 +752,14 @@ public class VentanaCreaCitas extends JDialog {
 	private JComboBox<Integer> getComboBoxMinutoFinCita() {
 		if (comboBoxMinutoFinCita == null) {
 			comboBoxMinutoFinCita = new JComboBox<Integer>();
+			comboBoxMinutoFinCita.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					if (comboBoxMinutoFinCita.getSelectedIndex() < 0) {
+						comboBoxMinutoFinCita.setSelectedIndex(0);
+					}
+				}
+			});
 			comboBoxMinutoFinCita.setEditable(true);
 			Integer[] h = new Integer[60];
 			for (int i = 0; i < h.length; i++) {
@@ -1757,23 +1781,29 @@ public class VentanaCreaCitas extends JDialog {
 				    		JornadaDto jor = new JornadaDto();
 				    		jor.diaEntrada=inicioj.toString();
 				    		jor.diasalida=finj.toString();
+				    		if(!jornadas.contains(jor)) {
 				    		jornadas.add(jor);
 				    		jornadas.remove(jornada);
+				    		}
 
 				    	}else if((inicioFecha.before(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
 				    		
 				    		JornadaDto jor = new JornadaDto();
 				    		jor.diaEntrada=inicioj.toString();
 				    		jor.diasalida=finFecha.toString();
+				    		if(!jornadas.contains(jor)) {
 				    		jornadas.add(jor);
 				    		jornadas.remove(jornada);
+				    		}
 				    	}else if((inicioFecha.after(inicioj)||igualdad1) && (finFecha.after(finj)||igualdad2)) {
 				    		
 				    		JornadaDto jor = new JornadaDto();
 				    		jor.diaEntrada=inicioFecha.toString();
 				    		jor.diasalida=finj.toString();
-				    		jornadas.add(jor);
-				    		jornadas.remove(jornada);
+				    		if(!jornadas.contains(jor)) {
+				    			jornadas.add(jor);
+					    		jornadas.remove(jornada);
+				    		}
 				    	}else if((inicioFecha.after(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
 				    		//No hace nada
 				    	}else {

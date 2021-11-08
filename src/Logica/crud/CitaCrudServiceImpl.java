@@ -57,8 +57,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void addHorario(Timestamp d1, Timestamp d2, int opcion, int[] ids_medicos) throws Exception {
-		new AddHorario(d1, d2, opcion, ids_medicos).execute();
+	public void addHorario(Timestamp d1, Timestamp d2, List<Boolean> dias, int[] ids_medicos) throws Exception {
+		new AddHorario(d1, d2, dias, ids_medicos).execute();
 		
 	}
     //Rober
@@ -74,8 +74,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void InsertCita(CitaDto cita) {
-		new InsertCita(cita).execute();
+	public int InsertCita(CitaDto cita) {
+		return new InsertCita(cita).execute();
 		
 	}
 
@@ -85,8 +85,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void EnviarEmail(String correo) {
-		new EnviarGmailUrgente(correo).execute();
+	public void EnviarEmail(String correo,PacienteDto paciente,CitaDto cita) {
+		new EnviarGmailUrgente(correo,paciente,cita).execute();
 		
 	}
 	
@@ -113,7 +113,7 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void AddContactoCita(String id, String contacto) {
+	public void AddContactoCita(int id, String contacto) {
 		new AddContactoCita(id,contacto).execute();
 		
 	}
@@ -138,6 +138,18 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	@Override
 	public void updateAcudioCita(String id, String acude) {
 		new UpdateAcudioCita(id, acude).execute();
+		
+	}
+
+	@Override
+	public void updateCita(String idMedico, Timestamp horaInicio, Timestamp horaFin, String idSala, String idCita) {
+		new UpdateCita(idMedico, horaInicio, horaFin, idSala, idCita).execute();
+		
+	}
+
+	@Override
+	public void AddSolicitud(SolicitudDto sol) {
+		new AddSolicitud(sol).execute();
 		
 	}
 	

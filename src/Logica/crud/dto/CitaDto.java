@@ -15,6 +15,7 @@ public class CitaDto
 	public String acude;
 	
 	public String idMedico;
+	public String Especialidad;
 	public String idPaciente;
 	public String idSala;
 	public String contacto;

@@ -15,12 +15,13 @@ public class InsertCitaAction
       this.cita=dto;
 	}
 
-	public void execute(){
+	public int execute(){
 
 		try {
-			service.InsertCita(cita);
+			return service.InsertCita(cita);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}	
+		}
+		return 0;	
 	}
 }

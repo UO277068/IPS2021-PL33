@@ -12,7 +12,7 @@ public class InsertCita
 {
 
   //SQL
-  private String SQL = "insert into public.cita values (?,?,?,?,?,?,?,?,?,?,?,?)";
+  private String SQL = "insert into public.cita values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   private CitaDto cita;
   private String SQLID = "select count(*) from public.cita";
   public InsertCita(CitaDto dto) 
@@ -22,7 +22,7 @@ public class InsertCita
         
   }
    
-  public void execute() 
+  public int execute() 
    {
 	   Connection c = null;
 		PreparedStatement pst = null;
@@ -39,14 +39,18 @@ public class InsertCita
 			pst.setString(6,cita.horaFinal);
 			pst.setString(7,cita.horaEntrada);
 			pst.setString(8,cita.horaSalida);
-			pst.setString(9,cita.contacto);
-			pst.setString(10,cita.idMedico);
-			pst.setString(11,cita.idPaciente);
-			pst.setString(12,cita.idSala);
+			pst.setString(9,cita.acude);
+			pst.setString(10,cita.contacto);
+			pst.setString(11,cita.Especialidad);
+			pst.setString(12,cita.idMedico);
+			pst.setString(13,cita.idPaciente);
+			pst.setString(14,cita.idSala);
 			
 			pst.executeUpdate();
 
 			pst.close();
+			
+			return calculateId()+1;
 			
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -54,6 +58,7 @@ public class InsertCita
 		finally {
 			if (c!=null) try{c.close();;} catch (SQLException e) {}
 		}
+		
    }
   
   public int calculateId() {

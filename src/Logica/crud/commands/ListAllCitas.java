@@ -24,8 +24,9 @@ public class ListAllCitas
 			
 			pst = c.prepareStatement(SQL);
 			rs = pst.executeQuery();
-			CitaDto cita= new CitaDto();
-			if(rs.next()) {
+			CitaDto cita= null;
+			while(rs.next()) {
+				cita= new CitaDto();
 				cita.id=rs.getString("id");
 				cita.causa=rs.getString("causa");
 				cita.contacto=rs.getString("contacto");
@@ -37,7 +38,7 @@ public class ListAllCitas
 				cita.horaInicio=rs.getString("hora_inicio");
 				cita.horaFinal=rs.getString("hora_fin"); 
 				
-				result.add(cita); //Añade a la lista la cita que tiene el metodo
+				result.add(cita); //Aï¿½ade a la lista la cita que tiene el metodo
 			}
 			pst.close();
 			

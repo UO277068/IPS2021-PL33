@@ -2,23 +2,21 @@ package igu.action;
 
 import Logica.BusinessFactory;
 import Logica.crud.CitaCrudService;
+import Logica.crud.dto.SolicitudDto;
 
-public class AddCausasAction {//GS
-
+public class AddSolicitudAction {
 	 private CitaCrudService service = BusinessFactory.forCitaCrudService();
-	 private String id;
-	 private String causa;
+	 private SolicitudDto sol;
 		
-	public AddCausasAction( String id, String causa) 
-	{
-		this.id=id;
-	    this.causa=causa;
-	}
+		public AddSolicitudAction(SolicitudDto dto) 
+		{
+	      this.sol=dto;
+		}
 
 		public void execute(){
 
 			try {
-				service.AddCausa(id, causa);
+				service.AddSolicitud(sol);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}	

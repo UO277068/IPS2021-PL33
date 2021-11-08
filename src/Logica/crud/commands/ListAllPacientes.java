@@ -32,6 +32,7 @@ public class ListAllPacientes {
 				paciente = new PacienteDto();
 				paciente.id=rs.getString("id");
 				paciente.name=rs.getString("nombre");
+				paciente.dni=rs.getString("dni");
 				paciente.surname=rs.getString("apellidos");
 				paciente.contacto=rs.getString("contacto");
 				nombre.add(paciente);

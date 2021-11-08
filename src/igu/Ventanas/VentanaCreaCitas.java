@@ -1816,7 +1816,7 @@ public class VentanaCreaCitas extends JDialog {
 			
 			for(JornadaDto dto: jornadas) 
 			{
-				resultado.add(dto.diaEntrada+"-"+dto.diasalida);
+				resultado.add(dto.diasalida+"-"+dto.diaEntrada);
 			}
 		}
 		return resultado;
@@ -1852,8 +1852,8 @@ public class VentanaCreaCitas extends JDialog {
 					{
 					  String h = listHorariosDisponibles.getSelectedValue();
 					  String[] horarios = h.split("-");
-					  Timestamp inicio = Timestamp.valueOf(horarios[0]);
-					  Timestamp fina = Timestamp.valueOf(horarios[1]);
+					  Timestamp inicio = Timestamp.valueOf(horarios[0]+"-"+horarios[1]+"-"+horarios[2]);
+					  Timestamp fina = Timestamp.valueOf(horarios[3]+"-"+horarios[4]+"-"+horarios[5]);
 //					    Timestamp m = Timestamp.from(getDateChooser().getDate().toInstant());
 //                      String string = inicio.toString().split(" ")[0];
                      

@@ -146,6 +146,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new UpdateCita(idMedico, horaInicio, horaFin, idSala, idCita).execute();
 		
 	}
+
+	@Override
+	public void AddSolicitud(SolicitudDto sol) {
+		new AddSolicitud(sol).execute();
+		
+	}
 	
 	
 

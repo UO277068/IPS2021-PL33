@@ -41,4 +41,5 @@ public interface CitaCrudService {
 	void updateCausasInHistorial(String id, String idPaciente, String causa);
 	void updatePrescripcionInHistorial(String id, String prescripcion);
 	void updateAcudioCita(String id,String acude);
+	void AddSolicitud(SolicitudDto sol);
 }

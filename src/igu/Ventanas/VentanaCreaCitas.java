@@ -1285,8 +1285,8 @@ public class VentanaCreaCitas extends JDialog {
 		especialidades[34]="Medicina fisica";
 		especialidades[35]="Medicina intensiva";
 		especialidades[36]="Microbilogia";
-		especialidades[37]="Oncología Medica";
-		especialidades[38]="Oncología Radioterápica";
+		especialidades[37]="Oncologï¿½a Medica";
+		especialidades[38]="Oncologï¿½a Radioterï¿½pica";
 		especialidades[39]="Oftalmologia";
 		especialidades[40]="Otorriolaringologia";
 		especialidades[41]="Pediatria";

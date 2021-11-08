@@ -1841,9 +1841,9 @@ public class VentanaPrincipal extends JFrame {
 	private String formateaFecha(Date fecha) {
 		String[] fechaS = fecha.toString().split(" ");
 		String mes = fechaS[1];
-		String año = fechaS[5];
+		String aÃ±o = fechaS[5];
 		String dia = fechaS[2];
-		return año + "-" + seleccionaMes(mes) + "-" + dia;
+		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 	
 	private String seleccionaMes(String mes) {
@@ -1933,7 +1933,7 @@ public class VentanaPrincipal extends JFrame {
 					else{
 						CitaDto cita = listaFiltrada.get(getListCitas().getSelectedIndex());
 					
-						Integer respuesta = JOptionPane.showConfirmDialog(null,"¿Estas seguro de solicitar eliminar la cita seleccionada?");
+						Integer respuesta = JOptionPane.showConfirmDialog(null,"ï¿½Estas seguro de solicitar eliminar la cita seleccionada?");
 						if(respuesta==JOptionPane.YES_OPTION) {
 						
 						SolicitudDto sol= new SolicitudDto();

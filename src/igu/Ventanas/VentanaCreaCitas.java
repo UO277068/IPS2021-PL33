@@ -2,10 +2,12 @@ package igu.Ventanas;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,6 +26,7 @@ import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -38,6 +41,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Array;
+
 import javax.swing.border.SoftBevelBorder;
 
 import Logica.crud.dto.*;
@@ -107,6 +112,45 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelFiltroEspecialidad;
 	private JTextField textFieldFiltroMedico;
 	private JCheckBox chckbxEspecialidad;
+	private JTextField txtEspecialidadSeleccionada;
+	private JPanel panelCreaCita;
+	private JPanel panelDisponibilidad;
+	private JPanel panelContenidos;
+	private JPanel panelCentralDisponibilidad;
+	private JPanel panelBotonesDisponibilidad;
+	private JButton btnAtras;
+	private JPanel panelMedicosDisponibilidad;
+	private JPanel panelListaSeleccionadosDisponibilidad;
+	private JPanel panelHoraDisponibilidad;
+	private JPanel panelInformacionDisponibilidad;
+	private JScrollPane scrollPaneMedicosDisponibilidad;
+	private JList<String> listMedicosDisponibilidad;
+	private JLabel lblHorariosDisponibles;
+	private JScrollPane scrollPaneHorarios;
+	private JList<String> listHorariosDisponibles;
+	private JPanel panelFiltroMedicosDisponibilidad;
+	private JCheckBox chckbxFiltroMedicosDisponibilidad;
+	private JTextField textFieldFiltroMedicosDisponibilidad;
+	private JLabel lblHoraInicioDisponibilidad;
+	private JLabel lblHoraFinalDisponibilidad;
+	private JLabel lblFechaFinalDisponibilidad;
+	private JDateChooser dcInicioDisponibilidad;
+	private JDateChooser dcFinalDisponibilidad;
+	private JPanel panelHoraInicioDisponibilidad;
+	private JPanel panelHoraFinalDisponibilidad;
+	private JLabel lblFechaInicioDisponibilidad;
+	private JComboBox<Integer> comboBoxHoraInicioDisponibilidad;
+	private JLabel lblSeparacionInicioDisponibilidad;
+	private JComboBox<Integer> comboBoxMinutoInicioDisponibilidad;
+	private JComboBox<Integer> comboBoxHoraFinalDisponibilidad;
+	private JLabel lblSeparacionFinalDisponibilidad;
+	private JComboBox<Integer> comboBoxMinutoFinalDisponibilidad;
+	private JPanel panelContenidoCita;
+	private JPanel panelContenidoDisponibilidad;
+	private JCheckBox chckbxFiltrarPorHora;
+	private JPanel panelOpcionesDisponibilidad;
+	private JButton btnFiltrarPorHoraDisponibilidad;
+	private JButton btnSeleccionarHorario;
 	
 	//Atributos
 	List<String> medicosselectModel;
@@ -115,7 +159,6 @@ public class VentanaCreaCitas extends JDialog {
 	List<MedicoDto> medicosSeleccionados;
 	String[] especialidades;
 	String SelectedEspecialidad;
-	private JTextField txtEspecialidadSeleccionada;
 	
 
 	/**
@@ -154,9 +197,38 @@ public class VentanaCreaCitas extends JDialog {
         this.setMinimumSize(new Dimension(800, 520));
         this.setBounds(100, 100, 648, 492);
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        this.getContentPane().add(getPanelDatos(), BorderLayout.CENTER);
-        this.getContentPane().add(getPanelBotones(), BorderLayout.SOUTH);
+        getContentPane().add(getPanelContenidos(), BorderLayout.CENTER);
+	}
+	
+	private JPanel getPanelContenidos() {
+		if (panelContenidos == null) {
+			panelContenidos = new JPanel();
+			panelContenidos.setLayout(new CardLayout(0, 0));
+			panelContenidos.add(getPanelContenidoCita(), "PanelCreaCitas");
+			panelContenidos.add(getPanelContenidoDisponibilidad(), "PanelDisponibilidad");
+		}
+		return panelContenidos;
+	}
+	
+	private JPanel getPanelDisponibilidad() {
+		if (panelDisponibilidad == null) {
+			panelDisponibilidad = new JPanel();
+			panelDisponibilidad.setLayout(new BorderLayout(0, 0));
+			panelDisponibilidad.add(getPanelCentralDisponibilidad(), BorderLayout.CENTER);
+			panelDisponibilidad.add(getPanelBotonesDisponibilidad(), BorderLayout.SOUTH);
+		}
+		return panelDisponibilidad;
+	}
+	
+	private JPanel getPanelCreaCita() {
+		if (panelCreaCita == null) {
+			panelCreaCita = new JPanel();
+			panelCreaCita.setLayout(new BorderLayout(0, 0));
+			panelCreaCita.add(getPanelDatos(), BorderLayout.CENTER);
+			panelCreaCita.add(getPanelBotones(), BorderLayout.SOUTH);
 
+		}
+		return panelCreaCita;
 	}
 
 	private JPanel getPanelDatos() {
@@ -251,7 +323,9 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel getPanelUrgencia() {
 		if (panelUrgencia == null) {
 			panelUrgencia = new JPanel();
+			panelUrgencia.setLayout(new GridLayout(0, 2, 0, 0));
 			panelUrgencia.add(getChckbxUrgente());
+			panelUrgencia.add(getChckbxFiltrarPorHora());
 		}
 		return panelUrgencia;
 	}
@@ -598,10 +672,12 @@ public class VentanaCreaCitas extends JDialog {
 				public void itemStateChanged(ItemEvent e) {
 					if (comboBoxHoraInicioCita.getSelectedIndex() < 0) {
 						comboBoxHoraInicioCita.setSelectedIndex(0);
+					}else 
+					{
+						getComboBoxHoraInicioDisponibilidad().setSelectedIndex(comboBoxHoraInicioCita.getSelectedIndex());
 					}
 					if (comboBoxHoraInicioCita.getSelectedItem().toString().length() >= 2) {
 						comboBoxMinutoInicioCita.grabFocus();
-						// requestFocus();
 					}
 				}
 			});
@@ -684,6 +760,9 @@ public class VentanaCreaCitas extends JDialog {
 					if (date != null) {
 						dcInicio.setMaxSelectableDate(date);
 					}
+					if(date != null && dcInicio.getDate()!=null) {
+						getChckbxFiltrarPorHora().setEnabled(true);
+					}
 				}
 			});
 			JTextFieldDateEditor editor = (JTextFieldDateEditor) dcInicio.getDateEditor();
@@ -702,6 +781,9 @@ public class VentanaCreaCitas extends JDialog {
 					if (date != null) {
 						dcFin.setMinSelectableDate(date);
 						dcFin.setDate(date);
+					}
+					if(date != null && dcFin.getDate()!=null) {
+						getChckbxFiltrarPorHora().setEnabled(true);
 					}
 				}
 			});
@@ -723,6 +805,48 @@ public class VentanaCreaCitas extends JDialog {
 	private JButton getBtnHorariosMedicos() {
 		if (btnHorariosMedicos == null) {
 			btnHorariosMedicos = new JButton("DisponibilidadMedicos");
+			btnHorariosMedicos.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					//Tratamiento de datos
+					  if(getListSeleccionados().getModel().getSize()==0) 
+					  {
+						  String[] medicosstr = medicosToString(medicos);
+						  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+						  getListMedicosDisponibilidad().setModel(model);
+
+						  getChckbxFiltroMedicosDisponibilidad().setSelected(false);
+						  getChckbxFiltroMedicosDisponibilidad().setEnabled(false);  
+					  }else {
+						  getListMedicosDisponibilidad().setModel(getListSeleccionados().getModel());
+						  int[] indices= new int[getListSeleccionados().getModel().getSize()];
+						     for(int i=0;i<getListSeleccionados().getModel().getSize();i++) 
+						     {
+						    	indices[i]=i;
+						     }
+						  getListMedicosDisponibilidad().setSelectedIndices(indices);
+						  getChckbxFiltroMedicosDisponibilidad().setSelected(true);
+						  getChckbxFiltroMedicosDisponibilidad().setEnabled(true);
+					  }
+					
+					  if(getDcInicio().getDate()!=null) 
+					  {
+						  getDcInicioDisponibilidad().setDate(getDcInicio().getDate());
+					  }
+					  if(getDcFin().getDate()!=null) 
+					  {
+						 getDcFinalDisponibilidad().setDate(getDcFin().getDate()); 
+					  }
+					  getComboBoxHoraInicioDisponibilidad().setSelectedIndex(getComboBoxHoraInicioCita().getSelectedIndex());
+					  getComboBoxMinutoInicioDisponibilidad().setSelectedIndex(getComboBoxMinutoInicioCita().getSelectedIndex());
+					  
+					  getComboBoxHoraFinalDisponibilidad().setSelectedIndex(getComboBoxHoraFinCita().getSelectedIndex());
+					  getComboBoxMinutoFinalDisponibilidad().setSelectedIndex(getComboBoxMinutoFinCita().getSelectedIndex());
+					//
+					CardLayout c = (CardLayout)getPanelContenidos().getLayout();
+					c.show(getPanelContenidos(),"PanelDisponibilidad");
+				}
+			});
 		}
 		return btnHorariosMedicos;
 	}
@@ -1205,5 +1329,504 @@ public class VentanaCreaCitas extends JDialog {
 		v.setLocationRelativeTo(this);
 		v.setModal(true);
 		v.setVisible(true);
+	}
+
+	private JPanel getPanelCentralDisponibilidad() {
+		if (panelCentralDisponibilidad == null) {
+			panelCentralDisponibilidad = new JPanel();
+			panelCentralDisponibilidad.setLayout(new GridLayout(2, 0, 0, 0));
+			panelCentralDisponibilidad.add(getPanelMedicosDisponibilidad());
+			panelCentralDisponibilidad.add(getPanelInformacionDisponibilidad());
+		}
+		return panelCentralDisponibilidad;
+	}
+	private JPanel getPanelBotonesDisponibilidad() {
+		if (panelBotonesDisponibilidad == null) {
+			panelBotonesDisponibilidad = new JPanel();
+			panelBotonesDisponibilidad.add(getBtnAtras());
+		}
+		return panelBotonesDisponibilidad;
+	}
+	private JButton getBtnAtras() {
+		if (btnAtras == null) {
+			btnAtras = new JButton("Atras");
+			btnAtras.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					CardLayout c = (CardLayout)getPanelContenidos().getLayout();
+					c.show(getPanelContenidos(),"PanelCreaCitas");
+				}
+			});
+		}
+		return btnAtras;
+	}
+	private JPanel getPanelMedicosDisponibilidad() {
+		if (panelMedicosDisponibilidad == null) {
+			panelMedicosDisponibilidad = new JPanel();
+			panelMedicosDisponibilidad.setLayout(new GridLayout(0, 2, 0, 0));
+			panelMedicosDisponibilidad.add(getPanelListaSeleccionadosDisponibilidad());
+			panelMedicosDisponibilidad.add(getPanelHoraDisponibilidad());
+		}
+		return panelMedicosDisponibilidad;
+	}
+	private JPanel getPanelListaSeleccionadosDisponibilidad() {
+		if (panelListaSeleccionadosDisponibilidad == null) {
+			panelListaSeleccionadosDisponibilidad = new JPanel();
+			panelListaSeleccionadosDisponibilidad.setLayout(new BorderLayout(0, 0));
+			panelListaSeleccionadosDisponibilidad.add(getScrollPaneMedicosDisponibilidad());
+		}
+		return panelListaSeleccionadosDisponibilidad;
+	}
+	private JPanel getPanelHoraDisponibilidad() {
+		if (panelHoraDisponibilidad == null) {
+			panelHoraDisponibilidad = new JPanel();
+			panelHoraDisponibilidad.setLayout(new GridLayout(0, 2, 0, 0));
+			panelHoraDisponibilidad.add(getLblHoraInicioDisponibilidad());
+			panelHoraDisponibilidad.add(getPanelHoraInicioDisponibilidad());
+			panelHoraDisponibilidad.add(getLblHoraFinalDisponibilidad());
+			panelHoraDisponibilidad.add(getPanelHoraFinalDisponibilidad());
+			panelHoraDisponibilidad.add(getLblFechaInicioDisponibilidad());
+			panelHoraDisponibilidad.add(getDcInicioDisponibilidad());
+			panelHoraDisponibilidad.add(getLblFechaFinalDisponibilidad());
+			panelHoraDisponibilidad.add(getDcFinalDisponibilidad());
+		}
+		return panelHoraDisponibilidad;
+	}
+	private JPanel getPanelInformacionDisponibilidad() {
+		if (panelInformacionDisponibilidad == null) {
+			panelInformacionDisponibilidad = new JPanel();
+			panelInformacionDisponibilidad.setLayout(new BorderLayout(0, 0));
+			panelInformacionDisponibilidad.add(getLblHorariosDisponibles(), BorderLayout.NORTH);
+			panelInformacionDisponibilidad.add(getScrollPaneHorarios(), BorderLayout.CENTER);
+		}
+		return panelInformacionDisponibilidad;
+	}
+	private JScrollPane getScrollPaneMedicosDisponibilidad() {
+		if (scrollPaneMedicosDisponibilidad == null) {
+			scrollPaneMedicosDisponibilidad = new JScrollPane();
+			scrollPaneMedicosDisponibilidad.setViewportView(getListMedicosDisponibilidad());
+			scrollPaneMedicosDisponibilidad.setColumnHeaderView(getPanelFiltroMedicosDisponibilidad());
+		}
+		return scrollPaneMedicosDisponibilidad;
+	}
+	private JList<String> getListMedicosDisponibilidad() {
+		if (listMedicosDisponibilidad == null) {
+			listMedicosDisponibilidad = new JList<String>();
+		}
+		return listMedicosDisponibilidad;
+	}
+	private JLabel getLblHorariosDisponibles() {
+		if (lblHorariosDisponibles == null) {
+			lblHorariosDisponibles = new JLabel("Horarios disponibles mas cercanos:\r\n");
+		}
+		return lblHorariosDisponibles;
+	}
+	private JScrollPane getScrollPaneHorarios() {
+		if (scrollPaneHorarios == null) {
+			scrollPaneHorarios = new JScrollPane();
+			scrollPaneHorarios.setViewportView(getListHorariosDisponibles());
+			scrollPaneHorarios.setColumnHeaderView(getPanelOpcionesDisponibilidad());
+		}
+		return scrollPaneHorarios;
+	}
+	private JList<String> getListHorariosDisponibles() {
+		if (listHorariosDisponibles == null) {
+			listHorariosDisponibles = new JList<String>();
+			listHorariosDisponibles.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		}
+		return listHorariosDisponibles;
+	}
+	private JPanel getPanelFiltroMedicosDisponibilidad() {
+		if (panelFiltroMedicosDisponibilidad == null) {
+			panelFiltroMedicosDisponibilidad = new JPanel();
+			panelFiltroMedicosDisponibilidad.setLayout(new BorderLayout(0, 0));
+			panelFiltroMedicosDisponibilidad.add(getChckbxFiltroMedicosDisponibilidad(), BorderLayout.WEST);
+			panelFiltroMedicosDisponibilidad.add(getTextFieldFiltroMedicosDisponibilidad(), BorderLayout.CENTER);
+		}
+		return panelFiltroMedicosDisponibilidad;
+	}
+	private JCheckBox getChckbxFiltroMedicosDisponibilidad() {
+		if (chckbxFiltroMedicosDisponibilidad == null) {
+			chckbxFiltroMedicosDisponibilidad = new JCheckBox("Medicos Seleccionados");
+			chckbxFiltroMedicosDisponibilidad.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					if(chckbxFiltroMedicosDisponibilidad.isSelected())
+					{
+						 getListMedicosDisponibilidad().setModel(getListSeleccionados().getModel());
+						 int[] indices= new int[getListSeleccionados().getModel().getSize()];
+					     for(int i=0;i<getListSeleccionados().getModel().getSize();i++) 
+					     {
+					    	indices[i]=i;
+					     }
+					     getListMedicosDisponibilidad().setSelectedIndices(indices);
+					}else {
+						String[] medicosstr = medicosToString(medicos);
+						ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+						getListMedicosDisponibilidad().setModel(model);
+					} 
+				}
+			});
+			chckbxFiltroMedicosDisponibilidad.setSelected(true);
+		}
+		return chckbxFiltroMedicosDisponibilidad;
+	}
+	private JTextField getTextFieldFiltroMedicosDisponibilidad() {
+		if (textFieldFiltroMedicosDisponibilidad == null) {
+			textFieldFiltroMedicosDisponibilidad = new JTextField();
+			textFieldFiltroMedicosDisponibilidad.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) 
+				{
+					if(!chckbxFiltroMedicosDisponibilidad.isSelected()) {
+						  String[] medicosstr = medicosToString(filtrarListaMedicos(medicos,textFieldFiltroMedicosDisponibilidad.getText()));
+						  ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+						  listMedicos.setModel(model);
+						}else {
+						  String[] seleccionadosFiltrados =  medicosToString(filtrarListaMedicos(medicosSeleccionados,textFieldFiltroMedicosDisponibilidad.getText()));
+						  ListModel<String> model = new DefaultComboBoxModel<String>(seleccionadosFiltrados);
+						  listMedicos.setModel(model);
+						}
+				}
+			});
+			textFieldFiltroMedicosDisponibilidad.setColumns(10);
+		}
+		return textFieldFiltroMedicosDisponibilidad;
+	}
+	private JLabel getLblHoraInicioDisponibilidad() {
+		if (lblHoraInicioDisponibilidad == null) {
+			lblHoraInicioDisponibilidad = new JLabel("Hora de inicio:");
+		}
+		return lblHoraInicioDisponibilidad;
+	}
+	private JLabel getLblHoraFinalDisponibilidad() {
+		if (lblHoraFinalDisponibilidad == null) {
+			lblHoraFinalDisponibilidad = new JLabel("Hora final:");
+		}
+		return lblHoraFinalDisponibilidad;
+	}
+	private JLabel getLblFechaFinalDisponibilidad() {
+		if (lblFechaFinalDisponibilidad == null) {
+			lblFechaFinalDisponibilidad = new JLabel("Fecha final:");
+		}
+		return lblFechaFinalDisponibilidad;
+	}
+	private JDateChooser getDcInicioDisponibilidad() {
+		if (dcInicioDisponibilidad == null) {
+			dcInicioDisponibilidad = new JDateChooser();
+			dcInicioDisponibilidad.getDateEditor().setEnabled(false);
+		}
+		return dcInicioDisponibilidad;
+	}
+	private JDateChooser getDcFinalDisponibilidad() {
+		if (dcFinalDisponibilidad == null) {
+			dcFinalDisponibilidad = new JDateChooser();
+			dcFinalDisponibilidad.getDateEditor().setEnabled(false);
+		}
+		return dcFinalDisponibilidad;
+	}
+	private JPanel getPanelHoraInicioDisponibilidad() {
+		if (panelHoraInicioDisponibilidad == null) {
+			panelHoraInicioDisponibilidad = new JPanel();
+			panelHoraInicioDisponibilidad.add(getComboBoxHoraInicioDisponibilidad());
+			panelHoraInicioDisponibilidad.add(getLblSeparacionInicioDisponibilidad());
+			panelHoraInicioDisponibilidad.add(getComboBoxMinutoInicioDisponibilidad());
+		}
+		return panelHoraInicioDisponibilidad;
+	}
+	private JPanel getPanelHoraFinalDisponibilidad() {
+		if (panelHoraFinalDisponibilidad == null) {
+			panelHoraFinalDisponibilidad = new JPanel();
+			panelHoraFinalDisponibilidad.add(getComboBoxHoraFinalDisponibilidad());
+			panelHoraFinalDisponibilidad.add(getLblSeparacionFinalDisponibilidad());
+			panelHoraFinalDisponibilidad.add(getComboBoxMinutoFinalDisponibilidad());
+		}
+		return panelHoraFinalDisponibilidad;
+	}
+	private JLabel getLblFechaInicioDisponibilidad() {
+		if (lblFechaInicioDisponibilidad == null) {
+			lblFechaInicioDisponibilidad = new JLabel("Fecha Inicio:");
+		}
+		return lblFechaInicioDisponibilidad;
+	}
+	private JComboBox<Integer> getComboBoxHoraInicioDisponibilidad() {
+		if (comboBoxHoraInicioDisponibilidad == null) {
+			comboBoxHoraInicioDisponibilidad = new JComboBox<Integer>();
+			Integer[] h = new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i] = i;
+			}
+			comboBoxHoraInicioDisponibilidad.setBounds(342, 147, 72, 27);
+			comboBoxHoraInicioDisponibilidad.setModel(new DefaultComboBoxModel<Integer>(h));
+		}
+		return comboBoxHoraInicioDisponibilidad;
+	}
+	private JLabel getLblSeparacionInicioDisponibilidad() {
+		if (lblSeparacionInicioDisponibilidad == null) {
+			lblSeparacionInicioDisponibilidad = new JLabel(":");
+		}
+		return lblSeparacionInicioDisponibilidad;
+	}
+	private JComboBox<Integer> getComboBoxMinutoInicioDisponibilidad() {
+		if (comboBoxMinutoInicioDisponibilidad == null) {
+			comboBoxMinutoInicioDisponibilidad = new JComboBox<Integer>();
+			Integer[] h = new Integer[60];
+			for (int i = 0; i < h.length; i++) {
+				h[i] = i;
+			}
+			comboBoxMinutoInicioDisponibilidad.setBounds(342, 147, 72, 27);
+			comboBoxMinutoInicioDisponibilidad.setModel(new DefaultComboBoxModel<Integer>(h));
+			
+		}
+		return comboBoxMinutoInicioDisponibilidad;
+	}
+	private JComboBox<Integer> getComboBoxHoraFinalDisponibilidad() {
+		if (comboBoxHoraFinalDisponibilidad == null) {
+			comboBoxHoraFinalDisponibilidad = new JComboBox<Integer>();
+			Integer[] h = new Integer[24];
+			for (int i = 0; i < h.length; i++) {
+				h[i] = i;
+			}
+			comboBoxHoraFinalDisponibilidad.setBounds(342, 147, 72, 27);
+			comboBoxHoraFinalDisponibilidad.setModel(new DefaultComboBoxModel<Integer>(h));
+			
+		}
+		return comboBoxHoraFinalDisponibilidad;
+	}
+	private JLabel getLblSeparacionFinalDisponibilidad() {
+		if (lblSeparacionFinalDisponibilidad == null) {
+			lblSeparacionFinalDisponibilidad = new JLabel(":");
+		}
+		return lblSeparacionFinalDisponibilidad;
+	}
+	private JComboBox<Integer> getComboBoxMinutoFinalDisponibilidad() {
+		if (comboBoxMinutoFinalDisponibilidad == null) {
+			comboBoxMinutoFinalDisponibilidad = new JComboBox<Integer>();
+			Integer[] h = new Integer[60];
+			for (int i = 0; i < h.length; i++) {
+				h[i] = i;
+			}
+			comboBoxMinutoFinalDisponibilidad.setBounds(342, 147, 72, 27);
+			comboBoxMinutoFinalDisponibilidad.setModel(new DefaultComboBoxModel<Integer>(h));
+		}
+		return comboBoxMinutoFinalDisponibilidad;
+	}
+	private JPanel getPanelContenidoCita() {
+		if (panelContenidoCita == null) {
+			panelContenidoCita = new JPanel();
+			panelContenidoCita.setLayout(new CardLayout(0, 0));
+			panelContenidoCita.add(getPanelCreaCita(),"CreaCitas");
+
+		}
+		return panelContenidoCita;
+	}
+	private JPanel getPanelContenidoDisponibilidad() {
+		if (panelContenidoDisponibilidad == null) {
+			panelContenidoDisponibilidad = new JPanel();
+			panelContenidoDisponibilidad.setLayout(new CardLayout(0, 0));
+			panelContenidoDisponibilidad.add(getPanelDisponibilidad(), "name_1120899890498800");
+
+		}
+		return panelContenidoDisponibilidad;
+	}
+	private JCheckBox getChckbxFiltrarPorHora() {
+		if (chckbxFiltrarPorHora == null) {
+			chckbxFiltrarPorHora = new JCheckBox("Filtrar medicos por hora de la cita");
+			chckbxFiltrarPorHora.setEnabled(false);
+			chckbxFiltrarPorHora.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) 
+				{
+					getTextFieldFiltroMedico().setText("");
+					if(chckbxFiltrarPorHora.isSelected()) {
+					   filtraListaMedicos();
+					}else {
+						String[] medicosstr = medicosToString(medicos);
+						listMedicos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+						listMedicos.setModel(model);
+					}
+				}
+			});
+		}
+		return chckbxFiltrarPorHora;
+	}
+	
+	private void filtraListaMedicos() 
+	{
+		List<MedicoDto> filtro = new ArrayList<MedicoDto>();
+		for(MedicoDto medico: this.medicos) 
+		{
+			if(compruebaJornada(medico.id) && compruebaHora(medico.id)) 
+			{
+				filtro.add(medico);
+			}
+		}
+		String[] medicosstr = medicosToString(filtro);
+		ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
+		listMedicos.setModel(model);
+	}
+	private JPanel getPanelOpcionesDisponibilidad() {
+		if (panelOpcionesDisponibilidad == null) {
+			panelOpcionesDisponibilidad = new JPanel();
+			panelOpcionesDisponibilidad.setLayout(new GridLayout(0, 2, 0, 0));
+			panelOpcionesDisponibilidad.add(getBtnFiltrarPorHoraDisponibilidad());
+			panelOpcionesDisponibilidad.add(getBtnSeleccionarHorario());
+		}
+		return panelOpcionesDisponibilidad;
+	}
+	private JButton getBtnFiltrarPorHoraDisponibilidad() {
+		if (btnFiltrarPorHoraDisponibilidad == null) {
+			btnFiltrarPorHoraDisponibilidad = new JButton("Buscar Horarios");
+			btnFiltrarPorHoraDisponibilidad.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					if(checkCamposVaciosDisponibilidad()) 
+					{
+						List<String> horarios =obtenHorariosMedicosDisponibilidad();
+						if(horarios.size()==0)
+						{
+							horarios.add("No hay horarios disponibles");
+							getBtnSeleccionarHorario().setEnabled(false);
+						}else {
+							getBtnSeleccionarHorario().setEnabled(true);
+	
+						}
+						String[] s=new String[horarios.size()];
+						s = horarios.toArray(s);
+						ListModel<String> model = new DefaultComboBoxModel<String>(s);
+						listHorariosDisponibles.setModel(model);
+					}else {
+						JOptionPane.showInternalMessageDialog(null,"Añada la fecha y hora de entrada y de salida por la que desea buscar horarios");
+					}
+					
+				}
+			});
+		}
+		return btnFiltrarPorHoraDisponibilidad;
+	}
+	
+	private List<MedicoDto> obtenMedicosSeleccionadosDisponibilidad() {
+		int[] index = getListMedicosDisponibilidad().getSelectedIndices();
+		List<MedicoDto> listaSeleccionados = new ArrayList<MedicoDto>();
+		if (index.length > 0) {
+			for (int i = 0; i < index.length; i++) {
+				String medicot = getListMedicosDisponibilidad().getModel().getElementAt(index[i]);
+				String[] medico = medicot.split("-");
+				String nombre = medico[0];
+				String apellido = medico[1];
+				String dni = medico[2];
+
+				for (MedicoDto dto : this.medicos) {
+					if (nombre.equals(dto.name) && apellido.equals(dto.surname) && dni.equals(dto.dni)) {
+						listaSeleccionados.add(dto);
+					}
+				}
+			}
+			return listaSeleccionados;
+		}
+		return listaSeleccionados;
+	}
+	
+	private List<String> obtenHorariosMedicosDisponibilidad() 
+	{
+	List<String> resultado = new ArrayList<String>();
+		if(getListMedicosDisponibilidad().getSelectedIndex()!=-1) 
+		{
+			List<MedicoDto> medicosSeleccionadosDisponibilidad = obtenMedicosSeleccionadosDisponibilidad();
+			List<JornadaDto> jornadas = new ListJornadaLaboralByMedicoAction(medicosSeleccionadosDisponibilidad.get(0).id).execute();
+			List<JornadaDto> copia = new ArrayList<JornadaDto>(jornadas);
+			for(MedicoDto medico : medicosSeleccionadosDisponibilidad) 
+			{
+				if(medico.id!=(medicosSeleccionadosDisponibilidad.get(0).id))
+				{
+				 List<JornadaDto> jornadasC = new ListJornadaLaboralByMedicoAction(medico.id).execute();
+				 for(JornadaDto j : jornadasC) 
+				 {
+				    for(JornadaDto jornada : copia) 
+				    {
+				    	Timestamp inicioFecha = Timestamp.valueOf(jornada.diaEntrada);
+				    	Timestamp finFecha = Timestamp.valueOf(jornada.diasalida);
+				    	
+				    	Timestamp inicioj= Timestamp.valueOf(j.diaEntrada);
+				    	Timestamp finj = Timestamp.valueOf(j.diasalida);
+				    	
+				    	boolean igualdad1=inicioFecha.equals(inicioj);
+				    	boolean igualdad2=finFecha.equals(finj);
+				    	if((inicioFecha.before(inicioj)||igualdad1) && (finFecha.after(finj)||igualdad2)) 
+				    	{
+				    		JornadaDto jor = new JornadaDto();
+				    		jor.diaEntrada=inicioj.toString();
+				    		jor.diasalida=finj.toString();
+				    		jornadas.add(jor);
+				    		jornadas.remove(jornada);
+
+				    	}else if((inicioFecha.before(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
+				    		
+				    		JornadaDto jor = new JornadaDto();
+				    		jor.diaEntrada=inicioj.toString();
+				    		jor.diasalida=finFecha.toString();
+				    		jornadas.add(jor);
+				    		jornadas.remove(jornada);
+				    	}else if((inicioFecha.after(inicioj)||igualdad1) && (finFecha.after(finj)||igualdad2)) {
+				    		
+				    		JornadaDto jor = new JornadaDto();
+				    		jor.diaEntrada=inicioFecha.toString();
+				    		jor.diasalida=finj.toString();
+				    		jornadas.add(jor);
+				    		jornadas.remove(jornada);
+				    	}else if((inicioFecha.after(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
+				    		//No hace nada
+				    	}else {
+				    		jornadas.remove(jornada);
+				    	}	
+				    }
+				 }
+				}
+			}
+			
+			for(JornadaDto dto: jornadas) 
+			{
+				resultado.add(dto.diaEntrada+"-"+dto.diasalida);
+			}
+		}
+		return resultado;
+		
+   
+//		for (JornadaDto jornada : jornadas) {
+//			Timestamp inicioMedico = Timestamp.valueOf(jornada.diaEntrada);
+//			Timestamp finMedico = Timestamp.valueOf(jornada.diasalida);
+//			if (horainiciostamp.after(inicioMedico) && horafinstamp.before(finMedico)) {
+//				return true;
+//			}
+//		
+//	        }
+	}
+	
+	private boolean checkCamposVaciosDisponibilidad() {
+		if(getComboBoxHoraFinalDisponibilidad().getSelectedIndex()==-1 && getComboBoxHoraInicioDisponibilidad().getSelectedIndex()==-1 &&
+				getComboBoxMinutoFinalDisponibilidad().getSelectedIndex()==-1 && getComboBoxMinutoInicioDisponibilidad().getSelectedIndex()==-1
+				 && getDcFinalDisponibilidad().getDate()==null && getDcInicioDisponibilidad().getDate()==null) 
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	private JButton getBtnSeleccionarHorario() {
+		if (btnSeleccionarHorario == null) {
+			btnSeleccionarHorario = new JButton("SeleccionarHorario");
+			btnSeleccionarHorario.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					if(listHorariosDisponibles.getSelectedIndex()!=-1) 
+					{
+					  CardLayout c = (CardLayout)getPanelContenidos().getLayout();
+					  c.show(getPanelContenidos(),"PanelCreaCitas");
+					}
+				}
+			});
+			btnSeleccionarHorario.setEnabled(false);
+		}
+		return btnSeleccionarHorario;
 	}
 }

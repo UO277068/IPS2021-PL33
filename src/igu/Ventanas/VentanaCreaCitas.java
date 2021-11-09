@@ -478,7 +478,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Aï¿½adir especialidad");
+						btnAñadirMedico.setText("Añadir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						

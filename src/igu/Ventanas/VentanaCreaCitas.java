@@ -25,6 +25,7 @@ import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -41,6 +42,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.ListDataListener;
 
 import Logica.crud.dto.*;
 import javax.swing.JCheckBox;
@@ -63,12 +65,12 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelBotones;
 	private JPanel panelCitaEstandar;
 	private JPanel panelMedicosPacientes;
-	private JPanel panelHoraUrgencia;
+	private JPanel panelHoraSalaUrgencia;
 	private JPanel panelAviso;
 	private JPanel panelHora;
 	private JLabel lblHoraInicio;
 	private JLabel lblHoraFinCita;
-	private JPanel panelUrgencia;
+	private JPanel panelUrgenciaSala;
 	private JButton btnCrearCita;
 	private JPanel panelPaciente;
 	private JTextField textFieldAvisoUsuario;
@@ -156,6 +158,9 @@ public class VentanaCreaCitas extends JDialog {
 	List<MedicoDto> medicosSeleccionados;
 	String[] especialidades;
 	String SelectedEspecialidad;
+	private JPanel panelSala;
+	private JLabel lblSala;
+	private JComboBox<String> comboBoxSala;
 	
 
 	/**
@@ -241,7 +246,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel getPanelBotones() {
 		if (panelBotones == null) {
 			panelBotones = new JPanel();
-			panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panelBotones.setLayout(new GridLayout(0, 1, 0, 0));
 			panelBotones.add(getBtnCrearCita());
 		}
 		return panelBotones;
@@ -252,7 +257,7 @@ public class VentanaCreaCitas extends JDialog {
 			panelCitaEstandar = new JPanel();
 			panelCitaEstandar.setLayout(new BorderLayout(0, 0));
 			panelCitaEstandar.add(getPanelMedicosPacientes(), BorderLayout.CENTER);
-			panelCitaEstandar.add(getPanelHoraUrgencia(), BorderLayout.SOUTH);
+			panelCitaEstandar.add(getPanelHoraSalaUrgencia(), BorderLayout.SOUTH);
 		}
 		return panelCitaEstandar;
 	}
@@ -267,20 +272,20 @@ public class VentanaCreaCitas extends JDialog {
 		return panelMedicosPacientes;
 	}
 
-	private JPanel getPanelHoraUrgencia() {
-		if (panelHoraUrgencia == null) {
-			panelHoraUrgencia = new JPanel();
-			panelHoraUrgencia.setLayout(new BorderLayout(0, 0));
-			panelHoraUrgencia.add(getPanelHora(), BorderLayout.CENTER);
-			panelHoraUrgencia.add(getPanelUrgencia(), BorderLayout.SOUTH);
+	private JPanel getPanelHoraSalaUrgencia() {
+		if (panelHoraSalaUrgencia == null) {
+			panelHoraSalaUrgencia = new JPanel();
+			panelHoraSalaUrgencia.setLayout(new BorderLayout(0, 0));
+			panelHoraSalaUrgencia.add(getPanelHora(), BorderLayout.CENTER);
+			panelHoraSalaUrgencia.add(getPanelUrgenciaSala(), BorderLayout.SOUTH);
 		}
-		return panelHoraUrgencia;
+		return panelHoraSalaUrgencia;
 	}
 
 	private JPanel getPanelAviso() {
 		if (panelAviso == null) {
 			panelAviso = new JPanel();
-			panelAviso.setLayout(new GridLayout(0, 1, 0, 0));
+			panelAviso.setLayout(new BorderLayout(0, 0));
 			panelAviso.add(getTextFieldAvisoUsuario());
 		}
 		return panelAviso;
@@ -317,14 +322,15 @@ public class VentanaCreaCitas extends JDialog {
 		return lblHoraFinCita;
 	}
 
-	private JPanel getPanelUrgencia() {
-		if (panelUrgencia == null) {
-			panelUrgencia = new JPanel();
-			panelUrgencia.setLayout(new GridLayout(0, 2, 0, 0));
-			panelUrgencia.add(getChckbxUrgente());
-			panelUrgencia.add(getChckbxFiltrarPorHora());
+	private JPanel getPanelUrgenciaSala() {
+		if (panelUrgenciaSala == null) {
+			panelUrgenciaSala = new JPanel();
+			panelUrgenciaSala.setLayout(new GridLayout(0, 2, 0, 0));
+			panelUrgenciaSala.add(getChckbxUrgente());
+			panelUrgenciaSala.add(getChckbxFiltrarPorHora());
+			panelUrgenciaSala.add(getPanelSala());
 		}
-		return panelUrgencia;
+		return panelUrgenciaSala;
 	}
 
 	private JButton getBtnCrearCita() {
@@ -934,14 +940,33 @@ public class VentanaCreaCitas extends JDialog {
 	//Metodos privados
 	public void crearCita() 
 	{
-		if(checkValoresVentanaPrincipal()) //Comprueba que se han elegido los valores minimos para crear una cita
-		{
-		
 		PacienteDto paciente =  obtenPacienteSeleccionado();
+		if(paciente!=null) {
+		if(checkValoresVentanaPrincipal()) //Comprueba que se han elegido los valores minimos para crear una cita
+		{	
 		Integer respuesta=JOptionPane.YES_OPTION;
 		boolean urge = getChckbxUrgente().isSelected();
-		for(MedicoDto medico:medicosSeleccionados) {
-		
+		if(getListSeleccionados().getModel().getSize()!=0) { //Medicos seleccionados?
+		for(MedicoDto medico:medicosSeleccionados) 
+		{	
+		 GeneraCita(paciente, respuesta, urge, medico);
+		}
+		}else {
+			 respuesta=JOptionPane.showConfirmDialog(null,"¿Quiere crear una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+			if(respuesta==JOptionPane.YES_OPTION) { //Preguntar si desea generar una cita sin medicos
+		       GeneraCita(paciente, respuesta, urge, null);
+			}
+		}
+	  }
+		}else {
+			JOptionPane.showMessageDialog(null, "Elija un paciente para asignarle la cita");
+		}
+	}
+
+	private Integer GeneraCita(PacienteDto paciente, Integer respuesta, boolean urge, MedicoDto medico) {
+		CitaDto cita = new CitaDto();
+		cita.idMedico="NO DEFINIDO";
+		if(medico!=null) {
 		//Comprueba que la cita se establece dentro de la jornada laboral
 	    if(!compruebaJornada(medico.id)) {
 		 respuesta=JOptionPane.showConfirmDialog(null,"El horario de la cita no forma parte de la jornada laboral del medico "+medico.name+" "+medico.surname+".","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
@@ -950,11 +975,10 @@ public class VentanaCreaCitas extends JDialog {
 		if(respuesta==JOptionPane.YES_OPTION && !compruebaHora(medico.id)) {
 			 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" tiene otra cita a esa hora","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 		}
-		
+		 cita.idMedico=medico.id;
+		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
-		CitaDto cita = new CitaDto();
-		cita.idMedico=medico.id;
-		cita.idPaciente=paciente.id; //elegir mas de un paciente
+		cita.idPaciente=paciente.id;
 		cita.causa="";
 		//
 		Date inicio = getDcInicio().getDate();
@@ -976,7 +1000,7 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		cita.horaEntrada=null;
 		cita.horaSalida=null;
-		cita.idSala="1";
+		cita.idSala=getComboBoxSala().getEditor().getItem().toString();
 		cita.preescripcion="";
 		cita.contacto=paciente.contacto; //Por defecto F.E.R
 		cita.acude="INDEFINIDO";
@@ -993,7 +1017,8 @@ public class VentanaCreaCitas extends JDialog {
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
 		
-		}}}
+		}
+		return respuesta;
 	}
 
 	private PacienteDto obtenPacienteSeleccionado() {
@@ -1160,7 +1185,7 @@ public class VentanaCreaCitas extends JDialog {
 			// getTextFieldAvisoUsuario().setText("Se deben rellenar todos los campos
 			// correctamente para poder realizar una cita");
 			JOptionPane.showInternalMessageDialog(null,
-					"Se deben rellenar todos los campos correctamente para poder realizar una cita");
+					"Escoja una fecha para establecer la cita");
 			return false;
 		}
 //		if(!checkHoraFecha()) {
@@ -1187,7 +1212,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private boolean checkCamposVacios() {
 		//Compruba que se han seleccionado medicos
-		if(getListSeleccionados().getModel().getSize()==0 || getDcInicio().getDate()==null || getDcFin().getDate()==null ) 
+		if(getDcInicio().getDate()==null || getDcFin().getDate()==null ) 
 		{
 			return false;
 		}
@@ -1306,8 +1331,8 @@ public class VentanaCreaCitas extends JDialog {
 		especialidades[34]="Medicina fisica";
 		especialidades[35]="Medicina intensiva";
 		especialidades[36]="Microbilogia";
-		especialidades[37]="Oncologï¿½a Medica";
-		especialidades[38]="Oncologï¿½a Radioterï¿½pica";
+		especialidades[37]="Oncologia Medica";
+		especialidades[38]="Oncologia Radioterapica";
 		especialidades[39]="Oftalmologia";
 		especialidades[40]="Otorriolaringologia";
 		especialidades[41]="Pediatria";
@@ -1872,5 +1897,49 @@ public class VentanaCreaCitas extends JDialog {
 			btnSeleccionarHorario.setEnabled(false);
 		}
 		return btnSeleccionarHorario;
+	}
+	private JPanel getPanelSala() {
+		if (panelSala == null) {
+			panelSala = new JPanel();
+			panelSala.setLayout(new BorderLayout(0, 0));
+			panelSala.add(getLblSala(), BorderLayout.WEST);
+			panelSala.add(getComboBoxSala(), BorderLayout.CENTER);
+		}
+		return panelSala;
+	}
+	private JLabel getLblSala() {
+		if (lblSala == null) {
+			lblSala = new JLabel("Sala:");
+		}
+		return lblSala;
+	}
+	private JComboBox<String> getComboBoxSala() {
+		if (comboBoxSala == null) {
+			comboBoxSala = new JComboBox<String>();
+			comboBoxSala.setEditable(true);
+			String[] salas = new String[20];
+			salas[0]="No determinada";
+			salas[1]="1-1";
+			salas[2]="1-2";
+			salas[3]="1-3";
+			salas[4]="1-4";
+			salas[5]="1-5";
+			salas[6]="1-6";
+			salas[7]="1-7";
+			salas[8]="2-1";
+			salas[9]="2-2";
+			salas[10]="2-3";
+			salas[11]="2-4";
+			salas[12]="2-5";
+			salas[13]="2-6";
+			salas[14]="2-7";
+			salas[15]="3-1";
+			salas[16]="3-2";
+			salas[17]="3-3";
+			salas[18]="3-4";
+			salas[19]="3-5";
+			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
+		}
+		return comboBoxSala;
 	}
 }

@@ -3,6 +3,7 @@ package Logica.crud;
 import java.sql.Timestamp;
 import java.util.List;
 
+import Logica.Vacuna;
 import Logica.crud.commands.*;
 import Logica.crud.dto.*;
 
@@ -150,6 +151,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	@Override
 	public void AddSolicitud(SolicitudDto sol) {
 		new AddSolicitud(sol).execute();
+		
+	}
+
+	@Override
+	public void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
+		new AddVacuna(id, idPaciente, fecha, vacunas).execute();
 		
 	}
 	

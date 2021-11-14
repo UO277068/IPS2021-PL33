@@ -43,6 +43,8 @@ import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import Logica.Carta;
+import Logica.Vacuna;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
 import Logica.crud.dto.JornadaDto;
@@ -80,6 +82,8 @@ public class VentanaPrincipal extends JFrame {
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
 	private String acude = "INDEFINIDO";
+	private Carta carta;
+	private List<Vacuna> vacunas;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -235,6 +239,7 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane scllSolicitudMod;
 	private JTextArea txtSolicitudMod;
 	private JLabel lbObservacionesMod;
+	private JButton btAsignarVacuna;
 	
 
 	/**
@@ -350,6 +355,7 @@ public class VentanaPrincipal extends JFrame {
 			pnCita.add(getCbMinutosEntrada());
 			pnCita.add(getCbHoraSalida());
 			pnCita.add(getCbMinutosSalida());
+			pnCita.add(getBtAsignarVacuna());
 		}
 		return pnCita;
 	}
@@ -2393,4 +2399,36 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return lbObservacionesMod;
 	}
+	private JButton getBtAsignarVacuna() {
+		if (btAsignarVacuna == null) {
+			btAsignarVacuna = new JButton("Asignar Vacuna");
+			btAsignarVacuna.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+				}
+			});
+			btAsignarVacuna.setBounds(374, 204, 151, 29);
+		}
+		return btAsignarVacuna;
+	}
+	
+	private void mostrarVentanaVacuna() {
+		carta = new Carta();
+		VentanaVacuna v = new VentanaVacuna(carta, this);
+		v.setLocationRelativeTo(this);
+		v.setModal(true);
+		v.setVisible(true);
+		
+		
+	}
+
+	public CitaDto getCita() {
+		return cita;
+	}
+
+	public String getIdPaciente() {
+		return idPaciente;
+	}
+	
+	
 }

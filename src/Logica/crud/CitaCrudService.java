@@ -5,7 +5,7 @@ import java.util.List;
 
 
 import Logica.crud.dto.JornadaDto;
-
+import Logica.Vacuna;
 import Logica.crud.dto.*;
 
 /**
@@ -25,6 +25,7 @@ public interface CitaCrudService {
 	List<MedicoDto> listAllMedicos() throws Exception;
 	void addHorario(Timestamp d1, Timestamp d2, List<Boolean> dias, int[] ids_medicos) throws Exception;
 	void updateCita(String idMedico, Timestamp horaInicio, Timestamp horaFin, String idSala, String idCita);
+	void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas);
 	//Rober
 	List<JornadaDto> listJornadaLaboralByMedico(String id);
 	List<CitaDto> ListCitasByMedico(String id);

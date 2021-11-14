@@ -133,7 +133,7 @@ public class VentanaVacuna extends JDialog {
 		if (txPaciente == null) {
 			txPaciente = new JTextField();
 			txPaciente.setEditable(false);
-			txPaciente.setBounds(127, 45, 96, 19);
+			txPaciente.setBounds(127, 45, 162, 19);
 			txPaciente.setColumns(10);
 			String paciente = vp.getListapacientes().get(Integer.valueOf(vp.getCita().idPaciente)-1).name +" "+vp.getListapacientes().get(Integer.valueOf(vp.getCita().idPaciente)-1).surname;
 			txPaciente.setText(paciente);

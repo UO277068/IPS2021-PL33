@@ -13,6 +13,7 @@ import Logica.Carta;
 import Logica.Vacuna;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
 import igu.action.AddVacunaAction;
 
@@ -20,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
@@ -30,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class VentanaVacuna extends JDialog {
 
@@ -49,6 +53,7 @@ public class VentanaVacuna extends JDialog {
 	private JButton btEliminar;
 	private JButton btAsignar;
 	private VentanaPrincipal vp;
+	private JTextField txVacuna;
 
 	/**
 	 * Create the frame.
@@ -72,6 +77,7 @@ public class VentanaVacuna extends JDialog {
 		contentPane.add(getBtAñadir());
 		contentPane.add(getBtEliminar());
 		contentPane.add(getBtAsignar());
+		contentPane.add(getTxVacuna());
 	}
 	private JScrollPane getScVacuna() {
 		if (scVacuna == null) {
@@ -126,8 +132,11 @@ public class VentanaVacuna extends JDialog {
 	private JTextField getTxPaciente() {
 		if (txPaciente == null) {
 			txPaciente = new JTextField();
+			txPaciente.setEditable(false);
 			txPaciente.setBounds(127, 45, 96, 19);
 			txPaciente.setColumns(10);
+			String paciente = vp.getListapacientes().get(Integer.valueOf(vp.getCita().idPaciente)-1).name +" "+vp.getListapacientes().get(Integer.valueOf(vp.getCita().idPaciente)-1).surname;
+			txPaciente.setText(paciente);
 		}
 		return txPaciente;
 	}
@@ -198,5 +207,37 @@ public class VentanaVacuna extends JDialog {
 			btAsignar.setBounds(352, 457, 85, 21);
 		}
 		return btAsignar;
+	}
+	private JTextField getTxVacuna() {
+		if (txVacuna == null) {
+			txVacuna = new JTextField();
+			txVacuna.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent e) {
+					Vacuna[] vacunasstr = getVacunas(filtrarListaVacunas(vacunas,txVacuna.getText()));
+					ListModel<Vacuna> model = new DefaultComboBoxModel<Vacuna>(vacunasstr);
+					getListVacuna().setModel(model);
+				}
+			});
+			txVacuna.setBounds(60, 167, 313, 19);
+			txVacuna.setColumns(10);
+		}
+		return txVacuna;
+	}
+	
+	private List<Vacuna> filtrarListaVacunas(List<Vacuna> medi, String start) {
+		List<Vacuna> listaFiltrada = new ArrayList<Vacuna>();
+		for (Vacuna m : medi) {
+			// Filtro por nombre
+			if (m.getNombre().toUpperCase().startsWith(start.toUpperCase())) {
+				listaFiltrada.add(m);
+			}
+			//Filtro por documento de identficacion
+			else if(m.getComponente().toUpperCase().startsWith(start.toUpperCase())) 
+			{
+			    listaFiltrada.add(m);
+			}
+		}
+		return listaFiltrada;
 	}
 }

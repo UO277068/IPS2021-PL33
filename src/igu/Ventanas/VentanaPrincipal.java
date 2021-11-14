@@ -79,6 +79,10 @@ import java.awt.event.KeyEvent;
 public class VentanaPrincipal extends JFrame {
 
 	List<PacienteDto> listapacientes;
+	public List<PacienteDto> getListapacientes() {
+		return listapacientes;
+	}
+
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
 	private String acude = "INDEFINIDO";
@@ -240,6 +244,7 @@ public class VentanaPrincipal extends JFrame {
 	private JTextArea txtSolicitudMod;
 	private JLabel lbObservacionesMod;
 	private JButton btAsignarVacuna;
+	private JButton btAsignarVacunaH;
 	
 
 	/**
@@ -386,6 +391,10 @@ public class VentanaPrincipal extends JFrame {
 		c.show(getPnContenidos(), "PnHistorial");
 		String d = new ListDiagnosticoByIdAction(idPaciente).execute();
 		getTxHistorial().setText(d);
+		mostrarVacunas();
+	}
+	
+	private void mostrarVacunas() {
 		String v = new ListVacunaByIdAction(idPaciente).execute();
 		getTxVacuna().setText(v);
 	}
@@ -497,6 +506,7 @@ public class VentanaPrincipal extends JFrame {
 	private JTextArea getTxVacuna() {
 		if (txVacuna == null) {
 			txVacuna = new JTextArea();
+			txVacuna.setEditable(false);
 		}
 		return txVacuna;
 	}
@@ -627,6 +637,7 @@ public class VentanaPrincipal extends JFrame {
 			FlowLayout flowLayout = (FlowLayout) pnBt.getLayout();
 			flowLayout.setAlignment(FlowLayout.LEFT);
 			pnBt.add(getBtHAtras());
+			pnBt.add(getBtAsignarVacunaH());
 		}
 		return pnBt;
 	}
@@ -1032,6 +1043,7 @@ public class VentanaPrincipal extends JFrame {
 			btHistorialA.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					idPaciente=idsPaciente[getListaVCitaPaciente().getSelectedIndex()];
+					cita = lista.get(getListaVCitaPaciente().getSelectedIndex());
 					if(getListaVCitaPaciente().getSelectedIndex()!=-1)
 						mostrarPnHistorial();
 				}
@@ -2431,4 +2443,17 @@ public class VentanaPrincipal extends JFrame {
 	}
 	
 	
+	private JButton getBtAsignarVacunaH() {
+		if (btAsignarVacunaH == null) {
+			btAsignarVacunaH = new JButton("Asignar Vacuna");
+			btAsignarVacunaH.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+					mostrarVacunas();
+
+				}
+			});
+		}
+		return btAsignarVacunaH;
+	}
 }

@@ -160,6 +160,22 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		
 	}
 	
+	@Override
+	public List<SolicitudDto> listAllSolicitudes() {
+		return new ListAllSolicitudes().execute();
+	}
+
+	@Override
+	public void deleteSolicitud(String id) {
+		new DeleteSolicitud(id).execute();
+		
+	}
+
+	@Override
+	public void deleteCita(String id) {
+		new DeleteCita(id).execute();
+		
+	}
 	
 
 }

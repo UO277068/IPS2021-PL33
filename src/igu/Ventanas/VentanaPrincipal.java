@@ -1899,9 +1899,9 @@ public class VentanaPrincipal extends JFrame {
 	private String formateaFecha(Date fecha) {
 		String[] fechaS = fecha.toString().split(" ");
 		String mes = fechaS[1];
-		String aÃ±o = fechaS[5];
+		String año = fechaS[5];
 		String dia = fechaS[2];
-		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 	
 	private String seleccionaMes(String mes) {

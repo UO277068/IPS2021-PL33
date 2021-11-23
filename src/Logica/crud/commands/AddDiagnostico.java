@@ -8,16 +8,16 @@ import java.sql.Timestamp;
 
 import Logica.DataBaseManager;
 
-public class UpdateCausasInHistorial {
+public class AddDiagnostico {
 
-	private String SQL = "insert into public.diagnostico values (?,?,?,?,?,?)";
+	private String SQL = "insert into public.diagnostico values (?,?,?,?,?)";
 	private String SQLHora = "select hora_fin from public.cita where id=?";
 	private String causa;
 	private String id;
 	private String idPaciente;
 	private String SQLID = "select count(*) from public.diagnostico";
 	
-	public UpdateCausasInHistorial(String id, String idPaciente, String causa) {
+	public AddDiagnostico(String id, String idPaciente, String causa) {
 		this.id=id;
 		this.idPaciente=idPaciente;
 		this.causa = causa;
@@ -35,7 +35,6 @@ public class UpdateCausasInHistorial {
 			pst.setTimestamp(3, getHora());
 			pst.setString(4, causa);
 			pst.setString(5, null);
-			pst.setString(6, id);
 			pst.executeUpdate();
 			pst.close();
 			

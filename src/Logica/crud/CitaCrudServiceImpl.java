@@ -125,7 +125,7 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 
 	@Override
 	public void updateCausasInHistorial(String id, String idPaciente, String causa) {
-		new UpdateCausasInHistorial(id,idPaciente,causa).execute();;
+		new UpdateCausasInHistorial(id,idPaciente,causa).execute();
 		
 	}
 

@@ -44,6 +44,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListDataListener;
 
+import Logica.crud.commands.ListCitasBySala;
 import Logica.crud.dto.*;
 import javax.swing.JCheckBox;
 import javax.swing.ListSelectionModel;
@@ -54,6 +55,8 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class VentanaCreaCitas extends JDialog {
 
@@ -161,6 +164,9 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelSala;
 	private JLabel lblSala;
 	private JComboBox<String> comboBoxSala;
+	private JPanel panelMotivos;
+	private JLabel lblMotivos;
+	private JTextField textFieldMotivos;
 	
 
 	/**
@@ -329,6 +335,7 @@ public class VentanaCreaCitas extends JDialog {
 			panelUrgenciaSala.add(getChckbxUrgente());
 			panelUrgenciaSala.add(getChckbxFiltrarPorHora());
 			panelUrgenciaSala.add(getPanelSala());
+			panelUrgenciaSala.add(getPanelMotivos());
 		}
 		return panelUrgenciaSala;
 	}
@@ -979,7 +986,8 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
 		cita.idPaciente=paciente.id;
-		cita.causa="";
+		cita.causa="No determinandas"; //Añadir causas una vez el medico las determine
+		cita.motivo=getTextFieldMotivos().getText();
 		//
 		Date inicio = getDcInicio().getDate();
 		Date ultima = getDcFin().getDate();
@@ -1001,8 +1009,14 @@ public class VentanaCreaCitas extends JDialog {
 		cita.horaEntrada=null;
 		cita.horaSalida=null;
 		cita.idSala=getComboBoxSala().getEditor().getItem().toString();
+		boolean act=true;
+		if(getComboBoxSala().getSelectedIndex()!=0) 
+		{
+			act =compruebaHoraSala(cita); //Comprobacion hora sala.
+		}
+		if(act==true) {
 		cita.preescripcion="";
-		cita.contacto=paciente.contacto; //Por defecto F.E.R
+		cita.contacto=paciente.contacto; //Por defecto contacto de la cita = contacto del paciente
 		cita.acude="INDEFINIDO";
 		if(this.SelectedEspecialidad==null) 
 		{
@@ -1016,9 +1030,31 @@ public class VentanaCreaCitas extends JDialog {
 		ventanaContacto(idcita-1, paciente);
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
+		}
 		
 		}
 		return respuesta;
+	}
+
+	
+	private boolean compruebaHoraSala(CitaDto cita) 
+	{
+		List<CitaDto> listaDeCitas = new ListCitasBySala(cita.idSala).execute();
+		for(CitaDto c : listaDeCitas) 
+		{
+			if(Timestamp.valueOf(c.horaInicio).after(Timestamp.valueOf(cita.horaInicio)) || (Timestamp.valueOf(c.horaInicio).before(Timestamp.valueOf(cita.horaInicio)) && Timestamp.valueOf(c.horaFinal).after(Timestamp.valueOf(cita.horaFinal))) ) 
+			{
+				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.¿Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+				if(respuesta==JOptionPane.YES_OPTION) 
+				{
+					return true;
+				}else {
+					return false;
+				}
+			}
+		}
+		return true;
+		
 	}
 
 	private PacienteDto obtenPacienteSeleccionado() {
@@ -1941,5 +1977,36 @@ public class VentanaCreaCitas extends JDialog {
 			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
 		}
 		return comboBoxSala;
+	}
+	private JPanel getPanelMotivos() {
+		if (panelMotivos == null) {
+			panelMotivos = new JPanel();
+			panelMotivos.setLayout(new BorderLayout(0, 0));
+			panelMotivos.add(getLblMotivos(), BorderLayout.NORTH);
+			panelMotivos.add(getTextFieldMotivos(), BorderLayout.SOUTH);
+		}
+		return panelMotivos;
+	}
+	private JLabel getLblMotivos() {
+		if (lblMotivos == null) {
+			lblMotivos = new JLabel("Motivos de la cita:");
+		}
+		return lblMotivos;
+	}
+	private JTextField getTextFieldMotivos() {
+		if (textFieldMotivos == null) {
+			textFieldMotivos = new JTextField();
+			textFieldMotivos.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusGained(FocusEvent e) 
+				{
+					textFieldMotivos.selectAll();
+				}
+			});
+			textFieldMotivos.setText("No determinados");
+			textFieldMotivos.setHorizontalAlignment(SwingConstants.LEFT);
+			textFieldMotivos.setColumns(10);
+		}
+		return textFieldMotivos;
 	}
 }

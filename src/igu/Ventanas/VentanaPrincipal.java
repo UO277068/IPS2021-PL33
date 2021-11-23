@@ -15,6 +15,7 @@ import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
@@ -43,6 +44,7 @@ import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import Logica.crud.commands.ListInformacionUtilByDate;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
 import Logica.crud.dto.JornadaDto;
@@ -70,6 +72,11 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.BevelBorder;
 
 
 
@@ -80,6 +87,7 @@ public class VentanaPrincipal extends JFrame {
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
 	private String acude = "INDEFINIDO";
+	private String[] informacion;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -235,6 +243,30 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane scllSolicitudMod;
 	private JTextArea txtSolicitudMod;
 	private JLabel lbObservacionesMod;
+	private JPanel panelPrincipal;
+	private JPanel panelInformacionDeInteres;
+	private JPanel panelInformacionBotones;
+	private JButton btnSiguienteInformacion;
+	private JButton btnInformacionInteres;
+	private JPanel panelInformacionUtil;
+	private JPanel panelBotonesInformacion;
+	private JButton btnAtrasInformacion;
+	private JButton btnAñadirInformacion;
+	private JPanel panelCentralInformacion;
+	private JTextField textAvisoUsuarioInformacion;
+	private JPanel panelPrincipalInformacion;
+	private JPanel panelTextoInformacion;
+	private JLabel lblInformacion;
+	private JTextField textFieldInformacionPrincipal;
+	private JPanel panelFechaInformacion;
+	private JPanel panelModificadoresFecha;
+	private JCheckBox chckbxDiaInformacion;
+	private JCheckBox chckbxNewCheckBox_1;
+	private JCheckBox chckbxNewCheckBox_2;
+	private JTextField textFieldInformacionUtil;
+	private JPanel panelFecha;
+	private JDateChooser dcInicio;
+	private JDateChooser dcInicio_1;
 	
 
 	/**
@@ -259,6 +291,7 @@ public class VentanaPrincipal extends JFrame {
 	public VentanaPrincipal() 
 	{
 		//Atributos
+		this.informacion=recuperaInformacionUtil(); //Recupera la informacion util de la ventana de inicio
 		this.listamedicos=new ListAllMedicosAction().execute();
 		this.listapacientes=new ListAllPacientesAction().execute();
 		for (int i = 0; i < 7; i++) {
@@ -410,6 +443,7 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnVerCitas(), "PnVerCitas");
 			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
 			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
+			pnContenidos.add(getPanelInformacionUtil(), "PnInformacion");
 		}
 		return pnContenidos;
 	}
@@ -497,9 +531,9 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPnEleccion() {
 		if (pnEleccion == null) {
 			pnEleccion = new JPanel();
-			pnEleccion.setLayout(null);
-			pnEleccion.add(getBtAdministrador());
-			pnEleccion.add(getBtMedico());
+			pnEleccion.setLayout(new BorderLayout(0, 0));
+			pnEleccion.add(getPanelPrincipal(), BorderLayout.CENTER);
+			pnEleccion.add(getPanelInformacionDeInteres(), BorderLayout.SOUTH);
 		}
 		return pnEleccion;
 	}
@@ -511,7 +545,6 @@ public class VentanaPrincipal extends JFrame {
 				 mostrarPanelAdministrador();
 				}
 			});
-			btAdministrador.setBounds(239, 144, 117, 29);
 		}
 		return btAdministrador;
 	}
@@ -519,11 +552,11 @@ public class VentanaPrincipal extends JFrame {
 		if (btMedico == null) {
 			btMedico = new JButton("Medico");
 			btMedico.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+				public void actionPerformed(ActionEvent e) 
+				{
 					mostrarPnMedico();
 				}
 			});
-			btMedico.setBounds(402, 144, 117, 29);
 		}
 		return btMedico;
 	}
@@ -877,11 +910,12 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPanelBotonesPrincipal() {
 		if (panelBotonesPrincipal == null) {
 			panelBotonesPrincipal = new JPanel();
-			panelBotonesPrincipal.setLayout(new GridLayout(0, 4, 0, 0));
+			panelBotonesPrincipal.setLayout(new GridLayout(0, 5, 0, 0));
 			panelBotonesPrincipal.add(getBtnHistorial());
 			panelBotonesPrincipal.add(getBtnCrearCita());
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
 			panelBotonesPrincipal.add(getBtnModificarCita());
+			panelBotonesPrincipal.add(getBtnInformacionInteres());
 		}
 		return panelBotonesPrincipal;
 	}
@@ -1176,7 +1210,7 @@ public class VentanaPrincipal extends JFrame {
 						String sala=cita.idSala;
 						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
 						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
-						String motivo = cita.causa;
+						String motivo = cita.motivo;
 						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
 						getTxInfo().setText("Sala de la cita: "+sala+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
 						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+ "Medico de la cita: " + medico +"\n"+ "Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
@@ -1823,14 +1857,6 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return false;
 	}
-	private String formateaFecha(Date fecha) {
-		String[] fechaS = fecha.toString().split(" ");
-		String mes = fechaS[1];
-		String año = fechaS[5];
-		String dia = fechaS[2];
-		return año + "-" + seleccionaMes(mes) + "-" + dia;
-	}
-	
 	private String seleccionaMes(String mes) {
 		switch (mes) {
 		case "Jan":
@@ -2392,5 +2418,255 @@ public class VentanaPrincipal extends JFrame {
 			lbObservacionesMod.setHorizontalAlignment(SwingConstants.CENTER);
 		}
 		return lbObservacionesMod;
+	}
+	private JPanel getPanelPrincipal() {
+		if (panelPrincipal == null) {
+			panelPrincipal = new JPanel();
+			panelPrincipal.setLayout(new GridLayout(0, 2, 0, 0));
+			panelPrincipal.add(getBtAdministrador());
+			panelPrincipal.add(getBtMedico());
+		}
+		return panelPrincipal;
+	}
+	private JPanel getPanelInformacionDeInteres() {
+		if (panelInformacionDeInteres == null) {
+			panelInformacionDeInteres = new JPanel();
+			panelInformacionDeInteres.setLayout(new BorderLayout(0, 0));
+			panelInformacionDeInteres.add(getPanelInformacionBotones(), BorderLayout.EAST);
+			panelInformacionDeInteres.add(getTextFieldInformacionUtil(), BorderLayout.CENTER);
+		}
+		return panelInformacionDeInteres;
+	}
+	private JPanel getPanelInformacionBotones() {
+		if (panelInformacionBotones == null) {
+			panelInformacionBotones = new JPanel();
+			panelInformacionBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panelInformacionBotones.add(getBtnSiguienteInformacion());
+		}
+		return panelInformacionBotones;
+	}
+	private JButton getBtnSiguienteInformacion() {
+		if (btnSiguienteInformacion == null) {
+			btnSiguienteInformacion = new JButton("\u25BA");
+			btnSiguienteInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					String nuevaInfo = chargeInformacion();
+					getTextFieldInformacionUtil().setText(nuevaInfo);
+					
+				}
+			});
+		}
+		return btnSiguienteInformacion;
+	}
+	private JButton getBtnInformacionInteres() {
+		if (btnInformacionInteres == null) {
+			btnInformacionInteres = new JButton("Modificar informacion");
+			btnInformacionInteres.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					mostrarPnInformacion();
+				}
+
+			});
+		}
+		return btnInformacionInteres;
+	}
+	
+	private void mostrarPnInformacion() 
+	{
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnInformacion");
+		
+	}
+	
+	private JPanel getPanelInformacionUtil() {
+		if (panelInformacionUtil == null) {
+			panelInformacionUtil = new JPanel();
+			panelInformacionUtil.setLayout(new BorderLayout(0, 0));
+			panelInformacionUtil.add(getPanelBotonesInformacion(), BorderLayout.SOUTH);
+			panelInformacionUtil.add(getPanelCentralInformacion(), BorderLayout.CENTER);
+		}
+		return panelInformacionUtil;
+	}
+	private JPanel getPanelBotonesInformacion() {
+		if (panelBotonesInformacion == null) {
+			panelBotonesInformacion = new JPanel();
+			panelBotonesInformacion.add(getBtnAtrasInformacion());
+			panelBotonesInformacion.add(getBtnAñadirInformacion());
+		}
+		return panelBotonesInformacion;
+	}
+	private JButton getBtnAtrasInformacion() {
+		if (btnAtrasInformacion == null) {
+			btnAtrasInformacion = new JButton("Atras\r\n");
+			btnAtrasInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					CardLayout c = (CardLayout)getPnContenidos().getLayout();
+					c.show(getPnContenidos(), "PnAdministrador");
+				}
+			});
+			
+		}
+		return btnAtrasInformacion;
+	}
+	private JButton getBtnAñadirInformacion() {
+		if (btnAñadirInformacion == null) {
+			btnAñadirInformacion = new JButton("A\u00F1adir Informacion");
+			btnAñadirInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					boolean añadido =añadeInformacion();
+				}
+			});
+			btnAñadirInformacion.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		}
+		return btnAñadirInformacion;
+	}
+	
+	private boolean añadeInformacion() 
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
+	private JPanel getPanelCentralInformacion() {
+		if (panelCentralInformacion == null) {
+			panelCentralInformacion = new JPanel();
+			panelCentralInformacion.setLayout(new BorderLayout(0, 0));
+			panelCentralInformacion.add(getTextAvisoUsuarioInformacion(), BorderLayout.SOUTH);
+			panelCentralInformacion.add(getPanelPrincipalInformacion(), BorderLayout.CENTER);
+			panelCentralInformacion.add(getLblInformacion(), BorderLayout.NORTH);
+		}
+		return panelCentralInformacion;
+	}
+	private JTextField getTextAvisoUsuarioInformacion() {
+		if (textAvisoUsuarioInformacion == null) {
+			textAvisoUsuarioInformacion = new JTextField();
+			textAvisoUsuarioInformacion.setEditable(false);
+			textAvisoUsuarioInformacion.setColumns(10);
+		}
+		return textAvisoUsuarioInformacion;
+	}
+	private JPanel getPanelPrincipalInformacion() {
+		if (panelPrincipalInformacion == null) {
+			panelPrincipalInformacion = new JPanel();
+			panelPrincipalInformacion.setLayout(new GridLayout(1, 0, 0, 0));
+			panelPrincipalInformacion.add(getPanelTextoInformacion());
+		}
+		return panelPrincipalInformacion;
+	}
+	private JPanel getPanelTextoInformacion() {
+		if (panelTextoInformacion == null) {
+			panelTextoInformacion = new JPanel();
+			panelTextoInformacion.setLayout(new GridLayout(0, 2, 0, 0));
+			panelTextoInformacion.add(getTextFieldInformacionPrincipal());
+			panelTextoInformacion.add(getPanelFechaInformacion());
+		}
+		return panelTextoInformacion;
+	}
+	private JLabel getLblInformacion() {
+		if (lblInformacion == null) {
+			lblInformacion = new JLabel("A\u00F1ada la informacion y el tiempo que se desea mostrar:");
+		}
+		return lblInformacion;
+	}
+	private JTextField getTextFieldInformacionPrincipal() {
+		if (textFieldInformacionPrincipal == null) {
+			textFieldInformacionPrincipal = new JTextField();
+			textFieldInformacionPrincipal.setColumns(10);
+		}
+		return textFieldInformacionPrincipal;
+	}
+	private JPanel getPanelFechaInformacion() {
+		if (panelFechaInformacion == null) {
+			panelFechaInformacion = new JPanel();
+			panelFechaInformacion.setLayout(new BorderLayout(0, 0));
+			panelFechaInformacion.add(getPanel_2_1(), BorderLayout.NORTH);
+			panelFechaInformacion.add(getPanelFecha(), BorderLayout.CENTER);
+		}
+		return panelFechaInformacion;
+	}
+	private JPanel getPanel_2_1() {
+		if (panelModificadoresFecha == null) {
+			panelModificadoresFecha = new JPanel();
+			panelModificadoresFecha.add(getChckbxDiaInformacion());
+			panelModificadoresFecha.add(getChckbxNewCheckBox_1());
+			panelModificadoresFecha.add(getChckbxNewCheckBox_2());
+		}
+		return panelModificadoresFecha;
+	}
+	private JCheckBox getChckbxDiaInformacion() {
+		if (chckbxDiaInformacion == null) {
+			chckbxDiaInformacion = new JCheckBox("Dia\r\n");
+			chckbxDiaInformacion.setSelected(true);
+		}
+		return chckbxDiaInformacion;
+	}
+	private JCheckBox getChckbxNewCheckBox_1() {
+		if (chckbxNewCheckBox_1 == null) {
+			chckbxNewCheckBox_1 = new JCheckBox("Mes\r\n");
+			chckbxNewCheckBox_1.setSelected(true);
+		}
+		return chckbxNewCheckBox_1;
+	}
+	private JCheckBox getChckbxNewCheckBox_2() {
+		if (chckbxNewCheckBox_2 == null) {
+			chckbxNewCheckBox_2 = new JCheckBox("A\u00F1o\r\n");
+			chckbxNewCheckBox_2.setSelected(true);
+		}
+		return chckbxNewCheckBox_2;
+	}
+	
+	private String[] recuperaInformacionUtil()  //Carga la informacion a una lista o un array desde uno o varios ficheros locales.
+	{
+		LocalDateTime ahora =LocalDateTime.now();
+		String[] util = new ListInformacionUtilByDate().execute(Timestamp.valueOf(ahora));
+		this.informacion=util;
+		return util;
+	}
+	
+	private String chargeInformacion() //Escoje informacion al azar
+	{
+		int aleatorio=(int) Math.random()*this.informacion.length;
+		String text = this.informacion[aleatorio];
+		if(!getTextFieldInformacionUtil().getText().equals(text)) 
+		{
+			return text;
+		}else {
+			return this.informacion[aleatorio+1];
+		}
+	}
+	private JTextField getTextFieldInformacionUtil() {
+		if (textFieldInformacionUtil == null) {
+			textFieldInformacionUtil = new JTextField();
+			textFieldInformacionUtil.setEditable(false);
+			textFieldInformacionUtil.setColumns(10);
+			textFieldInformacionUtil.setText(this.informacion[0]);
+		}
+		return textFieldInformacionUtil;
+	}
+	private JPanel getPanelFecha() {
+		if (panelFecha == null) {
+			panelFecha = new JPanel();
+			panelFecha.setLayout(new GridLayout(2, 0, 0, 0));
+			panelFecha.add(getDcInicio());
+			panelFecha.add(getDcInicio_1());
+		}
+		return panelFecha;
+	}
+	private JDateChooser getDcInicio() {
+		if (dcInicio == null) {
+			dcInicio = new JDateChooser();
+		}
+		return dcInicio;
+	}
+	private JDateChooser getDcInicio_1() {
+		if (dcInicio_1 == null) {
+			dcInicio_1 = new JDateChooser();
+		}
+		return dcInicio_1;
 	}
 }

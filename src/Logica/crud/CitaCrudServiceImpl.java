@@ -125,8 +125,8 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void updateCausasInHistorial(String id, String idPaciente, String causa) {
-		new UpdateCausasInHistorial(id,idPaciente,causa).execute();;
+	public void addDiagnostico(String id, String idPaciente, String causa) {
+		new AddDiagnostico(id,idPaciente,causa).execute();;
 		
 	}
 
@@ -158,6 +158,24 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
 		new AddVacuna(id, idPaciente, fecha, vacunas).execute();
 		
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByCap(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByCap(cap).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByRange(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByRange(cap).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByCode(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByCode(cap).execute();
 	}
 	
 	

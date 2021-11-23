@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import Logica.DataBaseManager;
 
 public class ListDiagnosticoById {
-	private String SQL = "select causa, prescripcion, fecha from public.diagnostico where id_paciente=?";
+	private String SQL = "select diagnostico, prescripcion, fecha from public.diagnostico where id_paciente=?";
 
 	private String id;
 	
@@ -31,7 +31,7 @@ public class ListDiagnosticoById {
 			result="";
 			while(rs.next()) {
 				result+="Fecha de la visita: "+rs.getDate("fecha");
-				result+="\n\t-Causa de la visita: "+rs.getString("causa");
+				result+="\n\t-Diagnostico: "+rs.getString("diagnostico");
 				result+="\n\t-Prescripcion de la visita: "+rs.getString("prescripcion");
 				result+="\n";
 			}

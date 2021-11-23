@@ -41,6 +41,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
@@ -50,6 +51,8 @@ import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -61,18 +64,25 @@ import Logica.crud.commands.ListAllSolicitudes;
 import Logica.crud.commands.ListInformacionUtilByDate;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.DiagnosticoDto;
 import Logica.crud.dto.JornadaDto;
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
 import Logica.crud.dto.SolicitudDto;
+import igu.action.AddDiagnosticoAction;
 import igu.action.AddHorarioAction;
 import igu.action.AddSolicitudAction;
+import igu.action.DeleteSolicitudAction;
+import igu.action.InsertCitaAction;
 import igu.action.ListAllCitasAction;
 import igu.action.ListAllCitasByIdAction;
 import igu.action.ListAllMedicosAction;
 import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
+import igu.action.ListDiagnosticoByCapAction;
+import igu.action.ListDiagnosticoByCodeAction;
 import igu.action.ListDiagnosticoByIdAction;
+import igu.action.ListDiagnosticoByRangeAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 import igu.action.ListVacunaByIdAction;
 import igu.action.UpdateAcudioCitaAction;
@@ -85,6 +95,7 @@ import igu.action.UpdateHoraEntradaSalidaAction;
 public class VentanaPrincipal extends JFrame {
 
 	List<PacienteDto> listapacientes;
+	List<String> listaDiagnosticos;
 	public List<PacienteDto> getListapacientes() {
 		return listapacientes;
 	}
@@ -276,6 +287,23 @@ public class VentanaPrincipal extends JFrame {
 	private JDateChooser dcInicio_1;
 	private JButton btAsignarVacuna;
 	private JButton btAsignarVacunaH;
+
+	private JPanel pnDiagnosticos;
+	private JButton btDiagnostico;
+	private JScrollPane scTree;
+	private JTree tree;
+	private String capitulo = "";
+	private boolean isExpandedRange = false;
+	private boolean isExpandedCode = false;
+	private boolean isExpandedCapitulo = false;
+	private JScrollPane scDiagnostico;
+	private JList<String> listDiagnosticos;
+	private JButton btEliminar;
+	private JButton btAsignarDiagnostico;
+	private JLabel lbCie10;
+	private JLabel lbDiagnostico;
+	private JButton btAtrasDiagnostico;
+
 	private JButton btVerSolicitudes;
 	private JPanel pnVerSolicitudes;
 	private JPanel pnBotonesSolicitudes;
@@ -402,6 +430,7 @@ public class VentanaPrincipal extends JFrame {
 			pnCita.add(getCbHoraSalida());
 			pnCita.add(getCbMinutosSalida());
 			pnCita.add(getBtAsignarVacuna());
+			pnCita.add(getBtDiagnostico());
 		}
 		return pnCita;
 	}
@@ -424,6 +453,12 @@ public class VentanaPrincipal extends JFrame {
 	private void mostrarPnElegirMCita() {
 		CardLayout c = (CardLayout)getPnContenidos().getLayout();
 		c.show(getPnContenidos(), "PnElegirMCita");	
+		
+	}
+	
+	private void mostrarPnDiagnosticos() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnDiagnosticos");	
 		
 	}
 	
@@ -467,6 +502,7 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
 			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
 			pnContenidos.add(getPanelInformacionUtil(), "PnInformacion");
+			pnContenidos.add(getPnDiagnosticos(), "PnDiagnosticos");
 			pnContenidos.add(getPnVerSolicitudes(), "PnVerSolicitudes");
 
 		}
@@ -2742,6 +2778,225 @@ public class VentanaPrincipal extends JFrame {
 			});
 		}
 		return btAsignarVacunaH;
+	}
+
+	private JPanel getPnDiagnosticos() {
+		if (pnDiagnosticos == null) {
+			pnDiagnosticos = new JPanel();
+			pnDiagnosticos.setLayout(null);
+			pnDiagnosticos.add(getScTree());
+			pnDiagnosticos.add(getScDiagnostico());
+			pnDiagnosticos.add(getBtEliminar());
+			pnDiagnosticos.add(getBtAsignarDiagnostico());
+			pnDiagnosticos.add(getLbCie10());
+			pnDiagnosticos.add(getLbDiagnostico());
+			pnDiagnosticos.add(getBtAtrasDiagnostico());
+		}
+		return pnDiagnosticos;
+	}
+	private JButton getBtDiagnostico() {
+		if (btDiagnostico == null) {
+			btDiagnostico = new JButton("Asignar Diagnostico");
+			btDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnDiagnosticos();
+				}
+			});
+			btDiagnostico.setBounds(535, 204, 179, 29);
+		}
+		return btDiagnostico;
+	}
+	private JScrollPane getScTree() {
+		if (scTree == null) {
+			scTree = new JScrollPane();
+			scTree.setBounds(54, 38, 351, 300);
+			scTree.setViewportView(getTree_1());
+		}
+		return scTree;
+	}
+	private JTree getTree_1() {
+		if (tree == null) {
+			tree = new JTree();
+			
+			tree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if(tree.getSelectionPath()!=null) {
+						DefaultMutableTreeNode selected = (DefaultMutableTreeNode)tree.getSelectionPath().getLastPathComponent();
+						if(selected!=null && selected.getUserObject().toString().contains("Cap")) {
+							isExpandedCapitulo=true;
+							expandirCap();
+							capitulo=selected.getUserObject().toString();
+						}
+						else if(selected.getUserObject().toString().contains("-") && selected.getUserObject().toString().contains("(")) {
+							isExpandedRange=true;
+							expandirRange();
+						}
+						else if(selected.getUserObject().toString().contains(" - ") && !selected.getUserObject().toString().contains(".")){
+							isExpandedCode=true;
+							expandirCode();
+						}
+						else if(selected.getUserObject().toString().contains(".") && selected.getUserObject().toString().contains("-")){
+							listaDiagnosticos.add(selected.getUserObject().toString());
+							String[]  diag = new String[listaDiagnosticos.size()];
+							for (int i = 0; i<diag.length;i++) {
+								diag[i] = listaDiagnosticos.get(i);
+								
+							}
+							getListDiagnosticos().setModel(new DefaultComboBoxModel<String>(diag));
+
+						}
+						if(!isExpandedCapitulo)
+							expandirTab();
+					}
+				}
+			});
+			tree.setModel(new DefaultTreeModel(crearTree()));
+			listaDiagnosticos = new ArrayList<>();
+		}
+		return tree;
+	}
+	
+	private DefaultMutableTreeNode crearTree() {
+		 return new DefaultMutableTreeNode("Tab.D") {
+			{
+			}
+		};
+	}
+	
+
+	private void expandirTab() {
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		DefaultMutableTreeNode node = null;
+		for(int i =1; i<22;i++) {
+			if(i<10)
+				node = new DefaultMutableTreeNode("Cap.0"+i);
+			else
+				node = new DefaultMutableTreeNode("Cap."+i);
+			selected.add(node);
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	private void expandirCap() {
+		DefaultMutableTreeNode node = null;
+		if(isExpandedCapitulo) {
+			DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+			List<DiagnosticoDto> capitulos = new ListDiagnosticoByCapAction(selected.getUserObject().toString()).execute();
+			for(DiagnosticoDto diag : capitulos) {
+				//node=expandirRange(diag.descripcion);
+				node= new DefaultMutableTreeNode(diag.descripcion);
+				selected.add(node);
+			}
+		}
+		else {
+			node = new DefaultMutableTreeNode("");
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	
+	
+	private void expandirRange() {
+		DefaultMutableTreeNode node = null;
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		String range = selected.getUserObject().toString().split("\\(")[1].substring(0,7);
+		List<DiagnosticoDto> capitulos = new ListDiagnosticoByRangeAction(range).execute();
+		for(DiagnosticoDto diag : capitulos) {
+			node = new DefaultMutableTreeNode(diag.codigo+" - "+diag.descripcion);
+			selected.add(node);
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	
+
+	private void expandirCode() {
+		DefaultMutableTreeNode node = null;
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		if(isExpandedCode) {
+			List<DiagnosticoDto> capitulos = new ListDiagnosticoByCodeAction(selected.getUserObject().toString().substring(0,3)).execute();
+			for(DiagnosticoDto diag : capitulos) {
+				node = new DefaultMutableTreeNode(diag.codigo+" - "+diag.descripcion);
+				selected.add(node);
+			}
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	private JScrollPane getScDiagnostico() {
+		if (scDiagnostico == null) {
+			scDiagnostico = new JScrollPane();
+			scDiagnostico.setBounds(490, 93, 259, 205);
+			scDiagnostico.setViewportView(getListDiagnosticos());
+		}
+		return scDiagnostico;
+	}
+	private JList<String> getListDiagnosticos() {
+		if (listDiagnosticos == null) {
+			listDiagnosticos = new JList<String>();
+		}
+		return listDiagnosticos;
+	}
+	private JButton getBtEliminar() {
+		if (btEliminar == null) {
+			btEliminar = new JButton("Eliminar");
+			btEliminar.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					for (int i : getListDiagnosticos().getSelectedIndices()) {
+						listaDiagnosticos.remove(i);
+					}
+					String[]  diag = new String[listaDiagnosticos.size()];
+					for (int i = 0; i<diag.length;i++) {
+						diag[i] = listaDiagnosticos.get(i);
+						
+					}
+					getListDiagnosticos().setModel(new DefaultComboBoxModel<String>(diag));
+				}
+			});
+			btEliminar.setBounds(504, 330, 85, 21);
+		}
+		return btEliminar;
+	}
+	private JButton getBtAsignarDiagnostico() {
+		if (btAsignarDiagnostico == null) {
+			btAsignarDiagnostico = new JButton("Asignar");
+			btAsignarDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					for (String diag : listaDiagnosticos) {
+						new AddDiagnosticoAction(idCita, idPaciente, diag).execute();
+					}
+				}
+			});
+			btAsignarDiagnostico.setBounds(643, 330, 85, 21);
+		}
+		return btAsignarDiagnostico;
+	}
+	private JLabel getLbCie10() {
+		if (lbCie10 == null) {
+			lbCie10 = new JLabel("Cie10 - Diagnosticos");
+			lbCie10.setBounds(54, 10, 154, 13);
+		}
+		return lbCie10;
+	}
+	private JLabel getLbDiagnostico() {
+		if (lbDiagnostico == null) {
+			lbDiagnostico = new JLabel("Diagnostico:");
+			lbDiagnostico.setBounds(490, 70, 111, 13);
+		}
+		return lbDiagnostico;
+	}
+	private JButton getBtAtrasDiagnostico() {
+		if (btAtrasDiagnostico == null) {
+			btAtrasDiagnostico = new JButton("Atras");
+			btAtrasDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnCita();
+				}
+			});
+			btAtrasDiagnostico.setBounds(47, 404, 85, 21);
+		}
+		return btAtrasDiagnostico;
 	}
 	private JButton getBtVerSolicitudes() {
 		if (btVerSolicitudes == null) {

@@ -312,6 +312,7 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btDenegarSolicitud;
 	private JList listSolicitudes;
 	private List<SolicitudDto> solicitudes;
+	private JButton btSalir;
 
 	
 
@@ -3032,6 +3033,7 @@ public class VentanaPrincipal extends JFrame {
 			pnBotonesSolicitudes = new JPanel();
 			pnBotonesSolicitudes.add(getBtAceptarSolicitud());
 			pnBotonesSolicitudes.add(getBtDenegarSolicitud());
+			pnBotonesSolicitudes.add(getBtSalir());
 		}
 		return pnBotonesSolicitudes;
 	}
@@ -3123,5 +3125,16 @@ public class VentanaPrincipal extends JFrame {
 			if(solicitud.cuerpo.equals(idCita))
 				new DeleteSolicitud(solicitud.id).execute();
 		}
+	}
+	private JButton getBtSalir() {
+		if (btSalir == null) {
+			btSalir = new JButton("Salir");
+			btSalir.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPanelAdministrador();
+				}
+			});
+		}
+		return btSalir;
 	}
 }

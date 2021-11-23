@@ -3,8 +3,6 @@ package Logica.crud;
 import java.sql.Timestamp;
 import java.util.List;
 
-
-import Logica.crud.dto.JornadaDto;
 import Logica.Vacuna;
 import Logica.crud.dto.*;
 
@@ -46,4 +44,7 @@ public interface CitaCrudService {
 	void updatePrescripcionInHistorial(String id, String prescripcion);
 	void updateAcudioCita(String id,String acude);
 	void AddSolicitud(SolicitudDto sol);
+	List<SolicitudDto> listAllSolicitudes();
+	void deleteSolicitud(String id);
+	void deleteCita(String id);
 }

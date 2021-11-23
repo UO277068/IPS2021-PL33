@@ -55,6 +55,9 @@ import com.toedter.calendar.JDateChooser;
 
 import Logica.Carta;
 import Logica.Vacuna;
+import Logica.crud.commands.DeleteSolicitud;
+import Logica.crud.commands.DeleteCita;
+import Logica.crud.commands.ListAllSolicitudes;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
 import Logica.crud.dto.DiagnosticoDto;
@@ -65,6 +68,10 @@ import Logica.crud.dto.SolicitudDto;
 import igu.action.AddDiagnosticoAction;
 import igu.action.AddHorarioAction;
 import igu.action.AddSolicitudAction;
+
+import igu.action.DeleteSolicitudAction;
+import igu.action.InsertCitaAction;
+
 import igu.action.ListAllCitasAction;
 import igu.action.ListAllCitasByIdAction;
 import igu.action.ListAllMedicosAction;
@@ -253,6 +260,7 @@ public class VentanaPrincipal extends JFrame {
 	private JLabel lbObservacionesMod;
 	private JButton btAsignarVacuna;
 	private JButton btAsignarVacunaH;
+
 	private JPanel pnDiagnosticos;
 	private JButton btDiagnostico;
 	private JScrollPane scTree;
@@ -268,6 +276,17 @@ public class VentanaPrincipal extends JFrame {
 	private JLabel lbCie10;
 	private JLabel lbDiagnostico;
 	private JButton btAtrasDiagnostico;
+
+	private JButton btVerSolicitudes;
+	private JPanel pnVerSolicitudes;
+	private JPanel pnBotonesSolicitudes;
+	private JScrollPane scllPnSolicitudes;
+	private JButton btAceptarSolicitud;
+	private JButton btDenegarSolicitud;
+	private JList listSolicitudes;
+	
+	private List<SolicitudDto> solicitudes;
+
 	
 
 	/**
@@ -455,7 +474,11 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnVerCitas(), "PnVerCitas");
 			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
 			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
+
 			pnContenidos.add(getPnDiagnosticos(), "PnDiagnosticos");
+
+			pnContenidos.add(getPnVerSolicitudes(), "PnVerSolicitudes");
+
 		}
 		return pnContenidos;
 	}
@@ -925,11 +948,12 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPanelBotonesPrincipal() {
 		if (panelBotonesPrincipal == null) {
 			panelBotonesPrincipal = new JPanel();
-			panelBotonesPrincipal.setLayout(new GridLayout(0, 4, 0, 0));
+			panelBotonesPrincipal.setLayout(new GridLayout(0, 5, 0, 0));
 			panelBotonesPrincipal.add(getBtnHistorial());
 			panelBotonesPrincipal.add(getBtnCrearCita());
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
 			panelBotonesPrincipal.add(getBtnModificarCita());
+			panelBotonesPrincipal.add(getBtVerSolicitudes());
 		}
 		return panelBotonesPrincipal;
 	}
@@ -2070,7 +2094,7 @@ public class VentanaPrincipal extends JFrame {
 						
 						SolicitudDto sol= new SolicitudDto();
 						sol.tipo= "ELIMINAR";
-						sol.cuerpo= "Cita ID: " + cita.id;
+						sol.cuerpo=cita.id;
 						new AddSolicitudAction(sol).execute();
 						}	
 					}
@@ -2487,6 +2511,7 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return btAsignarVacunaH;
 	}
+
 	private JPanel getPnDiagnosticos() {
 		if (pnDiagnosticos == null) {
 			pnDiagnosticos = new JPanel();
@@ -2704,5 +2729,131 @@ public class VentanaPrincipal extends JFrame {
 			btAtrasDiagnostico.setBounds(47, 404, 85, 21);
 		}
 		return btAtrasDiagnostico;
+	}
+	private JButton getBtVerSolicitudes() {
+		if (btVerSolicitudes == null) {
+			btVerSolicitudes = new JButton("Ver Solicitudes");
+			btVerSolicitudes.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					actualizarSolicitudes();
+					mostrarPnVerSolicitudes();
+				}
+			});
+		}
+		return btVerSolicitudes;
+	}
+	
+	private void mostrarPnVerSolicitudes() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnVerSolicitudes");	
+		
+	}
+	
+	private JPanel getPnVerSolicitudes() {
+		if (pnVerSolicitudes == null) {
+			pnVerSolicitudes = new JPanel();
+			pnVerSolicitudes.setLayout(new BorderLayout(0, 0));
+			pnVerSolicitudes.add(getPnBotonesSolicitudes(), BorderLayout.SOUTH);
+			pnVerSolicitudes.add(getScllPnSolicitudes(), BorderLayout.CENTER);
+
+		}
+		return pnVerSolicitudes;
+	}
+	private JPanel getPnBotonesSolicitudes() {
+		if (pnBotonesSolicitudes == null) {
+			pnBotonesSolicitudes = new JPanel();
+			pnBotonesSolicitudes.add(getBtAceptarSolicitud());
+			pnBotonesSolicitudes.add(getBtDenegarSolicitud());
+		}
+		return pnBotonesSolicitudes;
+	}
+	private JScrollPane getScllPnSolicitudes() {
+		if (scllPnSolicitudes == null) {
+			scllPnSolicitudes = new JScrollPane();
+			scllPnSolicitudes.setViewportView(getListSolicitudes());
+		}
+		return scllPnSolicitudes;
+	}
+	//aceptar
+	private JButton getBtAceptarSolicitud() {
+		if (btAceptarSolicitud == null) {
+			btAceptarSolicitud = new JButton("Aceptar");
+			btAceptarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					if(solicitud.tipo.equals("CREAR")) {
+						
+					}else if(solicitud.tipo.equals("MODIFICAR")) {
+						
+					}else if(solicitud.tipo.equals("ELIMINAR")) {
+						Integer respuesta = JOptionPane.showConfirmDialog(null,"�Estas seguro de borrar la cita " + solicitud.cuerpo + "?");
+						if(respuesta==JOptionPane.YES_OPTION) {
+							new DeleteSolicitud(solicitud.id).execute();
+							new DeleteCita(solicitud.cuerpo).execute();
+							borrarResiduos(solicitud.cuerpo);
+						}
+						actualizarSolicitudes();
+					}
+				}
+			});
+			btAceptarSolicitud.setEnabled(false);
+		}
+		return btAceptarSolicitud;
+	}
+	//denegar
+	private JButton getBtDenegarSolicitud() {
+		if (btDenegarSolicitud == null) {
+			btDenegarSolicitud = new JButton("Denegar");
+			btDenegarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					Integer respuesta = JOptionPane.showConfirmDialog(null,"�Estas seguro de denegar la solictud " + solicitud.id + "?");
+					if(respuesta==JOptionPane.YES_OPTION) {
+						new DeleteSolicitud(solicitud.id).execute();
+						actualizarSolicitudes();
+						btDenegarSolicitud.setEnabled(false);
+						getBtAceptarSolicitud().setEnabled(false);
+					}
+				}
+			});
+			btDenegarSolicitud.setEnabled(false);
+		}
+		return btDenegarSolicitud;
+	}
+	private JList<String> getListSolicitudes() {
+		if (listSolicitudes == null) {
+			listSolicitudes = new JList<String>();
+			
+			listSolicitudes.setBorder(new TitledBorder(null, "Solicitudes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			solicitudes = new ListAllSolicitudes().execute();
+			actualizarSolicitudes();
+			
+			listSolicitudes.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					getBtAceptarSolicitud().setEnabled(true);
+					getBtDenegarSolicitud().setEnabled(true);
+				}
+			});
+		}
+		return listSolicitudes;
+	}
+	
+	private void actualizarSolicitudes() {
+		solicitudes = new ListAllSolicitudes().execute();
+		String[] sols = new String[solicitudes.size()];
+		for(int i=0;i<solicitudes.size();i++) {
+			SolicitudDto sol = solicitudes.get(i);
+			sols[i]= sol.id + " - " + sol.tipo + " - " + sol.cuerpo; 
+		}
+		ListModel<String> model = new DefaultComboBoxModel<String>(sols);
+		getListSolicitudes().setModel(model);
+	}
+	
+	private void borrarResiduos(String idCita) {
+		for(SolicitudDto solicitud: solicitudes) {
+			if(solicitud.cuerpo.equals(idCita))
+				new DeleteSolicitud(solicitud.id).execute();
+		}
 	}
 }

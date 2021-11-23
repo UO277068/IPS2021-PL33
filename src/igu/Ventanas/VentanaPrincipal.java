@@ -10,20 +10,27 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.sql.Date;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,14 +43,21 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import Logica.Carta;
+import Logica.Vacuna;
+import Logica.crud.commands.DeleteCita;
+import Logica.crud.commands.DeleteSolicitud;
+import Logica.crud.commands.ListAllSolicitudes;
 import Logica.crud.commands.ListInformacionUtilByDate;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
@@ -53,7 +67,6 @@ import Logica.crud.dto.PacienteDto;
 import Logica.crud.dto.SolicitudDto;
 import igu.action.AddHorarioAction;
 import igu.action.AddSolicitudAction;
-import igu.action.InsertCitaAction;
 import igu.action.ListAllCitasAction;
 import igu.action.ListAllCitasByIdAction;
 import igu.action.ListAllMedicosAction;
@@ -65,18 +78,6 @@ import igu.action.ListVacunaByIdAction;
 import igu.action.UpdateAcudioCitaAction;
 import igu.action.UpdateCitaAction;
 import igu.action.UpdateHoraEntradaSalidaAction;
-import javax.swing.JCheckBox;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.BevelBorder;
 
 
 
@@ -84,10 +85,16 @@ import javax.swing.border.BevelBorder;
 public class VentanaPrincipal extends JFrame {
 
 	List<PacienteDto> listapacientes;
+	public List<PacienteDto> getListapacientes() {
+		return listapacientes;
+	}
+
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
 	private String acude = "INDEFINIDO";
 	private String[] informacion;
+	private Carta carta;
+	private List<Vacuna> vacunas;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -267,6 +274,17 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel panelFecha;
 	private JDateChooser dcInicio;
 	private JDateChooser dcInicio_1;
+	private JButton btAsignarVacuna;
+	private JButton btAsignarVacunaH;
+	private JButton btVerSolicitudes;
+	private JPanel pnVerSolicitudes;
+	private JPanel pnBotonesSolicitudes;
+	private JScrollPane scllPnSolicitudes;
+	private JButton btAceptarSolicitud;
+	private JButton btDenegarSolicitud;
+	private JList listSolicitudes;
+	private List<SolicitudDto> solicitudes;
+
 	
 
 	/**
@@ -383,6 +401,7 @@ public class VentanaPrincipal extends JFrame {
 			pnCita.add(getCbMinutosEntrada());
 			pnCita.add(getCbHoraSalida());
 			pnCita.add(getCbMinutosSalida());
+			pnCita.add(getBtAsignarVacuna());
 		}
 		return pnCita;
 	}
@@ -413,6 +432,10 @@ public class VentanaPrincipal extends JFrame {
 		c.show(getPnContenidos(), "PnHistorial");
 		String d = new ListDiagnosticoByIdAction(idPaciente).execute();
 		getTxHistorial().setText(d);
+		mostrarVacunas();
+	}
+	
+	private void mostrarVacunas() {
 		String v = new ListVacunaByIdAction(idPaciente).execute();
 		getTxVacuna().setText(v);
 	}
@@ -444,6 +467,8 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
 			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
 			pnContenidos.add(getPanelInformacionUtil(), "PnInformacion");
+			pnContenidos.add(getPnVerSolicitudes(), "PnVerSolicitudes");
+
 		}
 		return pnContenidos;
 	}
@@ -525,6 +550,7 @@ public class VentanaPrincipal extends JFrame {
 	private JTextArea getTxVacuna() {
 		if (txVacuna == null) {
 			txVacuna = new JTextArea();
+			txVacuna.setEditable(false);
 		}
 		return txVacuna;
 	}
@@ -654,6 +680,7 @@ public class VentanaPrincipal extends JFrame {
 			FlowLayout flowLayout = (FlowLayout) pnBt.getLayout();
 			flowLayout.setAlignment(FlowLayout.LEFT);
 			pnBt.add(getBtHAtras());
+			pnBt.add(getBtAsignarVacunaH());
 		}
 		return pnBt;
 	}
@@ -916,6 +943,7 @@ public class VentanaPrincipal extends JFrame {
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
 			panelBotonesPrincipal.add(getBtnModificarCita());
 			panelBotonesPrincipal.add(getBtnInformacionInteres());
+			panelBotonesPrincipal.add(getBtVerSolicitudes());
 		}
 		return panelBotonesPrincipal;
 	}
@@ -1060,6 +1088,7 @@ public class VentanaPrincipal extends JFrame {
 			btHistorialA.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					idPaciente=idsPaciente[getListaVCitaPaciente().getSelectedIndex()];
+					cita = lista.get(getListaVCitaPaciente().getSelectedIndex());
 					if(getListaVCitaPaciente().getSelectedIndex()!=-1)
 						mostrarPnHistorial();
 				}
@@ -2047,7 +2076,7 @@ public class VentanaPrincipal extends JFrame {
 						
 						SolicitudDto sol= new SolicitudDto();
 						sol.tipo= "ELIMINAR";
-						sol.cuerpo= "Cita ID: " + cita.id;
+						sol.cuerpo=cita.id;
 						new AddSolicitudAction(sol).execute();
 						}	
 					}
@@ -2644,7 +2673,7 @@ public class VentanaPrincipal extends JFrame {
 			textFieldInformacionUtil = new JTextField();
 			textFieldInformacionUtil.setEditable(false);
 			textFieldInformacionUtil.setColumns(10);
-			textFieldInformacionUtil.setText(this.informacion[0]);
+			//textFieldInformacionUtil.setText(this.informacion[0]);
 		}
 		return textFieldInformacionUtil;
 	}
@@ -2668,5 +2697,176 @@ public class VentanaPrincipal extends JFrame {
 			dcInicio_1 = new JDateChooser();
 		}
 		return dcInicio_1;
+	}
+	private JButton getBtAsignarVacuna() {
+		if (btAsignarVacuna == null) {
+			btAsignarVacuna = new JButton("Asignar Vacuna");
+			btAsignarVacuna.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+				}
+			});
+			btAsignarVacuna.setBounds(374, 204, 151, 29);
+		}
+		return btAsignarVacuna;
+	}
+	
+	private void mostrarVentanaVacuna() {
+		carta = new Carta();
+		VentanaVacuna v = new VentanaVacuna(carta, this);
+		v.setLocationRelativeTo(this);
+		v.setModal(true);
+		v.setVisible(true);
+		
+		
+	}
+
+	public CitaDto getCita() {
+		return cita;
+	}
+
+	public String getIdPaciente() {
+		return idPaciente;
+	}
+	
+	
+	private JButton getBtAsignarVacunaH() {
+		if (btAsignarVacunaH == null) {
+			btAsignarVacunaH = new JButton("Asignar Vacuna");
+			btAsignarVacunaH.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+					mostrarVacunas();
+
+				}
+			});
+		}
+		return btAsignarVacunaH;
+	}
+	private JButton getBtVerSolicitudes() {
+		if (btVerSolicitudes == null) {
+			btVerSolicitudes = new JButton("Ver Solicitudes");
+			btVerSolicitudes.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					actualizarSolicitudes();
+					mostrarPnVerSolicitudes();
+				}
+			});
+		}
+		return btVerSolicitudes;
+	}
+	
+	private void mostrarPnVerSolicitudes() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnVerSolicitudes");	
+		
+	}
+	
+	private JPanel getPnVerSolicitudes() {
+		if (pnVerSolicitudes == null) {
+			pnVerSolicitudes = new JPanel();
+			pnVerSolicitudes.setLayout(new BorderLayout(0, 0));
+			pnVerSolicitudes.add(getPnBotonesSolicitudes(), BorderLayout.SOUTH);
+			pnVerSolicitudes.add(getScllPnSolicitudes(), BorderLayout.CENTER);
+
+		}
+		return pnVerSolicitudes;
+	}
+	private JPanel getPnBotonesSolicitudes() {
+		if (pnBotonesSolicitudes == null) {
+			pnBotonesSolicitudes = new JPanel();
+			pnBotonesSolicitudes.add(getBtAceptarSolicitud());
+			pnBotonesSolicitudes.add(getBtDenegarSolicitud());
+		}
+		return pnBotonesSolicitudes;
+	}
+	private JScrollPane getScllPnSolicitudes() {
+		if (scllPnSolicitudes == null) {
+			scllPnSolicitudes = new JScrollPane();
+			scllPnSolicitudes.setViewportView(getListSolicitudes());
+		}
+		return scllPnSolicitudes;
+	}
+	//aceptar
+	private JButton getBtAceptarSolicitud() {
+		if (btAceptarSolicitud == null) {
+			btAceptarSolicitud = new JButton("Aceptar");
+			btAceptarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					if(solicitud.tipo.equals("CREAR")) {
+						
+					}else if(solicitud.tipo.equals("MODIFICAR")) {
+						
+					}else if(solicitud.tipo.equals("ELIMINAR")) {
+						Integer respuesta = JOptionPane.showConfirmDialog(null,"�Estas seguro de borrar la cita " + solicitud.cuerpo + "?");
+						if(respuesta==JOptionPane.YES_OPTION) {
+							new DeleteSolicitud(solicitud.id).execute();
+							new DeleteCita(solicitud.cuerpo).execute();
+							borrarResiduos(solicitud.cuerpo);
+						}
+						actualizarSolicitudes();
+					}
+				}
+			});
+			btAceptarSolicitud.setEnabled(false);
+		}
+		return btAceptarSolicitud;
+	}
+	//denegar
+	private JButton getBtDenegarSolicitud() {
+		if (btDenegarSolicitud == null) {
+			btDenegarSolicitud = new JButton("Denegar");
+			btDenegarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					Integer respuesta = JOptionPane.showConfirmDialog(null,"�Estas seguro de denegar la solictud " + solicitud.id + "?");
+					if(respuesta==JOptionPane.YES_OPTION) {
+						new DeleteSolicitud(solicitud.id).execute();
+						actualizarSolicitudes();
+						btDenegarSolicitud.setEnabled(false);
+						getBtAceptarSolicitud().setEnabled(false);
+					}
+				}
+			});
+			btDenegarSolicitud.setEnabled(false);
+		}
+		return btDenegarSolicitud;
+	}
+	private JList<String> getListSolicitudes() {
+		if (listSolicitudes == null) {
+			listSolicitudes = new JList<String>();
+			
+			listSolicitudes.setBorder(new TitledBorder(null, "Solicitudes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			solicitudes = new ListAllSolicitudes().execute();
+			actualizarSolicitudes();
+			
+			listSolicitudes.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					getBtAceptarSolicitud().setEnabled(true);
+					getBtDenegarSolicitud().setEnabled(true);
+				}
+			});
+		}
+		return listSolicitudes;
+	}
+	
+	private void actualizarSolicitudes() {
+		solicitudes = new ListAllSolicitudes().execute();
+		String[] sols = new String[solicitudes.size()];
+		for(int i=0;i<solicitudes.size();i++) {
+			SolicitudDto sol = solicitudes.get(i);
+			sols[i]= sol.id + " - " + sol.tipo + " - " + sol.cuerpo; 
+		}
+		ListModel<String> model = new DefaultComboBoxModel<String>(sols);
+		getListSolicitudes().setModel(model);
+	}
+	
+	private void borrarResiduos(String idCita) {
+		for(SolicitudDto solicitud: solicitudes) {
+			if(solicitud.cuerpo.equals(idCita))
+				new DeleteSolicitud(solicitud.id).execute();
+		}
 	}
 }

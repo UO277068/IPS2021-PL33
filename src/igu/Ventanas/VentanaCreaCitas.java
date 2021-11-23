@@ -44,6 +44,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListDataListener;
 
+import Logica.crud.commands.GetSalaByName;
 import Logica.crud.commands.ListCitasBySala;
 import Logica.crud.dto.*;
 import javax.swing.JCheckBox;
@@ -972,7 +973,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private Integer GeneraCita(PacienteDto paciente, Integer respuesta, boolean urge, MedicoDto medico) {
 		CitaDto cita = new CitaDto();
-		cita.idMedico="NO DEFINIDO";
+		cita.idMedico=null;
 		if(medico!=null) {
 		//Comprueba que la cita se establece dentro de la jornada laboral
 	    if(!compruebaJornada(medico.id)) {
@@ -1013,14 +1014,20 @@ public class VentanaCreaCitas extends JDialog {
 		if(getComboBoxSala().getSelectedIndex()!=0) 
 		{
 			act =compruebaHoraSala(cita); //Comprobacion hora sala.
+		}else {
+			cita.idSala="Sala NO Determinada";
 		}
+		
 		if(act==true) {
+		 String Sala = new GetSalaByName().execute(cita.idSala);
+		 cita.idSala=Sala;
+		 
 		cita.preescripcion="";
 		cita.contacto=paciente.contacto; //Por defecto contacto de la cita = contacto del paciente
 		cita.acude="INDEFINIDO";
 		if(this.SelectedEspecialidad==null) 
 		{
-			cita.Especialidad="NO DEFINIDA";
+			cita.Especialidad=null;
 		}else {
 			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
 		}
@@ -1959,21 +1966,19 @@ public class VentanaCreaCitas extends JDialog {
 			salas[2]="1-2";
 			salas[3]="1-3";
 			salas[4]="1-4";
-			salas[5]="1-5";
-			salas[6]="1-6";
-			salas[7]="1-7";
-			salas[8]="2-1";
-			salas[9]="2-2";
-			salas[10]="2-3";
-			salas[11]="2-4";
-			salas[12]="2-5";
-			salas[13]="2-6";
-			salas[14]="2-7";
-			salas[15]="3-1";
-			salas[16]="3-2";
-			salas[17]="3-3";
-			salas[18]="3-4";
-			salas[19]="3-5";
+			salas[5]="2-1";
+			salas[6]="2-2";
+			salas[7]="2-3";
+			salas[8]="2-4";
+			salas[9]="3-1";
+			salas[10]="3-2";
+			salas[11]="3-3";
+			salas[12]="3-4";
+			salas[13]="4-1";
+			salas[14]="4-2";
+			salas[15]="4-3";
+			salas[16]="4-4";
+			
 			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
 		}
 		return comboBoxSala;

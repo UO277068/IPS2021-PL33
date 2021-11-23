@@ -16,12 +16,18 @@ public class ListCitasBySala
 
 	private String sala;
 	
-	public ListCitasBySala(String sala) 
+	public ListCitasBySala(String s) 
 	{
-		this.sala=sala;
+		this.sala=obtenSala(s);
+		
 
 	}
 	
+	private String obtenSala(String s) {
+		// TODO Auto-generated method stub
+		return new GetSalaByName().execute(s);
+	}
+
 	public List<CitaDto> execute() {
 		Connection c = null;
 		PreparedStatement pst = null;

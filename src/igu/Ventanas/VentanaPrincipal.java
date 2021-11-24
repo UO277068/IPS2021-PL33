@@ -316,6 +316,7 @@ public class VentanaPrincipal extends JFrame {
 	private JList listSolicitudes;
 	private List<SolicitudDto> solicitudes;
 	private JButton btSalir;
+	private JButton btCancelarMod;
 
 	
 
@@ -1526,6 +1527,8 @@ public class VentanaPrincipal extends JFrame {
 					getBtSolicitudMod().setVisible(false);
 					getScllSolicitudMod().setEnabled(false);
 					getScllSolicitudMod().setVisible(false);
+					getBtCancelarMod().setEnabled(false);
+					getBtCancelarMod().setVisible(false);
 					mostrarPnModificarCita();
 				}
 			});
@@ -1669,6 +1672,7 @@ public class VentanaPrincipal extends JFrame {
 			pnModificarCita.add(getTxMedicos());
 			pnModificarCita.add(getBtMAtras());
 			pnModificarCita.add(getScllSolicitudMod());
+			pnModificarCita.add(getBtCancelarMod());
 		}
 		return pnModificarCita;
 	}
@@ -2092,6 +2096,8 @@ public class VentanaPrincipal extends JFrame {
 					if(getListCitas().getSelectedIndex()!=-1) {
 						getBtElegirMedico().setEnabled(false);
 						getBtElegirMedico().setVisible(false);
+						getBtMAtras().setEnabled(false);
+						getBtMAtras().setVisible(false);
 						CitaDto cita = listaFiltrada.get(getListCitas().getSelectedIndex());
 						mostrarPnModificarCita();
 					}
@@ -2150,18 +2156,14 @@ public class VentanaPrincipal extends JFrame {
 					if (respuesta == JOptionPane.YES_OPTION) {
 						String idM = String.valueOf(getListaElegirMedico().getSelectedIndex()+1);
 						SolicitudDto sol = new SolicitudDto();
-						Timestamp fecha = new Timestamp(getDcModificarFecha().getDate().getTime());
-						Timestamp fechaInicio = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraInicio().getSelectedIndex()+":"+getCbMMinutosInicio().getSelectedIndex()+":00");
-						Timestamp fechaFin = Timestamp.valueOf(fecha.toString().split(" ")[0]+" "+getCbMHoraFin().getSelectedIndex()+":"+getCbMMinutosFin().getSelectedIndex()+":00");
+						String[] fecha = getDcModificarFecha().getDate().toGMTString().split(" ");
+						String fechaInicio = getCbMHoraInicio().getSelectedIndex()+ ":" + getCbMMinutosInicio().getSelectedIndex()+ ":00";
+						String fechaFin = getCbMHoraFin().getSelectedIndex() + ":" + getCbMMinutosFin().getSelectedIndex()+ ":00";
 						String sala = String.valueOf(getCbMSala().getSelectedItem());
-
-						cita.horaInicio=fechaInicio.toString();
-						cita.horaFinal=fechaFin.toString();
-						cita.idSala=sala;
 						
 						sol.tipo= "MODIFICAR";
-						sol.cuerpo="Medico ID: " + idM + " Fecha: " + fecha.toString() + " Inicio: " + fechaInicio.toString() + " Fin: " + fechaFin.toString()
-								+ " Sala: " + sala;
+						String mes = formateaMes(fecha[1]);
+						sol.cuerpo= idM + "#" +  fecha[0]+ "-" +mes + "-"+fecha[2] + "#" + fechaInicio+ "#" + fechaFin + "#" + sala;
 						sol.observaciones = getTxtSolicitudMod().getText();
 						new AddSolicitudAction(sol).execute();
 						mostrarPnMedico();
@@ -2171,6 +2173,33 @@ public class VentanaPrincipal extends JFrame {
 			}
 		return btSolicitudMod;
 		}
+	
+	private String formateaMes(String mes) {
+		if(mes.equals("ENE"))
+			return "1";
+		if(mes.equals("FEB"))
+			return "2";
+		if(mes.equals("MAR"))
+			return "3";
+		if(mes.equals("ABR"))
+			return "4";
+		if(mes.equals("MAY"))
+			return "5";
+		if(mes.equals("JUN"))
+			return "6";
+		if(mes.equals("JUL"))
+			return "7";
+		if(mes.equals("AUG"))
+			return "8";
+		if(mes.equals("SEP"))
+			return "9";
+		if(mes.equals("OCT"))
+			return "10";
+		if(mes.equals("NOV"))
+			return "11";
+		else
+			return "12";
+	}
 
 	private JTextField getTxMedicos() {
 		if (txMedicos == null) {
@@ -2196,7 +2225,7 @@ public class VentanaPrincipal extends JFrame {
 					mostrarPnElegirMCita();
 				}
 			});
-			btMAtras.setBounds(22, 398, 117, 29);
+			btMAtras.setBounds(28, 398, 117, 29);
 		}
 		return btMAtras;
 	}
@@ -3144,7 +3173,7 @@ public class VentanaPrincipal extends JFrame {
 						aceptarSolicitudCrear(solicitud);
 						actualizarSolicitudes();
 					}else if(solicitud.tipo.equals("MODIFICAR")) {
-						
+						aceptarSolicitudModificar(solicitud);
 					}else if(solicitud.tipo.equals("ELIMINAR")) {
 						Integer respuesta = JOptionPane.showConfirmDialog(null,"�Estas seguro de borrar la cita " + solicitud.cuerpo + "?");
 						if(respuesta==JOptionPane.YES_OPTION) {
@@ -3173,6 +3202,13 @@ public class VentanaPrincipal extends JFrame {
 		citas.setModal(true);
 		citas.setVisible(true);
 	}
+	
+	private void aceptarSolicitudModificar(SolicitudDto solicitud) {
+		String cuerpo = solicitud.cuerpo;
+		String[] partes = cuerpo.split("#");
+		mostrarPnModificarCita();
+	}
+	
 	
 	//denegar
 	private JButton getBtDenegarSolicitud() {
@@ -3218,7 +3254,7 @@ public class VentanaPrincipal extends JFrame {
 		String[] sols = new String[solicitudes.size()];
 		for(int i=0;i<solicitudes.size();i++) {
 			SolicitudDto sol = solicitudes.get(i);
-			sols[i]= sol.id + " - " + sol.tipo + " - " + sol.cuerpo; 
+			sols[i]= sol.id + " - " + sol.tipo + " - " + sol.cuerpo + " - " + sol.observaciones; 
 		}
 		ListModel<String> model = new DefaultComboBoxModel<String>(sols);
 		getListSolicitudes().setModel(model);
@@ -3240,5 +3276,17 @@ public class VentanaPrincipal extends JFrame {
 			});
 		}
 		return btSalir;
+	}
+	private JButton getBtCancelarMod() {
+		if (btCancelarMod == null) {
+			btCancelarMod = new JButton("Cancelar");
+			btCancelarMod.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnMedico();
+				}
+			});
+			btCancelarMod.setBounds(28, 398, 117, 29);
+		}
+		return btCancelarMod;
 	}
 }

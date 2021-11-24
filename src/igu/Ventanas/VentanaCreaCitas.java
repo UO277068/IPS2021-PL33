@@ -994,8 +994,8 @@ public class VentanaCreaCitas extends JDialog {
 		Date ultima = getDcFin().getDate();
 		String horaInicio =getComboBoxHoraInicioCita().getSelectedItem().toString()+":"+getComboBoxMinutoInicioCita().getSelectedItem().toString();
 		String horafin =getComboBoxHoraFinCita().getSelectedItem().toString()+":"+getComboBoxMinutoFinCita().getSelectedItem().toString();
-		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";;
-		String fechafin=formateaFecha(ultima)+" "+horafin+":00";;
+		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";
+		String fechafin=formateaFecha(ultima)+" "+horafin+":00";
 		
 		cita.horaInicio=fecha; //fecha +hora inicio
 		cita.horaFinal=fechafin;

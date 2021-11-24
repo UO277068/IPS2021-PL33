@@ -123,11 +123,9 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public String getContactoByIdPaciente(String id) {
 		return new GetContactoByIdPaciente(id).execute();
 	}
-
-	@Override
+	
 	public void addDiagnostico(String id, String idPaciente, String causa) {
-		new AddDiagnostico(id,idPaciente,causa).execute();;
-		
+		new AddDiagnostico(id,idPaciente,causa).execute();;	
 	}
 
 	@Override

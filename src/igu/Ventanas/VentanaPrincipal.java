@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -58,6 +59,7 @@ import com.toedter.calendar.JDateChooser;
 
 import Logica.Carta;
 import Logica.Vacuna;
+import Logica.crud.commands.AddInformacionUtil;
 import Logica.crud.commands.DeleteCita;
 import Logica.crud.commands.DeleteSolicitud;
 import Logica.crud.commands.ListAllSolicitudes;
@@ -65,6 +67,7 @@ import Logica.crud.commands.ListInformacionUtilByDate;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
 import Logica.crud.dto.DiagnosticoDto;
+import Logica.crud.dto.InformacionDto;
 import Logica.crud.dto.JornadaDto;
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
@@ -279,12 +282,12 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel panelFechaInformacion;
 	private JPanel panelModificadoresFecha;
 	private JCheckBox chckbxDiaInformacion;
-	private JCheckBox chckbxNewCheckBox_1;
-	private JCheckBox chckbxNewCheckBox_2;
+	private JCheckBox chckbxMesInformacion;
+	private JCheckBox chckbxAoInformacion;
 	private JTextField textFieldInformacionUtil;
 	private JPanel panelFecha;
-	private JDateChooser dcInicio;
-	private JDateChooser dcInicio_1;
+	private JDateChooser dcHorarioInformacionInicio;
+	private JDateChooser dcHorarioInformacionFin;
 	private JButton btAsignarVacuna;
 	private JButton btAsignarVacunaH;
 
@@ -2517,8 +2520,11 @@ public class VentanaPrincipal extends JFrame {
 			btnSiguienteInformacion.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
+					if(informacion.length!=0) 
+					{
 					String nuevaInfo = chargeInformacion();
 					getTextFieldInformacionUtil().setText(nuevaInfo);
+					}
 					
 				}
 			});
@@ -2584,6 +2590,11 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) 
 				{
 					boolean añadido =añadeInformacion();
+					if(añadido==true) 
+					{
+						getTextAvisoUsuarioInformacion().setText("La informacion se ha añadido correctamente");
+						getTextFieldInformacionPrincipal().setText("");
+					}
 				}
 			});
 			btnAñadirInformacion.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -2591,10 +2602,81 @@ public class VentanaPrincipal extends JFrame {
 		return btnAñadirInformacion;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private boolean añadeInformacion() 
 	{
-		// TODO Auto-generated method stub
-		return false;
+	  String texto = getTextFieldInformacionPrincipal().getText();
+	  if(texto==null ||texto.isEmpty()) 
+	  {
+		 return false; 
+	  }else {
+		  int resp = JOptionPane.YES_OPTION;
+		  if(getDcHorarioInformacionFin().getDate()==null) 
+		  {
+			resp = JOptionPane.showConfirmDialog(null,"Si no selecciona fecha de fin se pondra por defecto el año.¿Desea continuar?"); 
+		  }
+		  
+		  if(resp!=JOptionPane.YES_OPTION) {
+			  return false;
+		  }else {
+			  InformacionDto info = new InformacionDto();
+			  if(chckbxAoInformacion.isSelected() && chckbxDiaInformacion.isSelected() && chckbxMesInformacion.isSelected()) {
+			  java.util.Date inicio = getDcHorarioInformacionInicio().getDate();
+			  java.util.Date ultima = getDcHorarioInformacionFin().getDate();
+			  String fechaInicioInformacion = formateaFecha(inicio)+" "+"00:00"+":00";
+			  String fechafinInformacion=formateaFecha(ultima)+" "+"00:00"+":00";
+			  info.inicio=  Timestamp.valueOf(fechaInicioInformacion);
+			  info.fin=  Timestamp.valueOf(fechafinInformacion);
+			  info.texto=texto;
+			  new AddInformacionUtil().execute(info);
+			  this.informacion = recuperaInformacionUtil();
+			  return true;
+			  }else 
+			  {
+				 String[] fechaI = dcHorarioInformacionInicio.getDate().toString().split(" ");
+				 String[] fechaF = dcHorarioInformacionFin.getDate().toString().split(" ");
+
+				 String yearI="";
+				 String monthI="";
+				 String dayI ="";
+				 String yearF="";
+				 String monthF="";
+				 String dayF ="";
+				 if(chckbxAoInformacion.isSelected()) 
+				 {
+					yearI=fechaI[5];
+					yearF=fechaF[5];
+				 }else {yearI="1999";yearF="3999";}
+				 if(chckbxMesInformacion.isSelected()) 
+				 {
+					monthI=fechaI[1];
+					monthF=fechaF[1];
+				 }else {monthI="Jan";monthF="Dec";}
+				 if(chckbxDiaInformacion.isSelected()) {
+					 dayI=fechaI[2];
+					 dayF=fechaF[2];
+				 }else {dayI="01";dayF="28";}
+				 
+				 String fechaInicioInformacion2 = yearI + "-" + seleccionaMes(monthI) + "-" + dayI+" "+"00:00"+":00";
+				 String fechafinInformacion2= yearF + "-" + seleccionaMes(monthF) + "-" + dayF+" "+"00:00"+":00";
+				 
+				 info.inicio=  Timestamp.valueOf(fechaInicioInformacion2);
+				 info.fin=  Timestamp.valueOf(fechafinInformacion2);
+				 info.texto=texto;
+				 new AddInformacionUtil().execute(info);
+				 this.informacion = recuperaInformacionUtil();
+				 return true;
+			  }
+		  }
+	  }
+	}
+	
+	private String formateaFecha(java.util.Date ultima) {
+		String[] fechaS = ultima.toString().split(" ");
+		String mes = fechaS[1];
+		String año = fechaS[5];
+		String dia = fechaS[2];
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 	
 	
@@ -2659,8 +2741,8 @@ public class VentanaPrincipal extends JFrame {
 		if (panelModificadoresFecha == null) {
 			panelModificadoresFecha = new JPanel();
 			panelModificadoresFecha.add(getChckbxDiaInformacion());
-			panelModificadoresFecha.add(getChckbxNewCheckBox_1());
-			panelModificadoresFecha.add(getChckbxNewCheckBox_2());
+			panelModificadoresFecha.add(getChckbxMesInformacion());
+			panelModificadoresFecha.add(getChckbxAoInformacion());
 		}
 		return panelModificadoresFecha;
 	}
@@ -2671,19 +2753,19 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return chckbxDiaInformacion;
 	}
-	private JCheckBox getChckbxNewCheckBox_1() {
-		if (chckbxNewCheckBox_1 == null) {
-			chckbxNewCheckBox_1 = new JCheckBox("Mes\r\n");
-			chckbxNewCheckBox_1.setSelected(true);
+	private JCheckBox getChckbxMesInformacion() {
+		if (chckbxMesInformacion == null) {
+			chckbxMesInformacion = new JCheckBox("Mes\r\n");
+			chckbxMesInformacion.setSelected(true);
 		}
-		return chckbxNewCheckBox_1;
+		return chckbxMesInformacion;
 	}
-	private JCheckBox getChckbxNewCheckBox_2() {
-		if (chckbxNewCheckBox_2 == null) {
-			chckbxNewCheckBox_2 = new JCheckBox("A\u00F1o\r\n");
-			chckbxNewCheckBox_2.setSelected(true);
+	private JCheckBox getChckbxAoInformacion() {
+		if (chckbxAoInformacion == null) {
+			chckbxAoInformacion = new JCheckBox("A\u00F1o\r\n");
+			chckbxAoInformacion.setSelected(true);
 		}
-		return chckbxNewCheckBox_2;
+		return chckbxAoInformacion;
 	}
 	
 	private String[] recuperaInformacionUtil()  //Carga la informacion a una lista o un array desde uno o varios ficheros locales.
@@ -2696,7 +2778,8 @@ public class VentanaPrincipal extends JFrame {
 	
 	private String chargeInformacion() //Escoje informacion al azar
 	{
-		int aleatorio=(int) Math.random()*this.informacion.length;
+		Random random = new Random();
+		int aleatorio = random.nextInt(this.informacion.length-1);
 		String text = this.informacion[aleatorio];
 		if(!getTextFieldInformacionUtil().getText().equals(text)) 
 		{
@@ -2710,7 +2793,12 @@ public class VentanaPrincipal extends JFrame {
 			textFieldInformacionUtil = new JTextField();
 			textFieldInformacionUtil.setEditable(false);
 			textFieldInformacionUtil.setColumns(10);
-			//textFieldInformacionUtil.setText(this.informacion[0]);
+			if(this.informacion.length!=0) {
+				textFieldInformacionUtil.setText(this.informacion[0]);
+			}else {
+				textFieldInformacionUtil.setText("Informacion Relevante por añadir");
+			}
+			
 		}
 		return textFieldInformacionUtil;
 	}
@@ -2718,22 +2806,22 @@ public class VentanaPrincipal extends JFrame {
 		if (panelFecha == null) {
 			panelFecha = new JPanel();
 			panelFecha.setLayout(new GridLayout(2, 0, 0, 0));
-			panelFecha.add(getDcInicio());
-			panelFecha.add(getDcInicio_1());
+			panelFecha.add(getDcHorarioInformacionInicio());
+			panelFecha.add(getDcHorarioInformacionFin());
 		}
 		return panelFecha;
 	}
-	private JDateChooser getDcInicio() {
-		if (dcInicio == null) {
-			dcInicio = new JDateChooser();
+	private JDateChooser getDcHorarioInformacionInicio() {
+		if (dcHorarioInformacionInicio == null) {
+			dcHorarioInformacionInicio = new JDateChooser();
 		}
-		return dcInicio;
+		return dcHorarioInformacionInicio;
 	}
-	private JDateChooser getDcInicio_1() {
-		if (dcInicio_1 == null) {
-			dcInicio_1 = new JDateChooser();
+	private JDateChooser getDcHorarioInformacionFin() {
+		if (dcHorarioInformacionFin == null) {
+			dcHorarioInformacionFin = new JDateChooser();
 		}
-		return dcInicio_1;
+		return dcHorarioInformacionFin;
 	}
 	private JButton getBtAsignarVacuna() {
 		if (btAsignarVacuna == null) {

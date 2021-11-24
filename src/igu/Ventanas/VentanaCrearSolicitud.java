@@ -18,7 +18,6 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 
-import igu.action.AddSolicitudAction;
 import igu.action.EnviarEmailUrgenteAction;
 import igu.action.InsertCitaAction;
 import igu.action.ListAllMedicosAction;
@@ -60,7 +59,7 @@ import java.util.Locale;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-public class VentanaSolicitarCrearCita extends JDialog {
+public class VentanaCrearSolicitud extends JDialog {
 
 	/**
 	 * 
@@ -76,7 +75,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JLabel lblHoraInicio;
 	private JLabel lblHoraFinCita;
 	private JPanel panelUrgenciaSala;
-	private JButton btSolicitarCrearCita;
+	private JButton btnCrearCita;
 	private JPanel panelPaciente;
 	private JTextField textFieldAvisoUsuario;
 	private JLabel lblFechaInicio;
@@ -170,16 +169,19 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JLabel lblMotivos;
 	private JTextField textFieldMotivos;
 	
+	
+	private String[] partes;
 
 	/**
 	 * Create the application.
 	 */
-	public VentanaSolicitarCrearCita(VentanaPrincipal principal) 
+	public VentanaCrearSolicitud(VentanaPrincipal principal, String[] partes) 
 	{ 
 		//setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
 		setTitle("Hospital:Crear Una cita");
 		setModal(true);
 		this.ventana=principal;
+		this.partes=partes;
 		initialize();
 	}
 
@@ -255,7 +257,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		if (panelBotones == null) {
 			panelBotones = new JPanel();
 			panelBotones.setLayout(new GridLayout(0, 1, 0, 0));
-			panelBotones.add(getBtSolicitarCrearCita());
+			panelBotones.add(getBtnCrearCita());
 		}
 		return panelBotones;
 	}
@@ -342,24 +344,24 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		return panelUrgenciaSala;
 	}
 
-	private JButton getBtSolicitarCrearCita() {
-		if (btSolicitarCrearCita == null) {
-			btSolicitarCrearCita = new JButton("Solicitar Cita");
-			btSolicitarCrearCita.setBounds(new Rectangle(0, 0, 59, 0));
-			btSolicitarCrearCita.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-			btSolicitarCrearCita.setAlignmentX(Component.RIGHT_ALIGNMENT);
-			btSolicitarCrearCita.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-			btSolicitarCrearCita.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			btSolicitarCrearCita.addActionListener(new ActionListener() {
+	private JButton getBtnCrearCita() {
+		if (btnCrearCita == null) {
+			btnCrearCita = new JButton("Crear cita");
+			btnCrearCita.setBounds(new Rectangle(0, 0, 59, 0));
+			btnCrearCita.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+			btnCrearCita.setAlignmentX(Component.RIGHT_ALIGNMENT);
+			btnCrearCita.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			btnCrearCita.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			btnCrearCita.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					getTextFieldAvisoUsuario().setVisible(true);
-					solicitarCita();
+					crearCita();
 				}
 			});
 
 		}
-		return btSolicitarCrearCita;
+		return btnCrearCita;
 	}
 
 	private JPanel getPanelPaciente() {
@@ -449,6 +451,9 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JCheckBox getChckbxUrgente() {
 		if (chckbxUrgente == null) {
 			chckbxUrgente = new JCheckBox("Es Urgente");
+			if(partes[7].equals("Si"))
+				chckbxUrgente.setSelected(true);
+			
 		}
 		return chckbxUrgente;
 	}
@@ -534,6 +539,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			listMedicos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
 			listMedicos.setModel(model);
+			listMedicos.setSelectedIndex(Integer.parseInt(partes[1])-1);
 		}
 		return listMedicos;
 	}
@@ -680,6 +686,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JComboBox<Integer> getComboBoxHoraInicioCita() {
 		if (comboBoxHoraInicioCita == null) {
 			comboBoxHoraInicioCita = new JComboBox<Integer>();
+			
 			comboBoxHoraInicioCita.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if (comboBoxHoraInicioCita.getSelectedIndex() < 0) {
@@ -700,6 +707,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			}
 			comboBoxHoraInicioCita.setBounds(342, 147, 72, 27);
 			comboBoxHoraInicioCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarHora(comboBoxHoraInicioCita, 4);
 
 		}
 		return comboBoxHoraInicioCita;
@@ -730,6 +738,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			}
 			comboBoxMinutoInicioCita.setBounds(342, 147, 72, 27);
 			comboBoxMinutoInicioCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarMinuto(comboBoxMinutoInicioCita, 4);
 		}
 
 		return comboBoxMinutoInicioCita;
@@ -738,6 +747,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JComboBox<Integer> getComboBoxHoraFinCita() {
 		if (comboBoxHoraFinCita == null) {
 			comboBoxHoraFinCita = new JComboBox<Integer>();
+			
 			comboBoxHoraFinCita.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) 
 				{
@@ -753,6 +763,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			}
 			comboBoxHoraFinCita.setBounds(342, 147, 72, 27);
 			comboBoxHoraFinCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarHora(comboBoxHoraFinCita, 6);
 		}
 		return comboBoxHoraFinCita;
 	}
@@ -782,6 +793,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			}
 			comboBoxMinutoFinCita.setBounds(342, 147, 72, 27);
 			comboBoxMinutoFinCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarMinuto(comboBoxMinutoFinCita, 6);
 		}
 		return comboBoxMinutoFinCita;
 	}
@@ -790,6 +802,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JDateChooser getDcInicio() {
 		if (dcInicio == null) {
 			dcInicio = new JDateChooser();
+			iniciarFecha(dcInicio,3);
 			dcInicio.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Date date = getDcFin().getDate();
@@ -807,10 +820,33 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		return dcInicio;
 
 	}
+	
+	private void iniciarFecha(JDateChooser dc,int index) {
+		String[] partesFecha = partes[index].split("-");
+		int[] fecha = new int[3];
+		fecha[0]=Integer.parseInt(partesFecha[0]);
+		fecha[1]=Integer.parseInt(partesFecha[1]);
+		fecha[2]=Integer.parseInt(partesFecha[2]);
+		Date date = new Date(fecha[0]-1900, fecha[1]-1, fecha[2]);
+		dc.setDate(date);
+	}
+	
+	private void iniciarHora(JComboBox cb, int index) {
+		//TODO
+		String[] partesHora = partes[index].split(":");
+		cb.setSelectedIndex(Integer.parseInt(partesHora[0]));
+	}
+	
+	private void iniciarMinuto(JComboBox cb, int index) {
+		//TODO
+		String[] partesHora = partes[index].split(":");
+		cb.setSelectedIndex(Integer.parseInt(partesHora[1]));
+	}
 
 	private JDateChooser getDcFin() {
 		if (dcFin == null) {
 			dcFin = new JDateChooser();
+			iniciarFecha(dcFin, 5);
 			dcFin.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Date date = getDcInicio().getDate();
@@ -903,6 +939,8 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			listPaciente.setModel(model);
 			listPaciente.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			listPaciente.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			listPaciente.setSelectedIndex(Integer.parseInt(partes[0])-1);
+			
 		}
 		return listPaciente;
 	}
@@ -947,7 +985,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	}
 	
 	//Metodos privados
-	public void solicitarCita() 
+	public void crearCita() 
 	{
 		PacienteDto paciente =  obtenPacienteSeleccionado();
 		if(paciente!=null) {
@@ -961,7 +999,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		 GeneraCita(paciente, respuesta, urge, medico);
 		}
 		}else {
-			 respuesta=JOptionPane.showConfirmDialog(null,"¿Quiere solicitar una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+			 respuesta=JOptionPane.showConfirmDialog(null,"¿Quiere crear una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 			if(respuesta==JOptionPane.YES_OPTION) { //Preguntar si desea generar una cita sin medicos
 		       GeneraCita(paciente, respuesta, urge, null);
 			}
@@ -973,10 +1011,8 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	}
 
 	private Integer GeneraCita(PacienteDto paciente, Integer respuesta, boolean urge, MedicoDto medico) {
-		SolicitudDto solicitud = new SolicitudDto();
-		solicitud.tipo= "CREAR";
-		solicitud.cuerpo= paciente.id + "#";
-		
+		CitaDto cita = new CitaDto();
+		cita.idMedico=null;
 		if(medico!=null) {
 		//Comprueba que la cita se establece dentro de la jornada laboral
 	    if(!compruebaJornada(medico.id)) {
@@ -986,62 +1022,64 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		if(respuesta==JOptionPane.YES_OPTION && !compruebaHora(medico.id)) {
 			 respuesta=JOptionPane.showConfirmDialog(null,"El medico "+medico.name+" "+medico.surname+" tiene otra cita a esa hora","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 		}
-		 solicitud.cuerpo+=medico.id + "#";
+		 cita.idMedico=medico.id;
 		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
-		
-		//solicitud.cuerpo+="No determinandas" + "#"; //Añadir causas una vez el medico las determine
-		solicitud.cuerpo+=getTextFieldMotivos().getText() + "#";
+		cita.idPaciente=paciente.id;
+		cita.causa="No determinandas"; //Añadir causas una vez el medico las determine
+		cita.motivo=getTextFieldMotivos().getText();
 		//
 		Date inicio = getDcInicio().getDate();
 		Date ultima = getDcFin().getDate();
 		String horaInicio =getComboBoxHoraInicioCita().getSelectedItem().toString()+":"+getComboBoxMinutoInicioCita().getSelectedItem().toString();
 		String horafin =getComboBoxHoraFinCita().getSelectedItem().toString()+":"+getComboBoxMinutoFinCita().getSelectedItem().toString();
-		String fecha = formateaFecha(inicio)+"#"+horaInicio+":00";;
-		String fechafin=formateaFecha(ultima)+"#"+horafin+":00";;
+		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";;
+		String fechafin=formateaFecha(ultima)+" "+horafin+":00";;
 		
-		solicitud.cuerpo+=fecha + "#"; //fecha +hora inicio
-		solicitud.cuerpo+=fechafin + "#";
+		cita.horaInicio=fecha; //fecha +hora inicio
+		cita.horaFinal=fechafin;
 		//
 		
 		if(urge) {
-		solicitud.cuerpo+="Si" + "#";
-		//enviarGmail(medico.correo,paciente,cita);
+		cita.urgencia="Si";
+		enviarGmail(medico.correo,paciente,cita);
 		}else {
-		solicitud.cuerpo+="No" + "#";
+		cita.urgencia="No";
 		}
-		//cita.horaEntrada=null;
-		//cita.horaSalida=null;
-		solicitud.cuerpo+=getComboBoxSala().getEditor().getItem().toString() + "#";
-//		boolean act=true;
-//		if(getComboBoxSala().getSelectedIndex()!=0) 
-//		{
-//			act =compruebaHoraSala(cita); //Comprobacion hora sala.
-//		}else {
-//			cita.idSala="Sala NO Determinada";
-//		}
-//		
-//		if(act==true) {
-//		 String Sala = new GetSalaByName().execute(cita.idSala);
-//		 cita.idSala=Sala;
+		cita.horaEntrada=null;
+		cita.horaSalida=null;
+		cita.idSala=getComboBoxSala().getEditor().getItem().toString();
+		boolean act=true;
+		if(getComboBoxSala().getSelectedIndex()!=0) 
+		{
+			act =compruebaHoraSala(cita); //Comprobacion hora sala.
+		}else {
+			cita.idSala="Sala NO Determinada";
+		}
+		
+		if(act==true) {
+		 String Sala = new GetSalaByName().execute(cita.idSala);
+		 cita.idSala=Sala;
 		 
-		//cita.preescripcion="";
-		//cita.contacto=paciente.contacto; //Por defecto contacto de la cita = contacto del paciente
-		//cita.acude="INDEFINIDO";
+		cita.preescripcion="";
+		cita.contacto=paciente.contacto; //Por defecto contacto de la cita = contacto del paciente
+		cita.acude="INDEFINIDO";
 		if(this.SelectedEspecialidad==null) 
 		{
-			solicitud.cuerpo+=null + "#";
+			cita.Especialidad=null;
 		}else {
-			solicitud.cuerpo+=this.SelectedEspecialidad.toUpperCase() + "#";
+			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
 		}
                      
-		//int idcita = new InsertCitaAction(cita).execute();
-		//System.out.print(idcita);
-		//ventanaContacto(idcita-1, paciente);
-		new AddSolicitudAction(solicitud).execute();
+		int idcita = new InsertCitaAction(cita).execute();
+		System.out.print(idcita);
+		ventanaContacto(idcita-1, paciente);
+
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
 		}
-		return 0;
+		
+		}
+		return respuesta;
 	}
 
 	
@@ -1408,18 +1446,18 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JTextField getTxtEspecialidadSeleccionada() {
 		if (txtEspecialidadSeleccionada == null) {
 			txtEspecialidadSeleccionada = new JTextField();
-			txtEspecialidadSeleccionada.setText("Especialidad: No determinada");
+			txtEspecialidadSeleccionada.setText("Especialidad: " + partes[9]);
 			txtEspecialidadSeleccionada.setColumns(10);
 		}
 		return txtEspecialidadSeleccionada;
 	}
 
-//	private void ventanaContacto(int idCita, PacienteDto paciente) {
-//		VentanaContacto v = new VentanaContacto(this, idCita, paciente);
-//		v.setLocationRelativeTo(this);
-//		v.setModal(true);
-//		v.setVisible(true);
-//	}
+	private void ventanaContacto(int idCita, PacienteDto paciente) {
+		VentanaContactoSolicitud v = new VentanaContactoSolicitud(this, idCita, paciente);
+		v.setLocationRelativeTo(this);
+		v.setModal(true);
+		v.setVisible(true);
+	}
 
 	private JPanel getPanelCentralDisponibilidad() {
 		if (panelCentralDisponibilidad == null) {
@@ -1981,6 +2019,12 @@ public class VentanaSolicitarCrearCita extends JDialog {
 			salas[16]="4-4";
 			
 			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
+			String salaS = partes[8];
+			for(int i = 0; i<20;i++) {
+				if(salas[i]!=null)
+					if(salas[i].equals(salaS))
+						comboBoxSala.setSelectedIndex(i);
+			}
 		}
 		return comboBoxSala;
 	}
@@ -2002,6 +2046,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JTextField getTextFieldMotivos() {
 		if (textFieldMotivos == null) {
 			textFieldMotivos = new JTextField();
+			textFieldMotivos.setText(partes[2]);
 			textFieldMotivos.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusGained(FocusEvent e) 
@@ -2009,7 +2054,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 					textFieldMotivos.selectAll();
 				}
 			});
-			textFieldMotivos.setText("No determinados");
+			textFieldMotivos.setText(partes[2]);
 			textFieldMotivos.setHorizontalAlignment(SwingConstants.LEFT);
 			textFieldMotivos.setColumns(10);
 		}

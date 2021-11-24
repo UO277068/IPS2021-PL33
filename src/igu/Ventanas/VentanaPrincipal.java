@@ -10,19 +10,28 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,43 +42,55 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 import com.toedter.calendar.JDateChooser;
 
+import Logica.Carta;
+import Logica.Vacuna;
+import Logica.crud.commands.AddInformacionUtil;
+import Logica.crud.commands.DeleteCita;
+import Logica.crud.commands.DeleteSolicitud;
+import Logica.crud.commands.ListAllSolicitudes;
+import Logica.crud.commands.ListInformacionUtilByDate;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
+import Logica.crud.dto.DiagnosticoDto;
+import Logica.crud.dto.InformacionDto;
 import Logica.crud.dto.JornadaDto;
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
 import Logica.crud.dto.SolicitudDto;
+import igu.action.AddDiagnosticoAction;
 import igu.action.AddHorarioAction;
 import igu.action.AddSolicitudAction;
+import igu.action.DeleteSolicitudAction;
 import igu.action.InsertCitaAction;
 import igu.action.ListAllCitasAction;
 import igu.action.ListAllCitasByIdAction;
 import igu.action.ListAllMedicosAction;
 import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
+import igu.action.ListDiagnosticoByCapAction;
+import igu.action.ListDiagnosticoByCodeAction;
 import igu.action.ListDiagnosticoByIdAction;
+import igu.action.ListDiagnosticoByRangeAction;
 import igu.action.ListJornadaLaboralByMedicoAction;
 import igu.action.ListVacunaByIdAction;
 import igu.action.UpdateAcudioCitaAction;
 import igu.action.UpdateCitaAction;
 import igu.action.UpdateHoraEntradaSalidaAction;
-import javax.swing.JCheckBox;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 
 
@@ -77,9 +98,17 @@ import java.awt.event.KeyEvent;
 public class VentanaPrincipal extends JFrame {
 
 	List<PacienteDto> listapacientes;
+	List<String> listaDiagnosticos;
+	public List<PacienteDto> getListapacientes() {
+		return listapacientes;
+	}
+
 	List<MedicoDto> listamedicos;
 	private int changeWindow=1;
 	private String acude = "INDEFINIDO";
+	private String[] informacion;
+	private Carta carta;
+	private List<Vacuna> vacunas;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -235,6 +264,58 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane scllSolicitudMod;
 	private JTextArea txtSolicitudMod;
 	private JLabel lbObservacionesMod;
+	private JPanel panelPrincipal;
+	private JPanel panelInformacionDeInteres;
+	private JPanel panelInformacionBotones;
+	private JButton btnSiguienteInformacion;
+	private JButton btnInformacionInteres;
+	private JPanel panelInformacionUtil;
+	private JPanel panelBotonesInformacion;
+	private JButton btnAtrasInformacion;
+	private JButton btnAñadirInformacion;
+	private JPanel panelCentralInformacion;
+	private JTextField textAvisoUsuarioInformacion;
+	private JPanel panelPrincipalInformacion;
+	private JPanel panelTextoInformacion;
+	private JLabel lblInformacion;
+	private JTextField textFieldInformacionPrincipal;
+	private JPanel panelFechaInformacion;
+	private JPanel panelModificadoresFecha;
+	private JCheckBox chckbxDiaInformacion;
+	private JCheckBox chckbxMesInformacion;
+	private JCheckBox chckbxAoInformacion;
+	private JTextField textFieldInformacionUtil;
+	private JPanel panelFecha;
+	private JDateChooser dcHorarioInformacionInicio;
+	private JDateChooser dcHorarioInformacionFin;
+	private JButton btAsignarVacuna;
+	private JButton btAsignarVacunaH;
+
+	private JPanel pnDiagnosticos;
+	private JButton btDiagnostico;
+	private JScrollPane scTree;
+	private JTree tree;
+	private String capitulo = "";
+	private boolean isExpandedRange = false;
+	private boolean isExpandedCode = false;
+	private boolean isExpandedCapitulo = false;
+	private JScrollPane scDiagnostico;
+	private JList<String> listDiagnosticos;
+	private JButton btEliminar;
+	private JButton btAsignarDiagnostico;
+	private JLabel lbCie10;
+	private JLabel lbDiagnostico;
+	private JButton btAtrasDiagnostico;
+
+	private JButton btVerSolicitudes;
+	private JPanel pnVerSolicitudes;
+	private JPanel pnBotonesSolicitudes;
+	private JScrollPane scllPnSolicitudes;
+	private JButton btAceptarSolicitud;
+	private JButton btDenegarSolicitud;
+	private JList listSolicitudes;
+	private List<SolicitudDto> solicitudes;
+
 	
 
 	/**
@@ -259,6 +340,7 @@ public class VentanaPrincipal extends JFrame {
 	public VentanaPrincipal() 
 	{
 		//Atributos
+		this.informacion=recuperaInformacionUtil(); //Recupera la informacion util de la ventana de inicio
 		this.listamedicos=new ListAllMedicosAction().execute();
 		this.listapacientes=new ListAllPacientesAction().execute();
 		for (int i = 0; i < 7; i++) {
@@ -350,6 +432,8 @@ public class VentanaPrincipal extends JFrame {
 			pnCita.add(getCbMinutosEntrada());
 			pnCita.add(getCbHoraSalida());
 			pnCita.add(getCbMinutosSalida());
+			pnCita.add(getBtAsignarVacuna());
+			pnCita.add(getBtDiagnostico());
 		}
 		return pnCita;
 	}
@@ -375,11 +459,21 @@ public class VentanaPrincipal extends JFrame {
 		
 	}
 	
+	private void mostrarPnDiagnosticos() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnDiagnosticos");	
+		
+	}
+	
 	private void mostrarPnHistorial(){
 		CardLayout c = (CardLayout)getPnContenidos().getLayout();
 		c.show(getPnContenidos(), "PnHistorial");
 		String d = new ListDiagnosticoByIdAction(idPaciente).execute();
 		getTxHistorial().setText(d);
+		mostrarVacunas();
+	}
+	
+	private void mostrarVacunas() {
 		String v = new ListVacunaByIdAction(idPaciente).execute();
 		getTxVacuna().setText(v);
 	}
@@ -410,6 +504,10 @@ public class VentanaPrincipal extends JFrame {
 			pnContenidos.add(getPnVerCitas(), "PnVerCitas");
 			pnContenidos.add(getPnElegirMCita(), "PnElegirMCita");
 			pnContenidos.add(getPnModificarCita(), "PnModificarCita");
+			pnContenidos.add(getPanelInformacionUtil(), "PnInformacion");
+			pnContenidos.add(getPnDiagnosticos(), "PnDiagnosticos");
+			pnContenidos.add(getPnVerSolicitudes(), "PnVerSolicitudes");
+
 		}
 		return pnContenidos;
 	}
@@ -491,15 +589,16 @@ public class VentanaPrincipal extends JFrame {
 	private JTextArea getTxVacuna() {
 		if (txVacuna == null) {
 			txVacuna = new JTextArea();
+			txVacuna.setEditable(false);
 		}
 		return txVacuna;
 	}
 	private JPanel getPnEleccion() {
 		if (pnEleccion == null) {
 			pnEleccion = new JPanel();
-			pnEleccion.setLayout(null);
-			pnEleccion.add(getBtAdministrador());
-			pnEleccion.add(getBtMedico());
+			pnEleccion.setLayout(new BorderLayout(0, 0));
+			pnEleccion.add(getPanelPrincipal(), BorderLayout.CENTER);
+			pnEleccion.add(getPanelInformacionDeInteres(), BorderLayout.SOUTH);
 		}
 		return pnEleccion;
 	}
@@ -511,7 +610,6 @@ public class VentanaPrincipal extends JFrame {
 				 mostrarPanelAdministrador();
 				}
 			});
-			btAdministrador.setBounds(239, 144, 117, 29);
 		}
 		return btAdministrador;
 	}
@@ -519,11 +617,11 @@ public class VentanaPrincipal extends JFrame {
 		if (btMedico == null) {
 			btMedico = new JButton("Medico");
 			btMedico.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+				public void actionPerformed(ActionEvent e) 
+				{
 					mostrarPnMedico();
 				}
 			});
-			btMedico.setBounds(402, 144, 117, 29);
 		}
 		return btMedico;
 	}
@@ -621,6 +719,7 @@ public class VentanaPrincipal extends JFrame {
 			FlowLayout flowLayout = (FlowLayout) pnBt.getLayout();
 			flowLayout.setAlignment(FlowLayout.LEFT);
 			pnBt.add(getBtHAtras());
+			pnBt.add(getBtAsignarVacunaH());
 		}
 		return pnBt;
 	}
@@ -877,11 +976,13 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPanelBotonesPrincipal() {
 		if (panelBotonesPrincipal == null) {
 			panelBotonesPrincipal = new JPanel();
-			panelBotonesPrincipal.setLayout(new GridLayout(0, 4, 0, 0));
+			panelBotonesPrincipal.setLayout(new GridLayout(0, 5, 0, 0));
 			panelBotonesPrincipal.add(getBtnHistorial());
 			panelBotonesPrincipal.add(getBtnCrearCita());
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
 			panelBotonesPrincipal.add(getBtnModificarCita());
+			panelBotonesPrincipal.add(getBtnInformacionInteres());
+			panelBotonesPrincipal.add(getBtVerSolicitudes());
 		}
 		return panelBotonesPrincipal;
 	}
@@ -1026,6 +1127,7 @@ public class VentanaPrincipal extends JFrame {
 			btHistorialA.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					idPaciente=idsPaciente[getListaVCitaPaciente().getSelectedIndex()];
+					cita = lista.get(getListaVCitaPaciente().getSelectedIndex());
 					if(getListaVCitaPaciente().getSelectedIndex()!=-1)
 						mostrarPnHistorial();
 				}
@@ -1176,7 +1278,7 @@ public class VentanaPrincipal extends JFrame {
 						String sala=cita.idSala;
 						String inicio = cita.horaInicio.split(" ")[1].substring(0,5);
 						String salida = cita.horaFinal.split(" ")[1].substring(0, 5);
-						String motivo = cita.causa;
+						String motivo = cita.motivo;
 						String medico = listamedicos.get(idMedico-1).name + " " +listamedicos.get(idMedico-1).surname;
 						getTxInfo().setText("Sala de la cita: "+sala+"\n"+"Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
 						getTxInfoCita().setText("Sala de la cita: "+sala+"\n"+ "Medico de la cita: " + medico +"\n"+ "Hora de inicio: "+inicio+"\n"+"Hora de salida: "+salida+"\n"+"Motivo de la cita: "+motivo );
@@ -1823,14 +1925,6 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return false;
 	}
-	private String formateaFecha(Date fecha) {
-		String[] fechaS = fecha.toString().split(" ");
-		String mes = fechaS[1];
-		String año = fechaS[5];
-		String dia = fechaS[2];
-		return año + "-" + seleccionaMes(mes) + "-" + dia;
-	}
-	
 	private String seleccionaMes(String mes) {
 		switch (mes) {
 		case "Jan":
@@ -2021,7 +2115,7 @@ public class VentanaPrincipal extends JFrame {
 						
 						SolicitudDto sol= new SolicitudDto();
 						sol.tipo= "ELIMINAR";
-						sol.cuerpo= "Cita ID: " + cita.id;
+						sol.cuerpo=cita.id;
 						new AddSolicitudAction(sol).execute();
 						}	
 					}
@@ -2392,5 +2486,730 @@ public class VentanaPrincipal extends JFrame {
 			lbObservacionesMod.setHorizontalAlignment(SwingConstants.CENTER);
 		}
 		return lbObservacionesMod;
+	}
+	private JPanel getPanelPrincipal() {
+		if (panelPrincipal == null) {
+			panelPrincipal = new JPanel();
+			panelPrincipal.setLayout(new GridLayout(0, 2, 0, 0));
+			panelPrincipal.add(getBtAdministrador());
+			panelPrincipal.add(getBtMedico());
+		}
+		return panelPrincipal;
+	}
+	private JPanel getPanelInformacionDeInteres() {
+		if (panelInformacionDeInteres == null) {
+			panelInformacionDeInteres = new JPanel();
+			panelInformacionDeInteres.setLayout(new BorderLayout(0, 0));
+			panelInformacionDeInteres.add(getPanelInformacionBotones(), BorderLayout.EAST);
+			panelInformacionDeInteres.add(getTextFieldInformacionUtil(), BorderLayout.CENTER);
+		}
+		return panelInformacionDeInteres;
+	}
+	private JPanel getPanelInformacionBotones() {
+		if (panelInformacionBotones == null) {
+			panelInformacionBotones = new JPanel();
+			panelInformacionBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panelInformacionBotones.add(getBtnSiguienteInformacion());
+		}
+		return panelInformacionBotones;
+	}
+	private JButton getBtnSiguienteInformacion() {
+		if (btnSiguienteInformacion == null) {
+			btnSiguienteInformacion = new JButton("\u25BA");
+			btnSiguienteInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					if(informacion.length!=0) 
+					{
+					String nuevaInfo = chargeInformacion();
+					getTextFieldInformacionUtil().setText(nuevaInfo);
+					}
+					
+				}
+			});
+		}
+		return btnSiguienteInformacion;
+	}
+	private JButton getBtnInformacionInteres() {
+		if (btnInformacionInteres == null) {
+			btnInformacionInteres = new JButton("Modificar informacion");
+			btnInformacionInteres.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					mostrarPnInformacion();
+				}
+
+			});
+		}
+		return btnInformacionInteres;
+	}
+	
+	private void mostrarPnInformacion() 
+	{
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnInformacion");
+		
+	}
+	
+	private JPanel getPanelInformacionUtil() {
+		if (panelInformacionUtil == null) {
+			panelInformacionUtil = new JPanel();
+			panelInformacionUtil.setLayout(new BorderLayout(0, 0));
+			panelInformacionUtil.add(getPanelBotonesInformacion(), BorderLayout.SOUTH);
+			panelInformacionUtil.add(getPanelCentralInformacion(), BorderLayout.CENTER);
+		}
+		return panelInformacionUtil;
+	}
+	private JPanel getPanelBotonesInformacion() {
+		if (panelBotonesInformacion == null) {
+			panelBotonesInformacion = new JPanel();
+			panelBotonesInformacion.add(getBtnAtrasInformacion());
+			panelBotonesInformacion.add(getBtnAñadirInformacion());
+		}
+		return panelBotonesInformacion;
+	}
+	private JButton getBtnAtrasInformacion() {
+		if (btnAtrasInformacion == null) {
+			btnAtrasInformacion = new JButton("Atras\r\n");
+			btnAtrasInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					CardLayout c = (CardLayout)getPnContenidos().getLayout();
+					c.show(getPnContenidos(), "PnAdministrador");
+				}
+			});
+			
+		}
+		return btnAtrasInformacion;
+	}
+	private JButton getBtnAñadirInformacion() {
+		if (btnAñadirInformacion == null) {
+			btnAñadirInformacion = new JButton("A\u00F1adir Informacion");
+			btnAñadirInformacion.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) 
+				{
+					boolean añadido =añadeInformacion();
+					if(añadido==true) 
+					{
+						getTextAvisoUsuarioInformacion().setText("La informacion se ha añadido correctamente");
+						getTextFieldInformacionPrincipal().setText("");
+					}
+				}
+			});
+			btnAñadirInformacion.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		}
+		return btnAñadirInformacion;
+	}
+	
+	@SuppressWarnings("deprecation")
+	private boolean añadeInformacion() 
+	{
+	  String texto = getTextFieldInformacionPrincipal().getText();
+	  if(texto==null ||texto.isEmpty()) 
+	  {
+		 return false; 
+	  }else {
+		  int resp = JOptionPane.YES_OPTION;
+		  if(getDcHorarioInformacionFin().getDate()==null) 
+		  {
+			resp = JOptionPane.showConfirmDialog(null,"Si no selecciona fecha de fin se pondra por defecto el año.¿Desea continuar?"); 
+		  }
+		  
+		  if(resp!=JOptionPane.YES_OPTION) {
+			  return false;
+		  }else {
+			  InformacionDto info = new InformacionDto();
+			  if(chckbxAoInformacion.isSelected() && chckbxDiaInformacion.isSelected() && chckbxMesInformacion.isSelected()) {
+			  java.util.Date inicio = getDcHorarioInformacionInicio().getDate();
+			  java.util.Date ultima = getDcHorarioInformacionFin().getDate();
+			  String fechaInicioInformacion = formateaFecha(inicio)+" "+"00:00"+":00";
+			  String fechafinInformacion=formateaFecha(ultima)+" "+"00:00"+":00";
+			  info.inicio=  Timestamp.valueOf(fechaInicioInformacion);
+			  info.fin=  Timestamp.valueOf(fechafinInformacion);
+			  info.texto=texto;
+			  new AddInformacionUtil().execute(info);
+			  this.informacion = recuperaInformacionUtil();
+			  return true;
+			  }else 
+			  {
+				 String[] fechaI = dcHorarioInformacionInicio.getDate().toString().split(" ");
+				 String[] fechaF = dcHorarioInformacionFin.getDate().toString().split(" ");
+
+				 String yearI="";
+				 String monthI="";
+				 String dayI ="";
+				 String yearF="";
+				 String monthF="";
+				 String dayF ="";
+				 if(chckbxAoInformacion.isSelected()) 
+				 {
+					yearI=fechaI[5];
+					yearF=fechaF[5];
+				 }else {yearI="1999";yearF="3999";}
+				 if(chckbxMesInformacion.isSelected()) 
+				 {
+					monthI=fechaI[1];
+					monthF=fechaF[1];
+				 }else {monthI="Jan";monthF="Dec";}
+				 if(chckbxDiaInformacion.isSelected()) {
+					 dayI=fechaI[2];
+					 dayF=fechaF[2];
+				 }else {dayI="01";dayF="28";}
+				 
+				 String fechaInicioInformacion2 = yearI + "-" + seleccionaMes(monthI) + "-" + dayI+" "+"00:00"+":00";
+				 String fechafinInformacion2= yearF + "-" + seleccionaMes(monthF) + "-" + dayF+" "+"00:00"+":00";
+				 
+				 info.inicio=  Timestamp.valueOf(fechaInicioInformacion2);
+				 info.fin=  Timestamp.valueOf(fechafinInformacion2);
+				 info.texto=texto;
+				 new AddInformacionUtil().execute(info);
+				 this.informacion = recuperaInformacionUtil();
+				 return true;
+			  }
+		  }
+	  }
+	}
+	
+	private String formateaFecha(java.util.Date ultima) {
+		String[] fechaS = ultima.toString().split(" ");
+		String mes = fechaS[1];
+		String año = fechaS[5];
+		String dia = fechaS[2];
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
+	}
+	
+	
+	private JPanel getPanelCentralInformacion() {
+		if (panelCentralInformacion == null) {
+			panelCentralInformacion = new JPanel();
+			panelCentralInformacion.setLayout(new BorderLayout(0, 0));
+			panelCentralInformacion.add(getTextAvisoUsuarioInformacion(), BorderLayout.SOUTH);
+			panelCentralInformacion.add(getPanelPrincipalInformacion(), BorderLayout.CENTER);
+			panelCentralInformacion.add(getLblInformacion(), BorderLayout.NORTH);
+		}
+		return panelCentralInformacion;
+	}
+	private JTextField getTextAvisoUsuarioInformacion() {
+		if (textAvisoUsuarioInformacion == null) {
+			textAvisoUsuarioInformacion = new JTextField();
+			textAvisoUsuarioInformacion.setEditable(false);
+			textAvisoUsuarioInformacion.setColumns(10);
+		}
+		return textAvisoUsuarioInformacion;
+	}
+	private JPanel getPanelPrincipalInformacion() {
+		if (panelPrincipalInformacion == null) {
+			panelPrincipalInformacion = new JPanel();
+			panelPrincipalInformacion.setLayout(new GridLayout(1, 0, 0, 0));
+			panelPrincipalInformacion.add(getPanelTextoInformacion());
+		}
+		return panelPrincipalInformacion;
+	}
+	private JPanel getPanelTextoInformacion() {
+		if (panelTextoInformacion == null) {
+			panelTextoInformacion = new JPanel();
+			panelTextoInformacion.setLayout(new GridLayout(0, 2, 0, 0));
+			panelTextoInformacion.add(getTextFieldInformacionPrincipal());
+			panelTextoInformacion.add(getPanelFechaInformacion());
+		}
+		return panelTextoInformacion;
+	}
+	private JLabel getLblInformacion() {
+		if (lblInformacion == null) {
+			lblInformacion = new JLabel("A\u00F1ada la informacion y el tiempo que se desea mostrar:");
+		}
+		return lblInformacion;
+	}
+	private JTextField getTextFieldInformacionPrincipal() {
+		if (textFieldInformacionPrincipal == null) {
+			textFieldInformacionPrincipal = new JTextField();
+			textFieldInformacionPrincipal.setColumns(10);
+		}
+		return textFieldInformacionPrincipal;
+	}
+	private JPanel getPanelFechaInformacion() {
+		if (panelFechaInformacion == null) {
+			panelFechaInformacion = new JPanel();
+			panelFechaInformacion.setLayout(new BorderLayout(0, 0));
+			panelFechaInformacion.add(getPanel_2_1(), BorderLayout.NORTH);
+			panelFechaInformacion.add(getPanelFecha(), BorderLayout.CENTER);
+		}
+		return panelFechaInformacion;
+	}
+	private JPanel getPanel_2_1() {
+		if (panelModificadoresFecha == null) {
+			panelModificadoresFecha = new JPanel();
+			panelModificadoresFecha.add(getChckbxDiaInformacion());
+			panelModificadoresFecha.add(getChckbxMesInformacion());
+			panelModificadoresFecha.add(getChckbxAoInformacion());
+		}
+		return panelModificadoresFecha;
+	}
+	private JCheckBox getChckbxDiaInformacion() {
+		if (chckbxDiaInformacion == null) {
+			chckbxDiaInformacion = new JCheckBox("Dia\r\n");
+			chckbxDiaInformacion.setSelected(true);
+		}
+		return chckbxDiaInformacion;
+	}
+	private JCheckBox getChckbxMesInformacion() {
+		if (chckbxMesInformacion == null) {
+			chckbxMesInformacion = new JCheckBox("Mes\r\n");
+			chckbxMesInformacion.setSelected(true);
+		}
+		return chckbxMesInformacion;
+	}
+	private JCheckBox getChckbxAoInformacion() {
+		if (chckbxAoInformacion == null) {
+			chckbxAoInformacion = new JCheckBox("A\u00F1o\r\n");
+			chckbxAoInformacion.setSelected(true);
+		}
+		return chckbxAoInformacion;
+	}
+	
+	private String[] recuperaInformacionUtil()  //Carga la informacion a una lista o un array desde uno o varios ficheros locales.
+	{
+		LocalDateTime ahora =LocalDateTime.now();
+		String[] util = new ListInformacionUtilByDate().execute(Timestamp.valueOf(ahora));
+		this.informacion=util;
+		return util;
+	}
+	
+	private String chargeInformacion() //Escoje informacion al azar
+	{
+		Random random = new Random();
+		int aleatorio = random.nextInt(this.informacion.length-1);
+		String text = this.informacion[aleatorio];
+		if(!getTextFieldInformacionUtil().getText().equals(text)) 
+		{
+			return text;
+		}else {
+			return this.informacion[aleatorio+1];
+		}
+	}
+	private JTextField getTextFieldInformacionUtil() {
+		if (textFieldInformacionUtil == null) {
+			textFieldInformacionUtil = new JTextField();
+			textFieldInformacionUtil.setEditable(false);
+			textFieldInformacionUtil.setColumns(10);
+			if(this.informacion.length!=0) {
+				textFieldInformacionUtil.setText(this.informacion[0]);
+			}else {
+				textFieldInformacionUtil.setText("Informacion Relevante por añadir");
+			}
+			
+		}
+		return textFieldInformacionUtil;
+	}
+	private JPanel getPanelFecha() {
+		if (panelFecha == null) {
+			panelFecha = new JPanel();
+			panelFecha.setLayout(new GridLayout(2, 0, 0, 0));
+			panelFecha.add(getDcHorarioInformacionInicio());
+			panelFecha.add(getDcHorarioInformacionFin());
+		}
+		return panelFecha;
+	}
+	private JDateChooser getDcHorarioInformacionInicio() {
+		if (dcHorarioInformacionInicio == null) {
+			dcHorarioInformacionInicio = new JDateChooser();
+		}
+		return dcHorarioInformacionInicio;
+	}
+	private JDateChooser getDcHorarioInformacionFin() {
+		if (dcHorarioInformacionFin == null) {
+			dcHorarioInformacionFin = new JDateChooser();
+		}
+		return dcHorarioInformacionFin;
+	}
+	private JButton getBtAsignarVacuna() {
+		if (btAsignarVacuna == null) {
+			btAsignarVacuna = new JButton("Asignar Vacuna");
+			btAsignarVacuna.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+				}
+			});
+			btAsignarVacuna.setBounds(374, 204, 151, 29);
+		}
+		return btAsignarVacuna;
+	}
+	
+	private void mostrarVentanaVacuna() {
+		carta = new Carta();
+		VentanaVacuna v = new VentanaVacuna(carta, this);
+		v.setLocationRelativeTo(this);
+		v.setModal(true);
+		v.setVisible(true);
+		
+		
+	}
+
+	public CitaDto getCita() {
+		return cita;
+	}
+
+	public String getIdPaciente() {
+		return idPaciente;
+	}
+	
+	
+	private JButton getBtAsignarVacunaH() {
+		if (btAsignarVacunaH == null) {
+			btAsignarVacunaH = new JButton("Asignar Vacuna");
+			btAsignarVacunaH.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarVentanaVacuna();
+					mostrarVacunas();
+
+				}
+			});
+		}
+		return btAsignarVacunaH;
+	}
+
+	private JPanel getPnDiagnosticos() {
+		if (pnDiagnosticos == null) {
+			pnDiagnosticos = new JPanel();
+			pnDiagnosticos.setLayout(null);
+			pnDiagnosticos.add(getScTree());
+			pnDiagnosticos.add(getScDiagnostico());
+			pnDiagnosticos.add(getBtEliminar());
+			pnDiagnosticos.add(getBtAsignarDiagnostico());
+			pnDiagnosticos.add(getLbCie10());
+			pnDiagnosticos.add(getLbDiagnostico());
+			pnDiagnosticos.add(getBtAtrasDiagnostico());
+		}
+		return pnDiagnosticos;
+	}
+	private JButton getBtDiagnostico() {
+		if (btDiagnostico == null) {
+			btDiagnostico = new JButton("Asignar Diagnostico");
+			btDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnDiagnosticos();
+				}
+			});
+			btDiagnostico.setBounds(535, 204, 179, 29);
+		}
+		return btDiagnostico;
+	}
+	private JScrollPane getScTree() {
+		if (scTree == null) {
+			scTree = new JScrollPane();
+			scTree.setBounds(54, 38, 351, 300);
+			scTree.setViewportView(getTree_1());
+		}
+		return scTree;
+	}
+	private JTree getTree_1() {
+		if (tree == null) {
+			tree = new JTree();
+			
+			tree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if(tree.getSelectionPath()!=null) {
+						DefaultMutableTreeNode selected = (DefaultMutableTreeNode)tree.getSelectionPath().getLastPathComponent();
+						if(selected!=null && selected.getUserObject().toString().contains("Cap")) {
+							isExpandedCapitulo=true;
+							expandirCap();
+							capitulo=selected.getUserObject().toString();
+						}
+						else if(selected.getUserObject().toString().contains("-") && selected.getUserObject().toString().contains("(")) {
+							isExpandedRange=true;
+							expandirRange();
+						}
+						else if(selected.getUserObject().toString().contains(" - ") && !selected.getUserObject().toString().contains(".")){
+							isExpandedCode=true;
+							expandirCode();
+						}
+						else if(selected.getUserObject().toString().contains(".") && selected.getUserObject().toString().contains("-")){
+							listaDiagnosticos.add(selected.getUserObject().toString());
+							String[]  diag = new String[listaDiagnosticos.size()];
+							for (int i = 0; i<diag.length;i++) {
+								diag[i] = listaDiagnosticos.get(i);
+								
+							}
+							getListDiagnosticos().setModel(new DefaultComboBoxModel<String>(diag));
+
+						}
+						if(!isExpandedCapitulo)
+							expandirTab();
+					}
+				}
+			});
+			tree.setModel(new DefaultTreeModel(crearTree()));
+			listaDiagnosticos = new ArrayList<>();
+		}
+		return tree;
+	}
+	
+	private DefaultMutableTreeNode crearTree() {
+		 return new DefaultMutableTreeNode("Tab.D") {
+			{
+			}
+		};
+	}
+	
+
+	private void expandirTab() {
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		DefaultMutableTreeNode node = null;
+		for(int i =1; i<22;i++) {
+			if(i<10)
+				node = new DefaultMutableTreeNode("Cap.0"+i);
+			else
+				node = new DefaultMutableTreeNode("Cap."+i);
+			selected.add(node);
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	private void expandirCap() {
+		DefaultMutableTreeNode node = null;
+		if(isExpandedCapitulo) {
+			DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+			List<DiagnosticoDto> capitulos = new ListDiagnosticoByCapAction(selected.getUserObject().toString()).execute();
+			for(DiagnosticoDto diag : capitulos) {
+				//node=expandirRange(diag.descripcion);
+				node= new DefaultMutableTreeNode(diag.descripcion);
+				selected.add(node);
+			}
+		}
+		else {
+			node = new DefaultMutableTreeNode("");
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	
+	
+	private void expandirRange() {
+		DefaultMutableTreeNode node = null;
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		String range = selected.getUserObject().toString().split("\\(")[1].substring(0,7);
+		List<DiagnosticoDto> capitulos = new ListDiagnosticoByRangeAction(range).execute();
+		for(DiagnosticoDto diag : capitulos) {
+			node = new DefaultMutableTreeNode(diag.codigo+" - "+diag.descripcion);
+			selected.add(node);
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	
+
+	private void expandirCode() {
+		DefaultMutableTreeNode node = null;
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode)getTree_1().getSelectionPath().getLastPathComponent();
+		if(isExpandedCode) {
+			List<DiagnosticoDto> capitulos = new ListDiagnosticoByCodeAction(selected.getUserObject().toString().substring(0,3)).execute();
+			for(DiagnosticoDto diag : capitulos) {
+				node = new DefaultMutableTreeNode(diag.codigo+" - "+diag.descripcion);
+				selected.add(node);
+			}
+		}
+		DefaultTreeModel model = (DefaultTreeModel) getTree_1().getModel();
+		model.reload();
+	}
+	private JScrollPane getScDiagnostico() {
+		if (scDiagnostico == null) {
+			scDiagnostico = new JScrollPane();
+			scDiagnostico.setBounds(490, 93, 259, 205);
+			scDiagnostico.setViewportView(getListDiagnosticos());
+		}
+		return scDiagnostico;
+	}
+	private JList<String> getListDiagnosticos() {
+		if (listDiagnosticos == null) {
+			listDiagnosticos = new JList<String>();
+		}
+		return listDiagnosticos;
+	}
+	private JButton getBtEliminar() {
+		if (btEliminar == null) {
+			btEliminar = new JButton("Eliminar");
+			btEliminar.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					for (int i : getListDiagnosticos().getSelectedIndices()) {
+						listaDiagnosticos.remove(i);
+					}
+					String[]  diag = new String[listaDiagnosticos.size()];
+					for (int i = 0; i<diag.length;i++) {
+						diag[i] = listaDiagnosticos.get(i);
+						
+					}
+					getListDiagnosticos().setModel(new DefaultComboBoxModel<String>(diag));
+				}
+			});
+			btEliminar.setBounds(504, 330, 85, 21);
+		}
+		return btEliminar;
+	}
+	private JButton getBtAsignarDiagnostico() {
+		if (btAsignarDiagnostico == null) {
+			btAsignarDiagnostico = new JButton("Asignar");
+			btAsignarDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					for (String diag : listaDiagnosticos) {
+						new AddDiagnosticoAction(idCita, idPaciente, diag).execute();
+					}
+				}
+			});
+			btAsignarDiagnostico.setBounds(643, 330, 85, 21);
+		}
+		return btAsignarDiagnostico;
+	}
+	private JLabel getLbCie10() {
+		if (lbCie10 == null) {
+			lbCie10 = new JLabel("Cie10 - Diagnosticos");
+			lbCie10.setBounds(54, 10, 154, 13);
+		}
+		return lbCie10;
+	}
+	private JLabel getLbDiagnostico() {
+		if (lbDiagnostico == null) {
+			lbDiagnostico = new JLabel("Diagnostico:");
+			lbDiagnostico.setBounds(490, 70, 111, 13);
+		}
+		return lbDiagnostico;
+	}
+	private JButton getBtAtrasDiagnostico() {
+		if (btAtrasDiagnostico == null) {
+			btAtrasDiagnostico = new JButton("Atras");
+			btAtrasDiagnostico.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					mostrarPnCita();
+				}
+			});
+			btAtrasDiagnostico.setBounds(47, 404, 85, 21);
+		}
+		return btAtrasDiagnostico;
+	}
+	private JButton getBtVerSolicitudes() {
+		if (btVerSolicitudes == null) {
+			btVerSolicitudes = new JButton("Ver Solicitudes");
+			btVerSolicitudes.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					actualizarSolicitudes();
+					mostrarPnVerSolicitudes();
+				}
+			});
+		}
+		return btVerSolicitudes;
+	}
+	
+	private void mostrarPnVerSolicitudes() {
+		CardLayout c = (CardLayout)getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnVerSolicitudes");	
+		
+	}
+	
+	private JPanel getPnVerSolicitudes() {
+		if (pnVerSolicitudes == null) {
+			pnVerSolicitudes = new JPanel();
+			pnVerSolicitudes.setLayout(new BorderLayout(0, 0));
+			pnVerSolicitudes.add(getPnBotonesSolicitudes(), BorderLayout.SOUTH);
+			pnVerSolicitudes.add(getScllPnSolicitudes(), BorderLayout.CENTER);
+
+		}
+		return pnVerSolicitudes;
+	}
+	private JPanel getPnBotonesSolicitudes() {
+		if (pnBotonesSolicitudes == null) {
+			pnBotonesSolicitudes = new JPanel();
+			pnBotonesSolicitudes.add(getBtAceptarSolicitud());
+			pnBotonesSolicitudes.add(getBtDenegarSolicitud());
+		}
+		return pnBotonesSolicitudes;
+	}
+	private JScrollPane getScllPnSolicitudes() {
+		if (scllPnSolicitudes == null) {
+			scllPnSolicitudes = new JScrollPane();
+			scllPnSolicitudes.setViewportView(getListSolicitudes());
+		}
+		return scllPnSolicitudes;
+	}
+	//aceptar
+	private JButton getBtAceptarSolicitud() {
+		if (btAceptarSolicitud == null) {
+			btAceptarSolicitud = new JButton("Aceptar");
+			btAceptarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					if(solicitud.tipo.equals("CREAR")) {
+						
+					}else if(solicitud.tipo.equals("MODIFICAR")) {
+						
+					}else if(solicitud.tipo.equals("ELIMINAR")) {
+						Integer respuesta = JOptionPane.showConfirmDialog(null,"ï¿½Estas seguro de borrar la cita " + solicitud.cuerpo + "?");
+						if(respuesta==JOptionPane.YES_OPTION) {
+							new DeleteSolicitud(solicitud.id).execute();
+							new DeleteCita(solicitud.cuerpo).execute();
+							borrarResiduos(solicitud.cuerpo);
+						}
+						actualizarSolicitudes();
+					}
+				}
+			});
+			btAceptarSolicitud.setEnabled(false);
+		}
+		return btAceptarSolicitud;
+	}
+	//denegar
+	private JButton getBtDenegarSolicitud() {
+		if (btDenegarSolicitud == null) {
+			btDenegarSolicitud = new JButton("Denegar");
+			btDenegarSolicitud.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
+					Integer respuesta = JOptionPane.showConfirmDialog(null,"ï¿½Estas seguro de denegar la solictud " + solicitud.id + "?");
+					if(respuesta==JOptionPane.YES_OPTION) {
+						new DeleteSolicitud(solicitud.id).execute();
+						actualizarSolicitudes();
+						btDenegarSolicitud.setEnabled(false);
+						getBtAceptarSolicitud().setEnabled(false);
+					}
+				}
+			});
+			btDenegarSolicitud.setEnabled(false);
+		}
+		return btDenegarSolicitud;
+	}
+	private JList<String> getListSolicitudes() {
+		if (listSolicitudes == null) {
+			listSolicitudes = new JList<String>();
+			
+			listSolicitudes.setBorder(new TitledBorder(null, "Solicitudes", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			solicitudes = new ListAllSolicitudes().execute();
+			actualizarSolicitudes();
+			
+			listSolicitudes.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					getBtAceptarSolicitud().setEnabled(true);
+					getBtDenegarSolicitud().setEnabled(true);
+				}
+			});
+		}
+		return listSolicitudes;
+	}
+	
+	private void actualizarSolicitudes() {
+		solicitudes = new ListAllSolicitudes().execute();
+		String[] sols = new String[solicitudes.size()];
+		for(int i=0;i<solicitudes.size();i++) {
+			SolicitudDto sol = solicitudes.get(i);
+			sols[i]= sol.id + " - " + sol.tipo + " - " + sol.cuerpo; 
+		}
+		ListModel<String> model = new DefaultComboBoxModel<String>(sols);
+		getListSolicitudes().setModel(model);
+	}
+	
+	private void borrarResiduos(String idCita) {
+		for(SolicitudDto solicitud: solicitudes) {
+			if(solicitud.cuerpo.equals(idCita))
+				new DeleteSolicitud(solicitud.id).execute();
+		}
 	}
 }

@@ -29,6 +29,7 @@ public class ListAllCitas
 				cita= new CitaDto();
 				cita.id=rs.getString("id");
 				cita.causa=rs.getString("causa");
+				cita.motivo=rs.getString("motivo");
 				cita.contacto=rs.getString("contacto");
 				cita.horaEntrada=rs.getString("hora_entrada");
 				cita.horaFinal=rs.getString("hora_fin");

@@ -733,7 +733,9 @@ public class VentanaSolicitarCrearCita extends JDialog {
 				if (respuesta == JOptionPane.YES_OPTION) {
 					
 					cuerpoSol+= "Medico ID: " + medico.id;
+					cuerpoSol+= medico.name + " " + medico.surname;
 					cuerpoSol+= "Paciente ID: " + paciente.id; // elegir mas de un paciente
+					cuerpoSol+= paciente.name + " " + paciente.surname;
 					cuerpoSol+= "Causa: ";
 					//
 					Date inicio = getDcInicio().getDate();

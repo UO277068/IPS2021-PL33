@@ -3,9 +3,7 @@ package Logica.crud;
 import java.sql.Timestamp;
 import java.util.List;
 
-
-import Logica.crud.dto.JornadaDto;
-
+import Logica.Vacuna;
 import Logica.crud.dto.*;
 
 /**
@@ -25,6 +23,10 @@ public interface CitaCrudService {
 	List<MedicoDto> listAllMedicos() throws Exception;
 	void addHorario(Timestamp d1, Timestamp d2, List<Boolean> dias, int[] ids_medicos) throws Exception;
 	void updateCita(String idMedico, Timestamp horaInicio, Timestamp horaFin, String idSala, String idCita);
+	void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas);
+	List<DiagnosticoDto> listDiagnosticoByCap(String cap);
+	List<DiagnosticoDto> listDiagnosticoByRange(String cap);
+	List<DiagnosticoDto> listDiagnosticoByCode(String cap);
 	//Rober
 	List<JornadaDto> listJornadaLaboralByMedico(String id);
 	List<CitaDto> ListCitasByMedico(String id);
@@ -38,8 +40,11 @@ public interface CitaCrudService {
 	List<CitaDto> listAllPrescripcion();
 	void AddContactoCita(int id, String contacto);
 	String getContactoByIdPaciente(String id);
-	void updateCausasInHistorial(String id, String idPaciente, String causa);
+	void addDiagnostico(String id, String idPaciente, String causa);
 	void updatePrescripcionInHistorial(String id, String prescripcion);
 	void updateAcudioCita(String id,String acude);
 	void AddSolicitud(SolicitudDto sol);
+	List<SolicitudDto> listAllSolicitudes();
+	void deleteSolicitud(String id);
+	void deleteCita(String id);
 }

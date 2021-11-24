@@ -44,6 +44,8 @@ import java.awt.event.KeyEvent;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListDataListener;
 
+import Logica.crud.commands.GetSalaByName;
+import Logica.crud.commands.ListCitasBySala;
 import Logica.crud.dto.*;
 import javax.swing.JCheckBox;
 import javax.swing.ListSelectionModel;
@@ -54,6 +56,8 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class VentanaCreaCitas extends JDialog {
 
@@ -161,6 +165,9 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelSala;
 	private JLabel lblSala;
 	private JComboBox<String> comboBoxSala;
+	private JPanel panelMotivos;
+	private JLabel lblMotivos;
+	private JTextField textFieldMotivos;
 	
 
 	/**
@@ -329,6 +336,7 @@ public class VentanaCreaCitas extends JDialog {
 			panelUrgenciaSala.add(getChckbxUrgente());
 			panelUrgenciaSala.add(getChckbxFiltrarPorHora());
 			panelUrgenciaSala.add(getPanelSala());
+			panelUrgenciaSala.add(getPanelMotivos());
 		}
 		return panelUrgenciaSala;
 	}
@@ -965,7 +973,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private Integer GeneraCita(PacienteDto paciente, Integer respuesta, boolean urge, MedicoDto medico) {
 		CitaDto cita = new CitaDto();
-		cita.idMedico="NO DEFINIDO";
+		cita.idMedico=null;
 		if(medico!=null) {
 		//Comprueba que la cita se establece dentro de la jornada laboral
 	    if(!compruebaJornada(medico.id)) {
@@ -979,14 +987,15 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
 		cita.idPaciente=paciente.id;
-		cita.causa="";
+		cita.causa="No determinandas"; //Añadir causas una vez el medico las determine
+		cita.motivo=getTextFieldMotivos().getText();
 		//
 		Date inicio = getDcInicio().getDate();
 		Date ultima = getDcFin().getDate();
 		String horaInicio =getComboBoxHoraInicioCita().getSelectedItem().toString()+":"+getComboBoxMinutoInicioCita().getSelectedItem().toString();
 		String horafin =getComboBoxHoraFinCita().getSelectedItem().toString()+":"+getComboBoxMinutoFinCita().getSelectedItem().toString();
-		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";;
-		String fechafin=formateaFecha(ultima)+" "+horafin+":00";;
+		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";
+		String fechafin=formateaFecha(ultima)+" "+horafin+":00";
 		
 		cita.horaInicio=fecha; //fecha +hora inicio
 		cita.horaFinal=fechafin;
@@ -1001,12 +1010,24 @@ public class VentanaCreaCitas extends JDialog {
 		cita.horaEntrada=null;
 		cita.horaSalida=null;
 		cita.idSala=getComboBoxSala().getEditor().getItem().toString();
+		boolean act=true;
+		if(getComboBoxSala().getSelectedIndex()!=0) 
+		{
+			act =compruebaHoraSala(cita); //Comprobacion hora sala.
+		}else {
+			cita.idSala="Sala NO Determinada";
+		}
+		
+		if(act==true) {
+		 String Sala = new GetSalaByName().execute(cita.idSala);
+		 cita.idSala=Sala;
+		 
 		cita.preescripcion="";
-		cita.contacto=paciente.contacto; //Por defecto F.E.R
+		cita.contacto=paciente.contacto; //Por defecto contacto de la cita = contacto del paciente
 		cita.acude="INDEFINIDO";
 		if(this.SelectedEspecialidad==null) 
 		{
-			cita.Especialidad="NO DEFINIDA";
+			cita.Especialidad=null;
 		}else {
 			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
 		}
@@ -1016,9 +1037,31 @@ public class VentanaCreaCitas extends JDialog {
 		ventanaContacto(idcita-1, paciente);
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
+		}
 		
 		}
 		return respuesta;
+	}
+
+	
+	private boolean compruebaHoraSala(CitaDto cita) 
+	{
+		List<CitaDto> listaDeCitas = new ListCitasBySala(cita.idSala).execute();
+		for(CitaDto c : listaDeCitas) 
+		{
+			if(Timestamp.valueOf(c.horaInicio).after(Timestamp.valueOf(cita.horaInicio)) || (Timestamp.valueOf(c.horaInicio).before(Timestamp.valueOf(cita.horaInicio)) && Timestamp.valueOf(c.horaFinal).after(Timestamp.valueOf(cita.horaFinal))) ) 
+			{
+				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.¿Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+				if(respuesta==JOptionPane.YES_OPTION) 
+				{
+					return true;
+				}else {
+					return false;
+				}
+			}
+		}
+		return true;
+		
 	}
 
 	private PacienteDto obtenPacienteSeleccionado() {
@@ -1923,23 +1966,52 @@ public class VentanaCreaCitas extends JDialog {
 			salas[2]="1-2";
 			salas[3]="1-3";
 			salas[4]="1-4";
-			salas[5]="1-5";
-			salas[6]="1-6";
-			salas[7]="1-7";
-			salas[8]="2-1";
-			salas[9]="2-2";
-			salas[10]="2-3";
-			salas[11]="2-4";
-			salas[12]="2-5";
-			salas[13]="2-6";
-			salas[14]="2-7";
-			salas[15]="3-1";
-			salas[16]="3-2";
-			salas[17]="3-3";
-			salas[18]="3-4";
-			salas[19]="3-5";
+			salas[5]="2-1";
+			salas[6]="2-2";
+			salas[7]="2-3";
+			salas[8]="2-4";
+			salas[9]="3-1";
+			salas[10]="3-2";
+			salas[11]="3-3";
+			salas[12]="3-4";
+			salas[13]="4-1";
+			salas[14]="4-2";
+			salas[15]="4-3";
+			salas[16]="4-4";
+			
 			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
 		}
 		return comboBoxSala;
+	}
+	private JPanel getPanelMotivos() {
+		if (panelMotivos == null) {
+			panelMotivos = new JPanel();
+			panelMotivos.setLayout(new BorderLayout(0, 0));
+			panelMotivos.add(getLblMotivos(), BorderLayout.NORTH);
+			panelMotivos.add(getTextFieldMotivos(), BorderLayout.SOUTH);
+		}
+		return panelMotivos;
+	}
+	private JLabel getLblMotivos() {
+		if (lblMotivos == null) {
+			lblMotivos = new JLabel("Motivos de la cita:");
+		}
+		return lblMotivos;
+	}
+	private JTextField getTextFieldMotivos() {
+		if (textFieldMotivos == null) {
+			textFieldMotivos = new JTextField();
+			textFieldMotivos.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusGained(FocusEvent e) 
+				{
+					textFieldMotivos.selectAll();
+				}
+			});
+			textFieldMotivos.setText("No determinados");
+			textFieldMotivos.setHorizontalAlignment(SwingConstants.LEFT);
+			textFieldMotivos.setColumns(10);
+		}
+		return textFieldMotivos;
 	}
 }

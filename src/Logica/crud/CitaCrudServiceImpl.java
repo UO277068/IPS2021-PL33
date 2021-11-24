@@ -3,6 +3,7 @@ package Logica.crud;
 import java.sql.Timestamp;
 import java.util.List;
 
+import Logica.Vacuna;
 import Logica.crud.commands.*;
 import Logica.crud.dto.*;
 
@@ -122,11 +123,9 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public String getContactoByIdPaciente(String id) {
 		return new GetContactoByIdPaciente(id).execute();
 	}
-
-	@Override
-	public void updateCausasInHistorial(String id, String idPaciente, String causa) {
-		new UpdateCausasInHistorial(id,idPaciente,causa).execute();
-		
+	
+	public void addDiagnostico(String id, String idPaciente, String causa) {
+		new AddDiagnostico(id,idPaciente,causa).execute();;	
 	}
 
 	@Override
@@ -152,7 +151,47 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new AddSolicitud(sol).execute();
 		
 	}
+
+	@Override
+	public void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
+		new AddVacuna(id, idPaciente, fecha, vacunas).execute();
+		
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByCap(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByCap(cap).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByRange(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByRange(cap).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByCode(String cap) {
+		// TODO Auto-generated method stub
+		return new ListDiagnosticoByCode(cap).execute();
+	}
 	
+	@Override
+	public List<SolicitudDto> listAllSolicitudes() {
+		return new ListAllSolicitudes().execute();
+	}
+
+	@Override
+	public void deleteSolicitud(String id) {
+		new DeleteSolicitud(id).execute();
+		
+	}
+
+	@Override
+	public void deleteCita(String id) {
+		new DeleteCita(id).execute();
+		
+	}
 	
 
 }

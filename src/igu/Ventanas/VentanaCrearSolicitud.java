@@ -18,6 +18,7 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 
+import igu.action.DeleteSolicitudAction;
 import igu.action.EnviarEmailUrgenteAction;
 import igu.action.InsertCitaAction;
 import igu.action.ListAllMedicosAction;
@@ -44,6 +45,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListDataListener;
 
+import Logica.crud.commands.DeleteSolicitud;
 import Logica.crud.commands.GetSalaByName;
 import Logica.crud.commands.ListCitasBySala;
 import Logica.crud.dto.*;
@@ -171,17 +173,19 @@ public class VentanaCrearSolicitud extends JDialog {
 	
 	
 	private String[] partes;
+	private String idSol;
 
 	/**
 	 * Create the application.
 	 */
-	public VentanaCrearSolicitud(VentanaPrincipal principal, String[] partes) 
+	public VentanaCrearSolicitud(VentanaPrincipal principal, String[] partes, String idSol) 
 	{ 
 		//setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
 		setTitle("Hospital:Crear Una cita");
 		setModal(true);
 		this.ventana=principal;
 		this.partes=partes;
+		this.idSol= idSol;
 		initialize();
 	}
 
@@ -1076,6 +1080,7 @@ public class VentanaCrearSolicitud extends JDialog {
 		ventanaContacto(idcita-1, paciente);
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
+		new DeleteSolicitudAction(idSol).execute();
 		}
 		
 		}

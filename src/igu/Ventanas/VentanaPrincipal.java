@@ -3138,9 +3138,11 @@ public class VentanaPrincipal extends JFrame {
 			btAceptarSolicitud = new JButton("Aceptar");
 			btAceptarSolicitud.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					//actualizarSolicitudes();
 					SolicitudDto solicitud = solicitudes.get(getListSolicitudes().getSelectedIndex());
 					if(solicitud.tipo.equals("CREAR")) {
-						
+						aceptarSolicitudCrear(solicitud);
+						actualizarSolicitudes();
 					}else if(solicitud.tipo.equals("MODIFICAR")) {
 						
 					}else if(solicitud.tipo.equals("ELIMINAR")) {
@@ -3158,6 +3160,20 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return btAceptarSolicitud;
 	}
+	
+	public void aceptarSolicitudCrear(SolicitudDto solicitud) {
+		String cuerpo = solicitud.cuerpo;
+		String[] partes = cuerpo.split("#");
+		mostrarVentanaCrearSolicitud(partes, solicitud.id);
+	}
+	private void mostrarVentanaCrearSolicitud(String[] partes, String idSol) 
+	{
+		VentanaCrearSolicitud citas = new VentanaCrearSolicitud(this, partes, idSol);
+		citas.setLocationRelativeTo(this);
+		citas.setModal(true);
+		citas.setVisible(true);
+	}
+	
 	//denegar
 	private JButton getBtDenegarSolicitud() {
 		if (btDenegarSolicitud == null) {

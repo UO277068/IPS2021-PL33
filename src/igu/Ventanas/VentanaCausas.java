@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import Logica.FileUtil;
 import Logica.crud.dto.CitaDto;
 import igu.action.AddCausasAction;
 import igu.action.ListAllCausasAction;
@@ -113,6 +114,7 @@ public class VentanaCausas extends JDialog {
 				public void actionPerformed(ActionEvent e) {
 					new AddCausasAction(idCita,getTxtCausa().getText()).execute();
 					new AddDiagnosticoAction(idCita, id,getTxtCausa().getText()).execute();
+					FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + getTxtCausa().getText()); 
 				}
 			});
 			btCausa.setBounds(129, 64, 117, 29);
@@ -127,6 +129,7 @@ public class VentanaCausas extends JDialog {
 					
 					CitaDto citaa = causas.get(getCbCausasPredefinidas().getSelectedIndex());
 					new AddCausasAction(idCita, citaa.causa).execute();
+					FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + citaa.causa); 
 					//new UpdateCausasInHistorialAction(idCita, id, citaa.causa).execute();
 				}
 			});

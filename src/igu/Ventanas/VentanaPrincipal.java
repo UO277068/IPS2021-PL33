@@ -26,6 +26,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -58,6 +61,7 @@ import javax.swing.tree.DefaultTreeModel;
 import com.toedter.calendar.JDateChooser;
 
 import Logica.Carta;
+import Logica.FileUtil;
 import Logica.Vacuna;
 import Logica.crud.commands.AddInformacionUtil;
 import Logica.crud.commands.DeleteCita;
@@ -318,7 +322,7 @@ public class VentanaPrincipal extends JFrame {
 	private JButton btSalir;
 	private JButton btCancelarMod;
 
-	
+	private static final String logger= "MiLogger";
 
 	/**
 	 * Launch the application.
@@ -341,6 +345,7 @@ public class VentanaPrincipal extends JFrame {
 	 */
 	public VentanaPrincipal() 
 	{
+		
 		//Atributos
 		this.informacion=recuperaInformacionUtil(); //Recupera la informacion util de la ventana de inicio
 		this.listamedicos=new ListAllMedicosAction().execute();
@@ -356,6 +361,9 @@ public class VentanaPrincipal extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getPnContenidos(), BorderLayout.CENTER);
+		
+		
+
 	}
 
 	private JPanel getPnMedico() {
@@ -3083,6 +3091,7 @@ public class VentanaPrincipal extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					for (String diag : listaDiagnosticos) {
 						new AddDiagnosticoAction(idCita, idPaciente, diag).execute();
+						FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + diag); 
 					}
 				}
 			});

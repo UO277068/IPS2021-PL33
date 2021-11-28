@@ -277,7 +277,7 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel panelInformacionUtil;
 	private JPanel panelBotonesInformacion;
 	private JButton btnAtrasInformacion;
-	private JButton btnAÃ±adirInformacion;
+	private JButton btnAñadirInformacion;
 	private JPanel panelCentralInformacion;
 	private JTextField textAvisoUsuarioInformacion;
 	private JPanel panelPrincipalInformacion;
@@ -2784,7 +2784,7 @@ public class VentanaPrincipal extends JFrame {
 		if (panelBotonesInformacion == null) {
 			panelBotonesInformacion = new JPanel();
 			panelBotonesInformacion.add(getBtnAtrasInformacion());
-			panelBotonesInformacion.add(getBtnAÃ±adirInformacion());
+			panelBotonesInformacion.add(getBtnAñadirInformacion());
 		}
 		return panelBotonesInformacion;
 	}
@@ -2802,27 +2802,27 @@ public class VentanaPrincipal extends JFrame {
 		}
 		return btnAtrasInformacion;
 	}
-	private JButton getBtnAÃ±adirInformacion() {
-		if (btnAÃ±adirInformacion == null) {
-			btnAÃ±adirInformacion = new JButton("A\u00F1adir Informacion");
-			btnAÃ±adirInformacion.addActionListener(new ActionListener() {
+	private JButton getBtnAñadirInformacion() {
+		if (btnAñadirInformacion == null) {
+			btnAñadirInformacion = new JButton("A\u00F1adir Informacion");
+			btnAñadirInformacion.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
-					boolean aÃ±adido =aÃ±adeInformacion();
-					if(aÃ±adido==true) 
+					boolean añadido =añadeInformacion();
+					if(añadido==true) 
 					{
 						getTextAvisoUsuarioInformacion().setText("La informacion se ha aï¿½adido correctamente");
 						getTextFieldInformacionPrincipal().setText("");
 					}
 				}
 			});
-			btnAÃ±adirInformacion.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			btnAñadirInformacion.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		}
-		return btnAÃ±adirInformacion;
+		return btnAñadirInformacion;
 	}
 	
 	@SuppressWarnings("deprecation")
-	private boolean aÃ±adeInformacion() 
+	private boolean añadeInformacion() 
 	{
 	  String texto = getTextFieldInformacionPrincipal().getText();
 	  if(texto==null ||texto.isEmpty()) 
@@ -2893,9 +2893,9 @@ public class VentanaPrincipal extends JFrame {
 	private String formateaFecha(java.util.Date ultima) {
 		String[] fechaS = ultima.toString().split(" ");
 		String mes = fechaS[1];
-		String aÃ±o = fechaS[5];
+		String año = fechaS[5];
 		String dia = fechaS[2];
-		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
+		return año + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 	
 	

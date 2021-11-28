@@ -13,9 +13,11 @@ import Logica.Carta;
 import Logica.FileUtil;
 import Logica.Vacuna;
 import Logica.crud.commands.ListPacienteById;
+import Logica.crud.commands.ListVacunaById;
 import Logica.crud.dto.CitaDto;
 import Logica.crud.dto.MedicoDto;
 import Logica.crud.dto.PacienteDto;
+import Logica.crud.dto.VacunaDto;
 import igu.action.AddVacunaAction;
 
 import javax.swing.JScrollPane;
@@ -41,6 +43,10 @@ import javax.swing.JComboBox;
 
 public class VentanaVacuna extends JDialog {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JScrollPane scVacuna;
 	private JScrollPane scVacunaElegida;
@@ -51,7 +57,7 @@ public class VentanaVacuna extends JDialog {
 	private JLabel lbPaciente;
 	private JTextField txPaciente;
 	private Carta carta;
-	private JButton btAÃ±adir;
+	private JButton btAñadir;
 	private List<Vacuna> vacunas;
 	private List<Vacuna> vacunasElegidas;
 	private JButton btEliminar;
@@ -81,7 +87,7 @@ public class VentanaVacuna extends JDialog {
 		contentPane.add(getLbVacunasElegidas());
 		contentPane.add(getLbPaciente());
 		contentPane.add(getTxPaciente());
-		contentPane.add(getBtAÃ±adir());
+		contentPane.add(getBtAñadir());
 		contentPane.add(getBtEliminar());
 		contentPane.add(getBtAsignar());
 		contentPane.add(getTxVacuna());
@@ -160,10 +166,10 @@ public class VentanaVacuna extends JDialog {
 		return txPaciente;
 	}
 
-	private JButton getBtAÃ±adir() {
-		if (btAÃ±adir == null) {
-			btAÃ±adir = new JButton("A\u00F1adir");
-			btAÃ±adir.addActionListener(new ActionListener() {
+	private JButton getBtAñadir() {
+		if (btAñadir == null) {
+			btAñadir = new JButton("A\u00F1adir");
+			btAñadir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
 					for (Vacuna vacuna : getListVacuna().getSelectedValuesList()) {
@@ -174,9 +180,9 @@ public class VentanaVacuna extends JDialog {
 
 				}
 			});
-			btAÃ±adir.setBounds(159, 385, 85, 21);
+			btAñadir.setBounds(159, 385, 85, 21);
 		}
-		return btAÃ±adir;
+		return btAñadir;
 	}
 
 	private Vacuna[] getVacunas(List<Vacuna> lista) {
@@ -231,10 +237,19 @@ public class VentanaVacuna extends JDialog {
 							fecha = Timestamp.valueOf(i);
 						} else
 							fecha = Timestamp.valueOf(LocalDateTime.now().toString().replace('T', ' '));
+						List<VacunaDto> vacunas = new ListVacunaById(vp.getCita().idPaciente).execute();
+						String str = " Antes: [";
+						for(VacunaDto vacuna: vacunas) 
+							str+= vacuna.vacuna+ ", ";
+						if(vacunas.size()<=0) 
+							str+= "[ ' ' ";
+						str+= " ] ";
+						FileUtil.escribirLog("MiLogger","Medico ID: 1 "+ str);
 						new AddVacunaAction(cita.idPaciente, fecha, vacunasElegidas).execute();
+						FileUtil.escribirLog("MiLogger", "Despues: Medico ID: 1 " + vacunasElegidas);
 					}
 
-					FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + vacunasElegidas);
+					
 				}
 			});
 			btAsignar.setBounds(352, 457, 85, 21);

@@ -47,4 +47,6 @@ public interface CitaCrudService {
 	List<SolicitudDto> listAllSolicitudes();
 	void deleteSolicitud(String id);
 	void deleteCita(String id);
+	MedicoDto listAllMedicoById(int id_medico);
+	CitaDto listCitaById(int id);
 }

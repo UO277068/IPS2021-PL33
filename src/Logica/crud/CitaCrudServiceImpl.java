@@ -192,6 +192,16 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new DeleteCita(id).execute();
 		
 	}
+
+	@Override
+	public MedicoDto listAllMedicoById(int id_medico) {
+		return new ListAllMedicoById(id_medico).execute();
+	}
+
+	@Override
+	public CitaDto listCitaById(int id) {
+		return new ListCitaById(id).execute();
+	}
 	
 
 }

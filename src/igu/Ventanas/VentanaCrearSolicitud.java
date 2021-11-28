@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -828,11 +829,14 @@ public class VentanaCrearSolicitud extends JDialog {
 	private void iniciarFecha(JDateChooser dc,int index) {
 		String[] partesFecha = partes[index].split("-");
 		int[] fecha = new int[3];
-		fecha[0]=Integer.parseInt(partesFecha[0]);
-		fecha[1]=Integer.parseInt(partesFecha[1]);
-		fecha[2]=Integer.parseInt(partesFecha[2]);
-		Date date = new Date(fecha[0]-1900, fecha[1]-1, fecha[2]);
-		dc.setDate(date);
+		Calendar cal  = Calendar.getInstance();
+		
+		fecha[0]=Integer.parseInt(partesFecha[0]);//año
+		fecha[1]=Integer.parseInt(partesFecha[1]);//mes
+		fecha[2]=Integer.parseInt(partesFecha[2]);//dia
+		
+		cal.set(fecha[0], fecha[1], fecha[2]);
+		dc.setCalendar(cal);
 	}
 	
 	private void iniciarHora(JComboBox cb, int index) {

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 
+import igu.action.DeleteSolicitudAction;
 import igu.action.EnviarEmailUrgenteAction;
 import igu.action.InsertCitaAction;
 import igu.action.ListAllMedicosAction;
@@ -44,6 +46,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListDataListener;
 
+import Logica.crud.commands.DeleteSolicitud;
 import Logica.crud.commands.GetSalaByName;
 import Logica.crud.commands.ListCitasBySala;
 import Logica.crud.dto.*;
@@ -59,7 +62,7 @@ import java.util.Locale;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-public class VentanaCreaCitas extends JDialog {
+public class VentanaCrearSolicitud extends JDialog {
 
 	/**
 	 * 
@@ -169,16 +172,21 @@ public class VentanaCreaCitas extends JDialog {
 	private JLabel lblMotivos;
 	private JTextField textFieldMotivos;
 	
+	
+	private String[] partes;
+	private String idSol;
 
 	/**
 	 * Create the application.
 	 */
-	public VentanaCreaCitas(VentanaPrincipal principal) 
+	public VentanaCrearSolicitud(VentanaPrincipal principal, String[] partes, String idSol) 
 	{ 
 		//setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaCreaCitas.class.getResource("/Multimedia/Logo.jpg")));
 		setTitle("Hospital:Crear Una cita");
 		setModal(true);
 		this.ventana=principal;
+		this.partes=partes;
+		this.idSol= idSol;
 		initialize();
 	}
 
@@ -448,6 +456,9 @@ public class VentanaCreaCitas extends JDialog {
 	private JCheckBox getChckbxUrgente() {
 		if (chckbxUrgente == null) {
 			chckbxUrgente = new JCheckBox("Es Urgente");
+			if(partes[7].equals("Si"))
+				chckbxUrgente.setSelected(true);
+			
 		}
 		return chckbxUrgente;
 	}
@@ -533,6 +544,7 @@ public class VentanaCreaCitas extends JDialog {
 			listMedicos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			ListModel<String> model = new DefaultComboBoxModel<String>(medicosstr);
 			listMedicos.setModel(model);
+			listMedicos.setSelectedIndex(Integer.parseInt(partes[1])-1);
 		}
 		return listMedicos;
 	}
@@ -679,6 +691,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JComboBox<Integer> getComboBoxHoraInicioCita() {
 		if (comboBoxHoraInicioCita == null) {
 			comboBoxHoraInicioCita = new JComboBox<Integer>();
+			
 			comboBoxHoraInicioCita.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if (comboBoxHoraInicioCita.getSelectedIndex() < 0) {
@@ -699,6 +712,7 @@ public class VentanaCreaCitas extends JDialog {
 			}
 			comboBoxHoraInicioCita.setBounds(342, 147, 72, 27);
 			comboBoxHoraInicioCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarHora(comboBoxHoraInicioCita, 4);
 
 		}
 		return comboBoxHoraInicioCita;
@@ -729,6 +743,7 @@ public class VentanaCreaCitas extends JDialog {
 			}
 			comboBoxMinutoInicioCita.setBounds(342, 147, 72, 27);
 			comboBoxMinutoInicioCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarMinuto(comboBoxMinutoInicioCita, 4);
 		}
 
 		return comboBoxMinutoInicioCita;
@@ -737,6 +752,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JComboBox<Integer> getComboBoxHoraFinCita() {
 		if (comboBoxHoraFinCita == null) {
 			comboBoxHoraFinCita = new JComboBox<Integer>();
+			
 			comboBoxHoraFinCita.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) 
 				{
@@ -752,6 +768,7 @@ public class VentanaCreaCitas extends JDialog {
 			}
 			comboBoxHoraFinCita.setBounds(342, 147, 72, 27);
 			comboBoxHoraFinCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarHora(comboBoxHoraFinCita, 6);
 		}
 		return comboBoxHoraFinCita;
 	}
@@ -781,6 +798,7 @@ public class VentanaCreaCitas extends JDialog {
 			}
 			comboBoxMinutoFinCita.setBounds(342, 147, 72, 27);
 			comboBoxMinutoFinCita.setModel(new DefaultComboBoxModel<Integer>(h));
+			iniciarMinuto(comboBoxMinutoFinCita, 6);
 		}
 		return comboBoxMinutoFinCita;
 	}
@@ -789,6 +807,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JDateChooser getDcInicio() {
 		if (dcInicio == null) {
 			dcInicio = new JDateChooser();
+			iniciarFecha(dcInicio,3);
 			dcInicio.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Date date = getDcFin().getDate();
@@ -806,10 +825,36 @@ public class VentanaCreaCitas extends JDialog {
 		return dcInicio;
 
 	}
+	
+	private void iniciarFecha(JDateChooser dc,int index) {
+		String[] partesFecha = partes[index].split("-");
+		int[] fecha = new int[3];
+		Calendar cal  = Calendar.getInstance();
+		
+		fecha[0]=Integer.parseInt(partesFecha[0]);//a�o
+		fecha[1]=Integer.parseInt(partesFecha[1]);//mes
+		fecha[2]=Integer.parseInt(partesFecha[2]);//dia
+		
+		cal.set(fecha[0], fecha[1], fecha[2]);
+		dc.setCalendar(cal);
+	}
+	
+	private void iniciarHora(JComboBox cb, int index) {
+		//TODO
+		String[] partesHora = partes[index].split(":");
+		cb.setSelectedIndex(Integer.parseInt(partesHora[0]));
+	}
+	
+	private void iniciarMinuto(JComboBox cb, int index) {
+		//TODO
+		String[] partesHora = partes[index].split(":");
+		cb.setSelectedIndex(Integer.parseInt(partesHora[1]));
+	}
 
 	private JDateChooser getDcFin() {
 		if (dcFin == null) {
 			dcFin = new JDateChooser();
+			iniciarFecha(dcFin, 5);
 			dcFin.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Date date = getDcInicio().getDate();
@@ -902,6 +947,8 @@ public class VentanaCreaCitas extends JDialog {
 			listPaciente.setModel(model);
 			listPaciente.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			listPaciente.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			listPaciente.setSelectedIndex(Integer.parseInt(partes[0])-1);
+			
 		}
 		return listPaciente;
 	}
@@ -994,8 +1041,8 @@ public class VentanaCreaCitas extends JDialog {
 		Date ultima = getDcFin().getDate();
 		String horaInicio =getComboBoxHoraInicioCita().getSelectedItem().toString()+":"+getComboBoxMinutoInicioCita().getSelectedItem().toString();
 		String horafin =getComboBoxHoraFinCita().getSelectedItem().toString()+":"+getComboBoxMinutoFinCita().getSelectedItem().toString();
-		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";
-		String fechafin=formateaFecha(ultima)+" "+horafin+":00";
+		String fecha = formateaFecha(inicio)+" "+horaInicio+":00";;
+		String fechafin=formateaFecha(ultima)+" "+horafin+":00";;
 		
 		cita.horaInicio=fecha; //fecha +hora inicio
 		cita.horaFinal=fechafin;
@@ -1037,6 +1084,7 @@ public class VentanaCreaCitas extends JDialog {
 		ventanaContacto(idcita-1, paciente);
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
+		new DeleteSolicitudAction(idSol).execute();
 		}
 		
 		}
@@ -1407,14 +1455,14 @@ public class VentanaCreaCitas extends JDialog {
 	private JTextField getTxtEspecialidadSeleccionada() {
 		if (txtEspecialidadSeleccionada == null) {
 			txtEspecialidadSeleccionada = new JTextField();
-			txtEspecialidadSeleccionada.setText("Especialidad: No determinada");
+			txtEspecialidadSeleccionada.setText("Especialidad: " + partes[9]);
 			txtEspecialidadSeleccionada.setColumns(10);
 		}
 		return txtEspecialidadSeleccionada;
 	}
 
 	private void ventanaContacto(int idCita, PacienteDto paciente) {
-		VentanaContacto v = new VentanaContacto(this, idCita, paciente);
+		VentanaContactoSolicitud v = new VentanaContactoSolicitud(this, idCita, paciente);
 		v.setLocationRelativeTo(this);
 		v.setModal(true);
 		v.setVisible(true);
@@ -1980,6 +2028,12 @@ public class VentanaCreaCitas extends JDialog {
 			salas[16]="4-4";
 			
 			comboBoxSala.setModel(new DefaultComboBoxModel<String>(salas));
+			String salaS = partes[8];
+			for(int i = 0; i<20;i++) {
+				if(salas[i]!=null)
+					if(salas[i].equals(salaS))
+						comboBoxSala.setSelectedIndex(i);
+			}
 		}
 		return comboBoxSala;
 	}
@@ -2001,6 +2055,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JTextField getTextFieldMotivos() {
 		if (textFieldMotivos == null) {
 			textFieldMotivos = new JTextField();
+			textFieldMotivos.setText(partes[2]);
 			textFieldMotivos.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusGained(FocusEvent e) 
@@ -2008,7 +2063,7 @@ public class VentanaCreaCitas extends JDialog {
 					textFieldMotivos.selectAll();
 				}
 			});
-			textFieldMotivos.setText("No determinados");
+			textFieldMotivos.setText(partes[2]);
 			textFieldMotivos.setHorizontalAlignment(SwingConstants.LEFT);
 			textFieldMotivos.setColumns(10);
 		}

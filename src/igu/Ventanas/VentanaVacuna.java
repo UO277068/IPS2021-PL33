@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import Logica.Carta;
+import Logica.FileUtil;
 import Logica.Vacuna;
 import Logica.crud.commands.ListPacienteById;
 import Logica.crud.dto.CitaDto;
@@ -215,6 +216,7 @@ public class VentanaVacuna extends JDialog {
 			btAsignar = new JButton("Asignar");
 			btAsignar.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+
 					Integer respuesta = JOptionPane.YES_OPTION;
 					if (getDcFecha().getDate() == null) {
 						respuesta = JOptionPane.showConfirmDialog(null,
@@ -231,6 +233,8 @@ public class VentanaVacuna extends JDialog {
 							fecha = Timestamp.valueOf(LocalDateTime.now().toString().replace('T', ' '));
 						new AddVacunaAction(cita.idPaciente, fecha, vacunasElegidas).execute();
 					}
+
+					FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + vacunasElegidas);
 				}
 			});
 			btAsignar.setBounds(352, 457, 85, 21);

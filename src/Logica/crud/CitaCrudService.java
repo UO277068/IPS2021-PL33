@@ -46,4 +46,9 @@ public interface CitaCrudService {
 	void updatePrescripcionInHistorial(String id, String prescripcion);
 	void updateAcudioCita(String id,String acude);
 	void AddSolicitud(SolicitudDto sol);
+	List<SolicitudDto> listAllSolicitudes();
+	void deleteSolicitud(String id);
+	void deleteCita(String id);
+	MedicoDto listAllMedicoById(int id_medico);
+	CitaDto listCitaById(int id);
 }

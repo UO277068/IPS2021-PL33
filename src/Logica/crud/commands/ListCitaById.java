@@ -10,36 +10,37 @@ import java.util.List;
 import Logica.DataBaseManager;
 import Logica.crud.dto.CitaDto;
 
-public class ListAllCitas 
-{
-	private String SQL = "select * from public.cita";
+public class ListCitaById {
 
-	public List<CitaDto> execute() {
+	private String SQL = "select * from public.cita where id=?";
+
+	private int id;
+	
+	public ListCitaById(int id) {
+		this.id=id;
+
+	}
+	
+	public CitaDto execute() {
 		Connection c = null;
 		PreparedStatement pst = null;
 		ResultSet rs = null;
-		List<CitaDto> result = new ArrayList<CitaDto>();
+		CitaDto cita = new CitaDto();
 		try {
 			c = DataBaseManager.getConnection();
 			
 			pst = c.prepareStatement(SQL);
+			pst.setInt(1, id);
 			rs = pst.executeQuery();
-			CitaDto cita= null;
-			while(rs.next()) {
-				cita= new CitaDto();
+
+			if(rs.next()) {
 				cita.id=rs.getString("id");
-				cita.causa=rs.getString("causa");
-				cita.motivo=rs.getString("motivo");
-				cita.contacto=rs.getString("contacto");
-				cita.horaEntrada=rs.getString("hora_entrada");
-				cita.horaFinal=rs.getString("hora_fin");
-				cita.idMedico=rs.getString("id_medico");
+				cita.idMedico = rs.getString("id_medico");
 				cita.idPaciente=rs.getString("id_paciente");
-				cita.idSala=rs.getString("id_sala");
 				cita.horaInicio=rs.getString("hora_inicio");
-				cita.horaFinal=rs.getString("hora_fin"); 
+				cita.horaFinal=rs.getString("hora_fin");
+				cita.idSala = rs.getString("id_sala");
 				
-				result.add(cita); //A�ade a la lista la cita que tiene el metodo
 			}
 			pst.close();
 			
@@ -49,6 +50,6 @@ public class ListAllCitas
 		finally {
 			if (c!=null) try{c.close();;} catch (SQLException e) {}
 		}
-		return result;
+		return cita;
 	}
 }

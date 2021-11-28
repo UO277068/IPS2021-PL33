@@ -18,7 +18,7 @@ import igu.action.AddContactoCitaAction;
 import igu.action.GetContactoByIdPacienteAction;
 import javax.swing.JComboBox;
 
-public class VentanaContacto extends JDialog {
+public class VentanaContactoSolicitud extends JDialog {
 	
 	/**
 	 * 
@@ -41,10 +41,10 @@ public class VentanaContacto extends JDialog {
 	String[] listPrefijos;
 
 	
-	private VentanaCreaCitas ventanaPrincipal;
+	private VentanaCrearSolicitud ventanaPrincipal;
 	private JComboBox<String> cbPrefijos;
 	
-	public VentanaContacto(VentanaCreaCitas vRober,int idCita, PacienteDto paciente) {
+	public VentanaContactoSolicitud(VentanaCrearSolicitud vRober,int idCita, PacienteDto paciente) {
 		this.ventanaPrincipal = vRober;
 		this.paciente = paciente;
 		this.idCita=idCita;
@@ -86,7 +86,7 @@ public class VentanaContacto extends JDialog {
 		return lbPaciente;
 	}
 	
-	public VentanaCreaCitas getVentanaPrincipal() {
+	public VentanaCrearSolicitud getVentanaPrincipal() {
 		return ventanaPrincipal;
 	}
 	

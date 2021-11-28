@@ -13,8 +13,12 @@ import java.awt.EventQueue;
 
 import javax.swing.JTextField;
 
+
 import Logica.Vacuna;
 import Logica.crud.commands.ListDiagnostico;
+
+import Logica.FileUtil;
+import Logica.crud.commands.ListAllCitasById;
 import Logica.crud.dto.*;
 import igu.action.*;
 
@@ -45,10 +49,13 @@ public class VentanaPrescripcion extends JDialog {
 	
 	List<CitaDto> prescripciones;
 	
+
 	static String id;
 	private JScrollPane scEnfermedad;
 	private JList<String> listEnfermedad;
 	private JLabel lbEnfermedades;
+
+	CitaDto cita;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -138,9 +145,10 @@ public class VentanaPrescripcion extends JDialog {
 			btPrescripcionExistente.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if(getCbPrescripciones().getSelectedItem()!=null) {
-						CitaDto presc = prescripciones.get(getCbPrescripciones().getSelectedIndex());
-						new AddPrescripcionAction(id,presc.preescripcion).execute();
-						new UpdatePrescripcionInHistorialAction( id, presc.preescripcion).execute();
+						CitaDto cita = prescripciones.get(getCbPrescripciones().getSelectedIndex());
+						new AddPrescripcionAction(cita.idPaciente,cita.preescripcion).execute();
+						new UpdatePrescripcionInHistorialAction(cita.idPaciente, cita.preescripcion).execute();
+						FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + cita.preescripcion); 
 					}
 					else
 						lbMensaje.setText("Selecciona una prescripci�n.");
@@ -172,6 +180,7 @@ public class VentanaPrescripcion extends JDialog {
 				new AddPrescripcionAction(id, txt).execute();
 				new UpdatePrescripcionInHistorialAction(lista.get(listEnfermedad.getSelectedIndex()).id,txt ).execute();
 				lbMensaje.setText("Prescripcion a�adida con exito.");
+				FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + txt); 
 			}
 		}catch(NullPointerException e) {
 			JOptionPane.showMessageDialog(this, "Prescripcion vacia.");

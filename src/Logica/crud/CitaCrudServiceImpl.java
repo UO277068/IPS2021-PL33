@@ -128,6 +128,7 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public void addDiagnostico(String idPaciente, Timestamp fecha, String causa,String idCita, String estado, String descripcion) {
 		new AddDiagnostico(idPaciente, fecha, causa, idCita, estado, descripcion).execute();;
 		
+
 	}
 
 	@Override
@@ -185,6 +186,32 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		return new ListDiagnosticoByPaciente(id).execute();
 	}
 	
+	@Override
+	public List<SolicitudDto> listAllSolicitudes() {
+		return new ListAllSolicitudes().execute();
+	}
+
+	@Override
+	public void deleteSolicitud(String id) {
+		new DeleteSolicitud(id).execute();
+		
+	}
+
+	@Override
+	public void deleteCita(String id) {
+		new DeleteCita(id).execute();
+		
+	}
+
+	@Override
+	public MedicoDto listAllMedicoById(int id_medico) {
+		return new ListAllMedicoById(id_medico).execute();
+	}
+
+	@Override
+	public CitaDto listCitaById(int id) {
+		return new ListCitaById(id).execute();
+	}
 	
 
 }

@@ -93,7 +93,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private JList<String> listMedicos;
 	private JList<String> listSeleccionados;
 	private JPanel panelBotonesMedico;
-	private JButton btnAñadirMedico;
+	private JButton btnAÃ±adirMedico;
 	private JButton btnEliminarMedico;
 	private JButton btnLimpiarListaSeleccionados;
 	private JLabel lblNewLabel;
@@ -493,7 +493,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Añadir especialidad");
+						btnAÃ±adirMedico.setText("Aï¿½adir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						
@@ -510,7 +510,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Añadir medicos");
+						btnAÃ±adirMedico.setText("Aï¿½adir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
@@ -552,7 +552,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		if (panelBotonesMedico == null) {
 			panelBotonesMedico = new JPanel();
 			panelBotonesMedico.setLayout(new GridLayout(0, 4, 0, 0));
-			panelBotonesMedico.add(getBtnAñadirMedico());
+			panelBotonesMedico.add(getBtnAÃ±adirMedico());
 			panelBotonesMedico.add(getBtnEliminarMedico());
 			panelBotonesMedico.add(getBtnHorariosMedicos());
 			panelBotonesMedico.add(getBtnLimpiarListaSeleccionados());
@@ -560,11 +560,11 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		return panelBotonesMedico;
 	}
 
-	private JButton getBtnAñadirMedico() {
-		if (btnAñadirMedico == null) {
-			btnAñadirMedico = new JButton("A\u00F1adir medicos");
-			btnAñadirMedico.setToolTipText("Seleccionar medicos");
-			btnAñadirMedico.addActionListener(new ActionListener() {
+	private JButton getBtnAÃ±adirMedico() {
+		if (btnAÃ±adirMedico == null) {
+			btnAÃ±adirMedico = new JButton("A\u00F1adir medicos");
+			btnAÃ±adirMedico.setToolTipText("Seleccionar medicos");
+			btnAÃ±adirMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
 				  if(!chckbxEspecialidad.isSelected()) {
@@ -588,7 +588,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 				}
 			});
 		}
-		return btnAñadirMedico;
+		return btnAÃ±adirMedico;
 	}
 
 	private JButton getBtnEliminarMedico() {
@@ -961,7 +961,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		 GeneraCita(paciente, respuesta, urge, medico);
 		}
 		}else {
-			 respuesta=JOptionPane.showConfirmDialog(null,"¿Quiere solicitar una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+			 respuesta=JOptionPane.showConfirmDialog(null,"ï¿½Quiere solicitar una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 			if(respuesta==JOptionPane.YES_OPTION) { //Preguntar si desea generar una cita sin medicos
 		       GeneraCita(paciente, respuesta, urge, null);
 			}
@@ -990,7 +990,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
 		
-		//solicitud.cuerpo+="No determinandas" + "#"; //Añadir causas una vez el medico las determine
+		//solicitud.cuerpo+="No determinandas" + "#"; //Aï¿½adir causas una vez el medico las determine
 		solicitud.cuerpo+=getTextFieldMotivos().getText() + "#";
 		//
 		Date inicio = getDcInicio().getDate();
@@ -1052,7 +1052,7 @@ public class VentanaSolicitarCrearCita extends JDialog {
 		{
 			if(Timestamp.valueOf(c.horaInicio).after(Timestamp.valueOf(cita.horaInicio)) || (Timestamp.valueOf(c.horaInicio).before(Timestamp.valueOf(cita.horaInicio)) && Timestamp.valueOf(c.horaFinal).after(Timestamp.valueOf(cita.horaFinal))) ) 
 			{
-				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.¿Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.ï¿½Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 				if(respuesta==JOptionPane.YES_OPTION) 
 				{
 					return true;
@@ -1147,9 +1147,9 @@ public class VentanaSolicitarCrearCita extends JDialog {
 	private String formateaFecha(Date fecha) {
 		String[] fechaS = fecha.toString().split(" ");
 		String mes = fechaS[1];
-		String año = fechaS[5];
+		String aÃ±o = fechaS[5];
 		String dia = fechaS[2];
-		return año + "-" + seleccionaMes(mes) + "-" + dia;
+		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 
 	private String seleccionaMes(String mes) {

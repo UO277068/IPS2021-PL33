@@ -1,7 +1,10 @@
 package igu.action;
 
+import java.util.List;
+
 import Logica.BusinessFactory;
 import Logica.crud.CitaCrudService;
+import Logica.crud.dto.DiagnosticoDto;
 
 public class ListDiagnosticoByIdAction {
 	private CitaCrudService service = BusinessFactory.forCitaCrudService();
@@ -9,9 +12,9 @@ public class ListDiagnosticoByIdAction {
 	public ListDiagnosticoByIdAction(String id) {
 		this.id=id;
 	}
-	public String execute(){
+	public List<DiagnosticoDto> execute(){
 
-		String nombre=null;
+		List<DiagnosticoDto> nombre=null;
 		try {
 			nombre = service.listDiagnosticoById(id);
 		} catch (Exception e) {

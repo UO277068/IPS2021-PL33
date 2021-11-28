@@ -13,6 +13,8 @@ import java.awt.EventQueue;
 
 import javax.swing.JTextField;
 
+import Logica.Vacuna;
+import Logica.crud.commands.ListDiagnostico;
 import Logica.crud.dto.*;
 import igu.action.*;
 
@@ -21,6 +23,9 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JList;
 
 public class VentanaPrescripcion extends JDialog {
 	/**
@@ -36,10 +41,14 @@ public class VentanaPrescripcion extends JDialog {
 	private JButton btPrescripcionExistente;
 	private JButton btCrearPrescripcion;
 	private JLabel lbMensaje;
+	private List<DiagnosticoDto> lista;
 	
 	List<CitaDto> prescripciones;
 	
 	static String id;
+	private JScrollPane scEnfermedad;
+	private JList<String> listEnfermedad;
+	private JLabel lbEnfermedades;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -66,7 +75,7 @@ public class VentanaPrescripcion extends JDialog {
 	private JPanel getPnPrescripcion() {
 		if (pnPrescripcion == null) {
 			pnPrescripcion = new JPanel();
-			setBounds(100,100,450,320);
+			setBounds(100,100,797,470);
 			pnPrescripcion.setLayout(null);
 			pnPrescripcion.add(getLbPrescripcionExistentes());
 			pnPrescripcion.add(getCbPrescripciones());
@@ -75,13 +84,15 @@ public class VentanaPrescripcion extends JDialog {
 			pnPrescripcion.add(getBtPrescripcionExistente());
 			pnPrescripcion.add(getBtCrearPrescripcion());
 			pnPrescripcion.add(getLbMensaje());
+			pnPrescripcion.add(getScEnfermedad());
+			pnPrescripcion.add(getLbEnfermedades());
 		}
 		return pnPrescripcion;
 	}
 	private JLabel getLbPrescripcionExistentes() {
 		if (lbPrescripcionExistentes == null) {
 			lbPrescripcionExistentes = new JLabel("Prescripciones Existentes:");
-			lbPrescripcionExistentes.setBounds(29, 11, 174, 30);
+			lbPrescripcionExistentes.setBounds(441, 28, 174, 30);
 		}
 		return lbPrescripcionExistentes;
 	}
@@ -92,7 +103,7 @@ public class VentanaPrescripcion extends JDialog {
 			cbPrescripciones.setBackground(Color.WHITE);
 			String[] prescripcionstr = prescripcionToString(prescripciones);
 			cbPrescripciones.setModel(new DefaultComboBoxModel<String>(prescripcionstr));
-			cbPrescripciones.setBounds(41, 53, 226, 30);
+			cbPrescripciones.setBounds(453, 70, 226, 30);
 		}
 		return cbPrescripciones;
 	}
@@ -109,7 +120,7 @@ public class VentanaPrescripcion extends JDialog {
 	private JLabel getLblCrearPrescripcion() {
 		if (lblCrearPrescripcion == null) {
 			lblCrearPrescripcion = new JLabel("Crear Prescripcion:");
-			lblCrearPrescripcion.setBounds(31, 135, 138, 30);
+			lblCrearPrescripcion.setBounds(443, 152, 138, 30);
 		}
 		return lblCrearPrescripcion;
 	}
@@ -117,7 +128,7 @@ public class VentanaPrescripcion extends JDialog {
 		if (txtPrescripcion == null) {
 			txtPrescripcion = new JTextField();
 			txtPrescripcion.setColumns(10);
-			txtPrescripcion.setBounds(41, 174, 226, 30);
+			txtPrescripcion.setBounds(453, 191, 226, 30);
 		}
 		return txtPrescripcion;
 	}
@@ -135,14 +146,14 @@ public class VentanaPrescripcion extends JDialog {
 						lbMensaje.setText("Selecciona una prescripci�n.");
 				}
 			});
-			btPrescripcionExistente.setBounds(51, 94, 165, 30);
+			btPrescripcionExistente.setBounds(463, 111, 165, 30);
 		}
 		return btPrescripcionExistente;
 	}
 	private JButton getBtCrearPrescripcion() {
 		if (btCrearPrescripcion == null) {
 			btCrearPrescripcion = new JButton("Usar Prescripcion");
-			btCrearPrescripcion.setBounds(51, 215, 165, 30);
+			btCrearPrescripcion.setBounds(463, 232, 165, 30);
 			btCrearPrescripcion.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					prescripcion();
@@ -159,7 +170,7 @@ public class VentanaPrescripcion extends JDialog {
 				JOptionPane.showMessageDialog(this, "Prescripcion vacia.");
 			else {
 				new AddPrescripcionAction(id, txt).execute();
-				new UpdatePrescripcionInHistorialAction(id,txt ).execute();
+				new UpdatePrescripcionInHistorialAction(lista.get(listEnfermedad.getSelectedIndex()).id,txt ).execute();
 				lbMensaje.setText("Prescripcion a�adida con exito.");
 			}
 		}catch(NullPointerException e) {
@@ -169,9 +180,42 @@ public class VentanaPrescripcion extends JDialog {
 	private JLabel getLbMensaje() {
 		if (lbMensaje == null) {
 			lbMensaje = new JLabel("");
-			lbMensaje.setBounds(31, 213, 200, 22);
+			lbMensaje.setBounds(443, 230, 200, 22);
 		}
 		return lbMensaje;
 	}
+	private JScrollPane getScEnfermedad() {
+		if (scEnfermedad == null) {
+			scEnfermedad = new JScrollPane();
+			scEnfermedad.setBounds(42, 70, 275, 209);
+			scEnfermedad.setViewportView(getListEnfermedad());
+		}
+		return scEnfermedad;
+	}
+	private JList<String> getListEnfermedad() {
+		if (listEnfermedad == null) {
+			listEnfermedad = new JList<String>();
+			lista = new ListDiagnostico(id).execute();
+			listEnfermedad.setModel(new DefaultComboBoxModel<String>(getDiagnostico(lista)));
+
+		}
+		return listEnfermedad;
+	}
 	
+	private String[] getDiagnostico(List<DiagnosticoDto> lista) {
+		//List<CitaDto> lista = new ListAllCitasByIdAction(idMedico).execute();
+		String[] diagnosticos = new String[lista.size()];
+		for (int i = 0; i < diagnosticos.length; i++) {
+			String diagnostico = lista.get(i).diagnostico;
+			diagnosticos[i]=diagnostico;
+		}
+		return diagnosticos;
+	}
+	private JLabel getLbEnfermedades() {
+		if (lbEnfermedades == null) {
+			lbEnfermedades = new JLabel("Enfermedades:");
+			lbEnfermedades.setBounds(42, 37, 144, 13);
+		}
+		return lbEnfermedades;
+	}
 }

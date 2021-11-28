@@ -14,13 +14,11 @@ public class AddVacuna {
 
 	private String SQL = "INSERT INTO public.vacuna VALUES(?,?,?,?,?)";
 	private String SQLID = "select count(*) from public.vacuna";
-	private String id;
 	private Timestamp fecha;
 	private List<Vacuna> vacunas;
 	private String idPaciente;
 	
-	public AddVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
-		this.id=id;
+	public AddVacuna(String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
 		this.idPaciente=idPaciente;
 		this.fecha=fecha;
 		this.vacunas=vacunas;
@@ -63,7 +61,7 @@ public class AddVacuna {
 			pst = c.prepareStatement(SQLID);
 			rs=pst.executeQuery();
 			if(rs.next())
-				id=rs.getInt(1);
+				id=rs.getInt(1)+1;
 			if(id==0)
 				id=1;
 			pst.close();

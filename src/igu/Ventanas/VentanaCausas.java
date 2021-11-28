@@ -17,7 +17,6 @@ import javax.swing.JTextField;
 import Logica.crud.dto.CitaDto;
 import igu.action.AddCausasAction;
 import igu.action.ListAllCausasAction;
-import igu.action.AddDiagnosticoAction;
 
 public class VentanaCausas extends JDialog {
 	/**
@@ -112,7 +111,7 @@ public class VentanaCausas extends JDialog {
 			btCausa.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					new AddCausasAction(idCita,getTxtCausa().getText()).execute();
-					new AddDiagnosticoAction(idCita, id,getTxtCausa().getText()).execute();
+					//new AddDiagnosticoAction(idCita, id,getTxtCausa().getText()).execute();
 				}
 			});
 			btCausa.setBounds(129, 64, 117, 29);

@@ -4,11 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import Logica.DataBaseManager;
+import Logica.crud.dto.DiagnosticoDto;
 
 public class ListDiagnosticoById {
-	private String SQL = "select diagnostico, prescripcion, fecha from public.diagnostico where id_paciente=?";
+	private String SQL = "select diagnostico, prescripcion, fecha, descripcion, activa from public.diagnostico where id_paciente=?";
 
 	private String id;
 	
@@ -17,23 +20,28 @@ public class ListDiagnosticoById {
 
 	}
 	
-	public String execute() {
+	public List<DiagnosticoDto> execute() {
 		Connection c = null;
 		PreparedStatement pst = null;
 		ResultSet rs = null;
-		String result = null;
+		List<DiagnosticoDto> result=null;
+		//String result = null;
+		DiagnosticoDto diag = null;
 		try {
 			c = DataBaseManager.getConnection();
 			
 			pst = c.prepareStatement(SQL);
 			pst.setString(1, id);
 			rs = pst.executeQuery();
-			result="";
+			result=new ArrayList<>();
 			while(rs.next()) {
-				result+="Fecha de la visita: "+rs.getDate("fecha");
-				result+="\n\t-Diagnostico: "+rs.getString("diagnostico");
-				result+="\n\t-Prescripcion de la visita: "+rs.getString("prescripcion");
-				result+="\n";
+				diag = new DiagnosticoDto();
+				diag.fecha=rs.getTimestamp("fecha");
+				diag.diagnostico=rs.getString("diagnostico");
+				diag.descripcion=rs.getString("descripcion");
+				diag.prescripcion=rs.getString("prescripcion");
+				diag.status=rs.getString("activa");
+				result.add(diag);
 			}
 			pst.close();
 			

@@ -36,6 +36,8 @@ public interface CitaCrudService {
 	int InsertCita(CitaDto cita);
 	List<CitaDto> listAllCitas();
 	void EnviarEmail(String correo,PacienteDto paciente,CitaDto cita);
+	void insertRequisitos(RequisitoDto dto);
+
 	//fer
 	void AddCausa(String id, String causa);
 	List<CitaDto> listAllCausas();

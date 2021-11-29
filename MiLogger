@@ -1,6 +1,6 @@
-nov 26, 2021 2:09:25 P.�M. Logica.FileUtil escribirLog
+nov 26, 2021 2:09:25 P.�M. Logica.FileUtil escribirLog
 INFO: null -> Hay que operarle urgentemente
-nov 26, 2021 2:31:55 P.�M. Logica.FileUtil escribirLog
+nov 26, 2021 2:31:55 P.�M. Logica.FileUtil escribirLog
 INFO: null -> amonugs
 nov 28, 2021 5:46:04 P. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> [Havrix 720 y 1440 - HA]
@@ -8,6 +8,7 @@ nov 28, 2021 5:48:07 P. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> A01.03 - NeumonÃ­a tifoidea
 nov 28, 2021 5:48:07 P. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> A01.04 - Artritis tifoidea
+
 nov 29, 2021 11:10:28 A. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> [Moderna Covid-19 - Covid-19]
 nov 29, 2021 11:14:51 A. M. Logica.FileUtil escribirLog
@@ -22,3 +23,25 @@ nov 29, 2021 7:48:52 P. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> A00.0 - Colera debido a Vibrio cholerae 01, biotipo cholerae 
 nov 29, 2021 7:49:22 P. M. Logica.FileUtil escribirLog
 INFORMACIÓN: Medico ID: 1null -> A00.0 - Colera debido a Vibrio cholerae 01, biotipo cholerae 
+
+nov 28, 2021 7:21:20 P.�M. Logica.FileUtil escribirLog
+INFO: Medico ID: 1  Antes: 
+nov 28, 2021 7:21:21 P.�M. Logica.FileUtil escribirLog
+INFO: Despues: Medico ID: 1 [Boostrix Polio - Tdpa-VPI, Cervarix - VPH, Comirnaty - Covid-19]
+nov 28, 2021 7:23:03 P.�M. Logica.FileUtil escribirLog
+INFO: Medico ID: 1  Antes: Boostrix Polio, Cervarix, Comirnaty, 
+nov 28, 2021 7:23:03 P.�M. Logica.FileUtil escribirLog
+INFO: Despues: Medico ID: 1 [Boostrix - Tdpa, Boostrix Polio - Tdpa-VPI, Cervarix - VPH]
+nov 28, 2021 7:24:22 P.�M. Logica.FileUtil escribirLog
+INFO: Medico ID: 1  Antes: [Bexsero, Comirnaty, Fluarix Tetra, Meningitec, Havrix 720 y 1440,  ] 
+nov 28, 2021 7:24:22 P.�M. Logica.FileUtil escribirLog
+INFO: Despues: Medico ID: 1 [(Afluria) - Gripe, Bexsero - MenB, Comirnaty - Covid-19]
+nov 28, 2021 7:24:37 P.�M. Logica.FileUtil escribirLog
+INFO: Medico ID: 1  Antes: [Bexsero, Comirnaty, Fluarix Tetra, Meningitec, Havrix 720 y 1440, (Afluria), Bexsero, Comirnaty,  ] 
+nov 28, 2021 7:24:37 P.�M. Logica.FileUtil escribirLog
+INFO: Despues: Medico ID: 1 [(Afluria) - Gripe, Bexsero - MenB, Comirnaty - Covid-19, Chiroflu - Gripe, Chiromas - Gripe]
+nov 28, 2021 7:25:00 P.�M. Logica.FileUtil escribirLog
+INFO: Medico ID: 1  Antes: [Bexsero, Comirnaty, Fluarix Tetra, Meningitec, Havrix 720 y 1440, (Afluria), Bexsero, Comirnaty, (Afluria), Bexsero, Comirnaty, Chiroflu, Chiromas,  ] 
+nov 28, 2021 7:25:00 P.�M. Logica.FileUtil escribirLog
+INFO: Despues: Medico ID: 1 []
+

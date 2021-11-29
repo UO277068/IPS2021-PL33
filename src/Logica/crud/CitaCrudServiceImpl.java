@@ -204,6 +204,10 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
+	public void insertRequisitos(RequisitoDto dto) {
+		new InsertRequisitos(dto).execute();
+	}
+
 	public MedicoDto listAllMedicoById(int id_medico) {
 		return new ListAllMedicoById(id_medico).execute();
 	}

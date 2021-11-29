@@ -20,6 +20,7 @@ import javax.swing.ListModel;
 
 import igu.action.EnviarEmailUrgenteAction;
 import igu.action.InsertCitaAction;
+import igu.action.InsertRequisitosCitaAction;
 import igu.action.ListAllMedicosAction;
 import igu.action.ListAllPacientesAction;
 import igu.action.ListCitasByMedicoAction;
@@ -58,6 +59,7 @@ import java.awt.event.ItemEvent;
 import java.util.Locale;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.JSpinner;
 
 public class VentanaCreaCitas extends JDialog {
 
@@ -160,6 +162,7 @@ public class VentanaCreaCitas extends JDialog {
 	List<PacienteDto> pacientes;
 	List<MedicoDto> medicos;
 	List<MedicoDto> medicosSeleccionados;
+	List<String> especialidadesSeleccionadas;
 	String[] especialidades;
 	String SelectedEspecialidad;
 	private JPanel panelSala;
@@ -168,6 +171,8 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelMotivos;
 	private JLabel lblMotivos;
 	private JTextField textFieldMotivos;
+	private JPanel panelAñadir;
+	private JSpinner spinnerMedicoEspecialidad;
 	
 
 	/**
@@ -198,6 +203,8 @@ public class VentanaCreaCitas extends JDialog {
 		this.medicosselectModel= new ArrayList<String>();
 		
 		this.medicosSeleccionados = new ArrayList<MedicoDto>();
+		
+		this.especialidadesSeleccionadas= new ArrayList<String>();
 		
 		this.especialidades=obtenerEspecialidades();
 		
@@ -489,8 +496,11 @@ public class VentanaCreaCitas extends JDialog {
 					if(chckbxEspecialidad.isSelected()) {
 						getLblMedicos().setText("Especialidades:");
 						ListModel<String> model = new DefaultComboBoxModel<String>(especialidades);
-						listMedicos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
+						spinnerMedicoEspecialidad.setVisible(true);
+						//getTxtEspecialidadSeleccionada().setVisible(false);
+
 						
 						btnAñadirMedico.setText("A�adir especialidad");
 						
@@ -500,6 +510,10 @@ public class VentanaCreaCitas extends JDialog {
 						{
 						  btnEliminarMedico.setEnabled(false);
 						}
+						
+						//Actualiza la lista de especialidades seleccionadas
+						String[] mste = especialidadesToString(especialidadesSeleccionadas);
+						getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mste));
 						
 						
 					}else {
@@ -514,6 +528,13 @@ public class VentanaCreaCitas extends JDialog {
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
 						btnEliminarMedico.setEnabled(true);
+						
+						//getTxtEspecialidadSeleccionada().setVisible(true);
+						
+						spinnerMedicoEspecialidad.setVisible(false);
+						
+						String[] mstr = medicosToString(medicosSeleccionados) ;
+						getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
 
 						
 					}
@@ -551,7 +572,7 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelBotonesMedico == null) {
 			panelBotonesMedico = new JPanel();
 			panelBotonesMedico.setLayout(new GridLayout(0, 4, 0, 0));
-			panelBotonesMedico.add(getBtnAñadirMedico());
+			panelBotonesMedico.add(getPanelAñadir());
 			panelBotonesMedico.add(getBtnEliminarMedico());
 			panelBotonesMedico.add(getBtnHorariosMedicos());
 			panelBotonesMedico.add(getBtnLimpiarListaSeleccionados());
@@ -582,12 +603,53 @@ public class VentanaCreaCitas extends JDialog {
 				   //Actualiza la lista de medicos normal
 				   //for(Medico)
 				}else {
-					insertarEspecialidad(listMedicos.getSelectedValue());
+					List<String> esp = obtenEspecialidadesSeleccionadas();
+					int resp = JOptionPane.YES_OPTION;
+					for(String especialidad : esp)
+					{
+						if(!checkMedicosSuficientes(esp)) {
+							resp = JOptionPane.showConfirmDialog(null,"No hay medicos suficentes de esa especialidade. �Desea a�adir?","Advertencia al a�adir Especialidades",JOptionPane.YES_NO_OPTION);
+						}
+						
+						if(!cont(especialidad) && resp==JOptionPane.YES_OPTION) {
+							especialidadesSeleccionadas.add(getSpinnerMedicoEspecialidad().getValue()+":"+especialidad);
+							insertarEspecialidad();
+						}
+					}
+					//Actualiza la lista de especialidades seleccionadas
+					String[] mste = especialidadesToString(especialidadesSeleccionadas);
+					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mste));
 				}
 				}
+
 			});
 		}
 		return btnAñadirMedico;
+	}
+	
+	private boolean checkMedicosSuficientes(List<String> especialidades) {
+		int t=0;
+		int pedido = (int) getSpinnerMedicoEspecialidad().getValue();
+	    for(String especialidad : especialidades) {
+		for (MedicoDto m : medicos) {
+			if(m.especialidad.toUpperCase().startsWith(especialidad.toUpperCase())) {
+			    t=t+1;
+			}}
+			if(t<pedido) {
+				return false;
+			}
+		}
+	    return true;
+		
+	}
+	
+	private boolean cont(String e) {
+		for(String esp : especialidadesSeleccionadas) {
+			if(esp.split(":")[1].equals(e)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private JButton getBtnEliminarMedico() {
@@ -605,7 +667,14 @@ public class VentanaCreaCitas extends JDialog {
 					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
 					}
 				 }else {
-					 eliminarEspecialidad();
+					 int i=getListSeleccionados().getSelectedIndex();
+						if(i>=0) {
+						especialidadesSeleccionadas.remove(i);
+						String[] mstr = especialidadesToString(especialidadesSeleccionadas)  ;
+						getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
+						eliminarEspecialidad();
+						}
+					 
 				 }
 				}
 			});
@@ -623,6 +692,7 @@ public class VentanaCreaCitas extends JDialog {
 					medicosSeleccionados.clear();
 					String[] mstr = medicosToString(medicosSeleccionados);
 					getListSeleccionados().setModel(new DefaultComboBoxModel<String>(mstr));
+					especialidadesSeleccionadas.clear();
 					eliminarEspecialidad();
 					
 				}
@@ -1030,10 +1100,12 @@ public class VentanaCreaCitas extends JDialog {
 			cita.Especialidad=null;
 		}else {
 			cita.Especialidad=this.SelectedEspecialidad.toUpperCase();
+			
 		}
                      
 		int idcita = new InsertCitaAction(cita).execute();
-		System.out.print(idcita);
+		cita.id=idcita-1+"";
+		introduceRequisitos(cita.id,especialidadesSeleccionadas);
 		ventanaContacto(idcita-1, paciente);
 
 		getTextFieldAvisoUsuario().setText("La cita se ha insertado correctamete");
@@ -1044,6 +1116,20 @@ public class VentanaCreaCitas extends JDialog {
 	}
 
 	
+	private void introduceRequisitos(String id, List<String> especialidadesSeleccionadas2) {
+		InsertRequisitosCitaAction insertaRequisitos = new InsertRequisitosCitaAction();
+		for(String esp : especialidadesSeleccionadas2) {
+			String[] requisito = esp.split(":");
+			RequisitoDto dto = new RequisitoDto();
+			dto.cita=id;
+			dto.numeroMedicos=requisito[0];
+			dto.especialidad=requisito[1];
+			insertaRequisitos.setReqDto(dto);
+			insertaRequisitos.execute();
+		}
+
+	}
+
 	private boolean compruebaHoraSala(CitaDto cita) 
 	{
 		List<CitaDto> listaDeCitas = new ListCitasBySala(cita.idSala).execute();
@@ -1198,6 +1284,23 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		return strMedicos;
 	}
+	
+	private String[] especialidadesToString(List<String> especialidades) {
+		String[] strEspecialidad = new String[especialidades.size()];
+		for (int i = 0; i < especialidades.size(); i++) {
+			String[] tot = especialidades.get(i).split(":");
+			String med=tot[0];
+			String esp= tot[1];
+			if(Integer.valueOf(med)==0) {
+				strEspecialidad[i] = esp;
+			}else if(Integer.valueOf(med)==1){
+				strEspecialidad[i] = med+" medico de "+esp;
+			}else {
+				strEspecialidad[i] = med+" medicos de "+esp;
+			}
+		}
+		return strEspecialidad;
+	}
 
 	private List<MedicoDto> obtenMedicosSeleccionados() {
 		int[] index = getListMedicos().getSelectedIndices();
@@ -1219,6 +1322,23 @@ public class VentanaCreaCitas extends JDialog {
 			return listaSeleccionados;
 		}
 		return listaSeleccionados;
+	}
+	
+	private List<String> obtenEspecialidadesSeleccionadas(){
+		int[] index = getListMedicos().getSelectedIndices();
+		List<String> lista = new ArrayList<String>();
+		if (index.length > 0) {
+			for (int i = 0; i < index.length; i++) {
+			  String select = getListMedicos().getModel().getElementAt(index[i]);
+			  
+			  for (String e : this.especialidades) {
+					if (e.equals(select)) {
+						lista.add(e);
+					}
+				}
+			}
+		}
+		return lista;
 	}
 
 	// Metodos de checkeo/Comprobacion de los campos introducidos
@@ -1389,18 +1509,20 @@ public class VentanaCreaCitas extends JDialog {
 		return especialidades;
 	}
 	
-	private void insertarEspecialidad(String e) 
+	private void insertarEspecialidad() 
 	{
-		this.SelectedEspecialidad=e;
+		this.SelectedEspecialidad="Seleccionadas";
 		getBtnEliminarMedico().setEnabled(true);
-	    getTxtEspecialidadSeleccionada().setText("Especialidad: "+e);
+	    getTxtEspecialidadSeleccionada().setText("Especialidades: "+"Determinadas");
 	}
 	
 	private void eliminarEspecialidad() 
 	{
+		if(this.especialidadesSeleccionadas.isEmpty()) {
 		this.SelectedEspecialidad=null;
 		getBtnEliminarMedico().setEnabled(false);
 	    getTxtEspecialidadSeleccionada().setText("Especialidad: No determinada");
+		}
 
  	}
 
@@ -1542,7 +1664,9 @@ public class VentanaCreaCitas extends JDialog {
 				{
 					if(chckbxFiltroMedicosDisponibilidad.isSelected())
 					{
-						 getListMedicosDisponibilidad().setModel(getListSeleccionados().getModel());
+						 String[] medicosst = medicosToString(medicosSeleccionados);
+						 ListModel<String> model1 = new DefaultComboBoxModel<String>(medicosst);
+						 getListMedicosDisponibilidad().setModel(model1);
 						 int[] indices= new int[getListSeleccionados().getModel().getSize()];
 					     for(int i=0;i<getListSeleccionados().getModel().getSize();i++) 
 					     {
@@ -1884,6 +2008,7 @@ public class VentanaCreaCitas extends JDialog {
 			
 			for(JornadaDto dto: jornadas) 
 			{
+			    
 				resultado.add(dto.diasalida+"-"+dto.diaEntrada);
 			}
 		}
@@ -2013,5 +2138,21 @@ public class VentanaCreaCitas extends JDialog {
 			textFieldMotivos.setColumns(10);
 		}
 		return textFieldMotivos;
+	}
+	private JPanel getPanelAñadir() {
+		if (panelAñadir == null) {
+			panelAñadir = new JPanel();
+			panelAñadir.setLayout(new BorderLayout(0, 0));
+			panelAñadir.add(getBtnAñadirMedico());
+			panelAñadir.add(getSpinnerMedicoEspecialidad(), BorderLayout.EAST);
+		}
+		return panelAñadir;
+	}
+	private JSpinner getSpinnerMedicoEspecialidad() {
+		if (spinnerMedicoEspecialidad == null) {
+			spinnerMedicoEspecialidad = new JSpinner();
+			spinnerMedicoEspecialidad.setVisible(false);
+		}
+		return spinnerMedicoEspecialidad;
 	}
 }

@@ -2,6 +2,9 @@ package Logica;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public abstract class FileUtil {
 	
@@ -54,4 +57,29 @@ public static void loadFile (String nombreFicheroEntrada, List<Vacuna> listaCata
 		}
 		return codigo;
 	}
+	
+	
+	public static void escribirLog(String rutaArchivo, String mensaje) {
+
+        Logger logger = Logger.getLogger("MyLog");
+        FileHandler fh;
+
+        try {
+
+            fh = new FileHandler(rutaArchivo, true);
+            logger.addHandler(fh);
+
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+
+            logger.info(mensaje);
+            
+            fh.close();
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -502,7 +502,7 @@ public class VentanaCreaCitas extends JDialog {
 						//getTxtEspecialidadSeleccionada().setVisible(false);
 
 						
-						btnAñadirMedico.setText("Añadir especialidad");
+						btnAñadirMedico.setText("Aï¿½adir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						
@@ -523,7 +523,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Añadir medicos");
+						btnAñadirMedico.setText("Aï¿½adir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
@@ -1030,7 +1030,7 @@ public class VentanaCreaCitas extends JDialog {
 		 GeneraCita(paciente, respuesta, urge, medico);
 		}
 		}else {
-			 respuesta=JOptionPane.showConfirmDialog(null,"¿Quiere crear una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+			 respuesta=JOptionPane.showConfirmDialog(null,"ï¿½Quiere crear una cita sin medicos definidos?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 			if(respuesta==JOptionPane.YES_OPTION) { //Preguntar si desea generar una cita sin medicos
 		       GeneraCita(paciente, respuesta, urge, null);
 			}
@@ -1057,7 +1057,7 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		if(respuesta==JOptionPane.YES_OPTION) {	
 		cita.idPaciente=paciente.id;
-		cita.causa="No determinandas"; //Añadir causas una vez el medico las determine
+		cita.causa="No determinandas"; //Aï¿½adir causas una vez el medico las determine
 		cita.motivo=getTextFieldMotivos().getText();
 		//
 		Date inicio = getDcInicio().getDate();
@@ -1137,7 +1137,7 @@ public class VentanaCreaCitas extends JDialog {
 		{
 			if(Timestamp.valueOf(c.horaInicio).after(Timestamp.valueOf(cita.horaInicio)) || (Timestamp.valueOf(c.horaInicio).before(Timestamp.valueOf(cita.horaInicio)) && Timestamp.valueOf(c.horaFinal).after(Timestamp.valueOf(cita.horaFinal))) ) 
 			{
-				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.¿Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
+				int respuesta = JOptionPane.showConfirmDialog(null,"La sala "+cita.idSala+"esta ocupada en ese momento.ï¿½Desea crear la cita?","Advertencia al Crear la cita",JOptionPane.YES_NO_OPTION);
 				if(respuesta==JOptionPane.YES_OPTION) 
 				{
 					return true;

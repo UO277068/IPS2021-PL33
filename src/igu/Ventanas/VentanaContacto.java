@@ -68,6 +68,7 @@ public class VentanaContacto extends JDialog {
 		
 		
 	}
+	
 	private String[] inicializaPrefijos() {
 		String[] ret = new String[10];
 		ret[0]="+34"; ret[1]="";

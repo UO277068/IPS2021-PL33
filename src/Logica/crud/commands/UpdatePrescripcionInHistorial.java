@@ -8,7 +8,7 @@ import Logica.DataBaseManager;
 
 public class UpdatePrescripcionInHistorial {
 
-	private String SQL = "update public.diagnostico set prescripcion=? where id_cita=?";
+	private String SQL = "update public.diagnostico set prescripcion=? where id=?";
 	private String diagnostico;
 	private String id;
 	

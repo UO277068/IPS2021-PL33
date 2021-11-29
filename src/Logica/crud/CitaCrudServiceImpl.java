@@ -40,13 +40,13 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public String listDiagnosticoById(String id) throws Exception {
+	public List<DiagnosticoDto> listDiagnosticoById(String id) throws Exception {
 		// TODO Auto-generated method stub
 		return new ListDiagnosticoById(id).execute();
 	}
 
 	@Override
-	public String listVacunaById(String id) throws Exception {
+	public List<VacunaDto> listVacunaById(String id) throws Exception {
 		// TODO Auto-generated method stub
 		return new ListVacunaById(id).execute();
 	}
@@ -123,9 +123,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public String getContactoByIdPaciente(String id) {
 		return new GetContactoByIdPaciente(id).execute();
 	}
-	
-	public void addDiagnostico(String id, String idPaciente, String causa) {
-		new AddDiagnostico(id,idPaciente,causa).execute();;	
+
+	@Override
+	public void addDiagnostico(String idPaciente, Timestamp fecha, String causa,String idCita, String estado, String descripcion) {
+		new AddDiagnostico(idPaciente, fecha, causa, idCita, estado, descripcion).execute();;
+		
+
 	}
 
 	@Override
@@ -153,27 +156,34 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	}
 
 	@Override
-	public void addVacuna(String id, String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
-		new AddVacuna(id, idPaciente, fecha, vacunas).execute();
+	public void addVacuna(String idPaciente, Timestamp fecha, List<Vacuna> vacunas) {
+		new AddVacuna(idPaciente, fecha, vacunas).execute();
 		
 	}
 
 	@Override
 	public List<DiagnosticoDto> listDiagnosticoByCap(String cap) {
-		// TODO Auto-generated method stub
 		return new ListDiagnosticoByCap(cap).execute();
 	}
 
 	@Override
 	public List<DiagnosticoDto> listDiagnosticoByRange(String cap) {
-		// TODO Auto-generated method stub
 		return new ListDiagnosticoByRange(cap).execute();
 	}
 
 	@Override
 	public List<DiagnosticoDto> listDiagnosticoByCode(String cap) {
-		// TODO Auto-generated method stub
 		return new ListDiagnosticoByCode(cap).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnostico(String id) {
+		return new ListDiagnostico(id).execute();
+	}
+
+	@Override
+	public List<DiagnosticoDto> listDiagnosticoByPaciente(String id) {
+		return new ListDiagnosticoByPaciente(id).execute();
 	}
 	
 	@Override
@@ -196,7 +206,15 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	@Override
 	public void insertRequisitos(RequisitoDto dto) {
 		new InsertRequisitos(dto).execute();
-		
+	}
+
+	public MedicoDto listAllMedicoById(int id_medico) {
+		return new ListAllMedicoById(id_medico).execute();
+	}
+
+	@Override
+	public CitaDto listCitaById(int id) {
+		return new ListCitaById(id).execute();
 	}
 	
 

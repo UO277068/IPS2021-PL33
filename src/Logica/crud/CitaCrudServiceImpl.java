@@ -192,6 +192,12 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 		new DeleteCita(id).execute();
 		
 	}
+
+	@Override
+	public void insertRequisitos(RequisitoDto dto) {
+		new InsertRequisitos(dto).execute();
+		
+	}
 	
 
 }

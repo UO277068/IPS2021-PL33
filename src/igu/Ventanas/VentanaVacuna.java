@@ -57,7 +57,7 @@ public class VentanaVacuna extends JDialog {
 	private JLabel lbPaciente;
 	private JTextField txPaciente;
 	private Carta carta;
-	private JButton btAñadir;
+	private JButton btAÃ±adir;
 	private List<Vacuna> vacunas;
 	private List<Vacuna> vacunasElegidas;
 	private JButton btEliminar;
@@ -87,7 +87,7 @@ public class VentanaVacuna extends JDialog {
 		contentPane.add(getLbVacunasElegidas());
 		contentPane.add(getLbPaciente());
 		contentPane.add(getTxPaciente());
-		contentPane.add(getBtAñadir());
+		contentPane.add(getBtAÃ±adir());
 		contentPane.add(getBtEliminar());
 		contentPane.add(getBtAsignar());
 		contentPane.add(getTxVacuna());
@@ -166,10 +166,10 @@ public class VentanaVacuna extends JDialog {
 		return txPaciente;
 	}
 
-	private JButton getBtAñadir() {
-		if (btAñadir == null) {
-			btAñadir = new JButton("A\u00F1adir");
-			btAñadir.addActionListener(new ActionListener() {
+	private JButton getBtAÃ±adir() {
+		if (btAÃ±adir == null) {
+			btAÃ±adir = new JButton("A\u00F1adir");
+			btAÃ±adir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
 					for (Vacuna vacuna : getListVacuna().getSelectedValuesList()) {
@@ -180,9 +180,9 @@ public class VentanaVacuna extends JDialog {
 
 				}
 			});
-			btAñadir.setBounds(159, 385, 85, 21);
+			btAÃ±adir.setBounds(159, 385, 85, 21);
 		}
-		return btAñadir;
+		return btAÃ±adir;
 	}
 
 	private Vacuna[] getVacunas(List<Vacuna> lista) {

@@ -41,7 +41,7 @@ public class VentanaEnfermedad extends JDialog {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JScrollPane scrollPane;
 	private JTextArea txObservaciones;
-	private JButton btAñadir;
+	private JButton btAÃ±adir;
 	private VentanaPrincipal vp;
 	private JComboBox<Integer> cbHora;
 	private JComboBox<Integer> cbMinutos;
@@ -120,11 +120,11 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return txObservaciones;
 	}
-	private JButton getBtAñadir() {
-		if (btAñadir == null) {
-			btAñadir = new JButton("A\u00F1adir");
-			btAñadir.setBounds(454, 347, 85, 21);
-			btAñadir.addActionListener(new ActionListener() {
+	private JButton getBtAÃ±adir() {
+		if (btAÃ±adir == null) {
+			btAÃ±adir = new JButton("A\u00F1adir");
+			btAÃ±adir.setBounds(454, 347, 85, 21);
+			btAÃ±adir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Timestamp d1 = new Timestamp(getDateChooser().getDate().getTime());
 					String i = d1.toString().split(" ")[0]+" "+getCbHora().getSelectedIndex()+":"+getCbMinutos().getSelectedIndex()+":00";
@@ -137,7 +137,7 @@ public class VentanaEnfermedad extends JDialog {
 				}
 			});
 		}
-		return btAñadir;
+		return btAÃ±adir;
 	}
 	private JComboBox<Integer> getCbHora() {
 		if (cbHora == null) {
@@ -173,7 +173,7 @@ public class VentanaEnfermedad extends JDialog {
 			pnSeguimiento.add(getLbFecha());
 			pnSeguimiento.add(getLbObservaciones());
 			pnSeguimiento.add(getScrollPane());
-			pnSeguimiento.add(getBtAñadir());
+			pnSeguimiento.add(getBtAÃ±adir());
 			pnSeguimiento.add(getCbHora());
 			pnSeguimiento.add(getCbMinutos());
 			pnSeguimiento.add(getBtAtras());

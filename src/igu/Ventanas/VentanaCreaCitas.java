@@ -94,7 +94,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JList<String> listMedicos;
 	private JList<String> listSeleccionados;
 	private JPanel panelBotonesMedico;
-	private JButton btnAñadirMedico;
+	private JButton btnAÃ±adirMedico;
 	private JButton btnEliminarMedico;
 	private JButton btnLimpiarListaSeleccionados;
 	private JLabel lblNewLabel;
@@ -171,7 +171,7 @@ public class VentanaCreaCitas extends JDialog {
 	private JPanel panelMotivos;
 	private JLabel lblMotivos;
 	private JTextField textFieldMotivos;
-	private JPanel panelAñadir;
+	private JPanel panelAÃ±adir;
 	private JSpinner spinnerMedicoEspecialidad;
 	
 
@@ -502,7 +502,7 @@ public class VentanaCreaCitas extends JDialog {
 						//getTxtEspecialidadSeleccionada().setVisible(false);
 
 						
-						btnAñadirMedico.setText("Aï¿½adir especialidad");
+						btnAÃ±adirMedico.setText("Aï¿½adir especialidad");
 						
 						btnEliminarMedico.setText("Eliminar especialidad");
 						
@@ -523,7 +523,7 @@ public class VentanaCreaCitas extends JDialog {
 						listMedicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 						listMedicos.setModel(model);
 						
-						btnAñadirMedico.setText("Aï¿½adir medicos");
+						btnAÃ±adirMedico.setText("Aï¿½adir medicos");
 						
 						btnEliminarMedico.setText("Eliminar medico seleccionado");
 						
@@ -572,7 +572,7 @@ public class VentanaCreaCitas extends JDialog {
 		if (panelBotonesMedico == null) {
 			panelBotonesMedico = new JPanel();
 			panelBotonesMedico.setLayout(new GridLayout(0, 4, 0, 0));
-			panelBotonesMedico.add(getPanelAñadir());
+			panelBotonesMedico.add(getPanelAÃ±adir());
 			panelBotonesMedico.add(getBtnEliminarMedico());
 			panelBotonesMedico.add(getBtnHorariosMedicos());
 			panelBotonesMedico.add(getBtnLimpiarListaSeleccionados());
@@ -580,11 +580,11 @@ public class VentanaCreaCitas extends JDialog {
 		return panelBotonesMedico;
 	}
 
-	private JButton getBtnAñadirMedico() {
-		if (btnAñadirMedico == null) {
-			btnAñadirMedico = new JButton("A\u00F1adir medicos");
-			btnAñadirMedico.setToolTipText("Seleccionar medicos");
-			btnAñadirMedico.addActionListener(new ActionListener() {
+	private JButton getBtnAÃ±adirMedico() {
+		if (btnAÃ±adirMedico == null) {
+			btnAÃ±adirMedico = new JButton("A\u00F1adir medicos");
+			btnAÃ±adirMedico.setToolTipText("Seleccionar medicos");
+			btnAÃ±adirMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
 				{
 				  if(!chckbxEspecialidad.isSelected()) {
@@ -608,7 +608,7 @@ public class VentanaCreaCitas extends JDialog {
 					for(String especialidad : esp)
 					{
 						if(!checkMedicosSuficientes(esp)) {
-							resp = JOptionPane.showConfirmDialog(null,"No hay medicos suficentes de esa especialidade. ¿Desea añadir?","Advertencia al añadir Especialidades",JOptionPane.YES_NO_OPTION);
+							resp = JOptionPane.showConfirmDialog(null,"No hay medicos suficentes de esa especialidade. ï¿½Desea aï¿½adir?","Advertencia al aï¿½adir Especialidades",JOptionPane.YES_NO_OPTION);
 						}
 						
 						if(!cont(especialidad) && resp==JOptionPane.YES_OPTION) {
@@ -624,7 +624,7 @@ public class VentanaCreaCitas extends JDialog {
 
 			});
 		}
-		return btnAñadirMedico;
+		return btnAÃ±adirMedico;
 	}
 	
 	private boolean checkMedicosSuficientes(List<String> especialidades) {
@@ -1232,9 +1232,9 @@ public class VentanaCreaCitas extends JDialog {
 	private String formateaFecha(Date fecha) {
 		String[] fechaS = fecha.toString().split(" ");
 		String mes = fechaS[1];
-		String año = fechaS[5];
+		String aÃ±o = fechaS[5];
 		String dia = fechaS[2];
-		return año + "-" + seleccionaMes(mes) + "-" + dia;
+		return aÃ±o + "-" + seleccionaMes(mes) + "-" + dia;
 	}
 
 	private String seleccionaMes(String mes) {
@@ -1912,7 +1912,7 @@ public class VentanaCreaCitas extends JDialog {
 						ListModel<String> model = new DefaultComboBoxModel<String>(s);
 						listHorariosDisponibles.setModel(model);
 					}else {
-						JOptionPane.showInternalMessageDialog(null,"Añada la fecha y hora de entrada y de salida por la que desea buscar horarios");
+						JOptionPane.showInternalMessageDialog(null,"Aï¿½ada la fecha y hora de entrada y de salida por la que desea buscar horarios");
 					}
 					
 				}
@@ -2139,14 +2139,14 @@ public class VentanaCreaCitas extends JDialog {
 		}
 		return textFieldMotivos;
 	}
-	private JPanel getPanelAñadir() {
-		if (panelAñadir == null) {
-			panelAñadir = new JPanel();
-			panelAñadir.setLayout(new BorderLayout(0, 0));
-			panelAñadir.add(getBtnAñadirMedico());
-			panelAñadir.add(getSpinnerMedicoEspecialidad(), BorderLayout.EAST);
+	private JPanel getPanelAÃ±adir() {
+		if (panelAÃ±adir == null) {
+			panelAÃ±adir = new JPanel();
+			panelAÃ±adir.setLayout(new BorderLayout(0, 0));
+			panelAÃ±adir.add(getBtnAÃ±adirMedico());
+			panelAÃ±adir.add(getSpinnerMedicoEspecialidad(), BorderLayout.EAST);
 		}
-		return panelAñadir;
+		return panelAÃ±adir;
 	}
 	private JSpinner getSpinnerMedicoEspecialidad() {
 		if (spinnerMedicoEspecialidad == null) {

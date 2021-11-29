@@ -11,7 +11,7 @@ import Logica.DataBaseManager;
 import Logica.crud.dto.DiagnosticoDto;
 
 public class ListDiagnosticoByPaciente {
-	private String SQL = "select id, diagnostico from public.diagnostico where id_paciente=?";
+	private String SQL = "select distinct diagnostico from public.diagnostico where id_paciente=?";
 
 	private String id;
 	
@@ -34,8 +34,7 @@ public class ListDiagnosticoByPaciente {
 			rs = pst.executeQuery();
 			while(rs.next()) {
 				result= new DiagnosticoDto();
-				result.id=rs.getString(1);
-				result.diagnostico=rs.getString(2);
+				result.diagnostico=rs.getString(1);
 				lista.add(result);
 			}
 			pst.close();

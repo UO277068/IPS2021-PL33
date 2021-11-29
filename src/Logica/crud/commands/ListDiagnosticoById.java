@@ -11,7 +11,7 @@ import Logica.DataBaseManager;
 import Logica.crud.dto.DiagnosticoDto;
 
 public class ListDiagnosticoById {
-	private String SQL = "select diagnostico, prescripcion, fecha, descripcion, activa from public.diagnostico where id_paciente=?";
+	private String SQL = "select diagnostico, prescripcion, fecha, descripcion, activa from public.diagnostico where id_paciente=? order by fecha, diagnostico";
 
 	private String id;
 	

@@ -16,6 +16,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -29,6 +30,9 @@ import Logica.crud.commands.ListDiagnostico;
 import Logica.crud.commands.ListDiagnosticoByPaciente;
 import Logica.crud.dto.DiagnosticoDto;
 import igu.action.AddDiagnosticoAction;
+import igu.action.ListDiagnosticoByIdAction;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 public class VentanaEnfermedad extends JDialog {
 
@@ -47,27 +51,33 @@ public class VentanaEnfermedad extends JDialog {
 	private JComboBox<Integer> cbMinutos;
 	private JPanel pnSeguimiento;
 	private JPanel pnElegirEnfermedad;
-	private JScrollPane listDiagnosticos;
-	private JList list;
+	private JScrollPane scDiagnosticos;
+	private JList listDiagnosticos;
 	private List<DiagnosticoDto> lista;
 	private JButton btSeguimento;
 	private JPanel pnContenidos;
 	private JButton btAtras;
+	private JScrollPane scSeguimiento;
+	private JTextArea txSeguimiento;
+	private JLabel lbDiagnostico;
+	private JLabel lbSeguimiento;
+	private JLabel lbHora;
+	private JLabel lbMinuto;
 
-	
 	/**
 	 * Create the frame.
 	 */
 	public VentanaEnfermedad(VentanaPrincipal vp) {
-		this.vp=vp;
+		this.vp = vp;
 		setTitle("Seguimiento enfermedad");
-		setBounds(100, 100, 611, 415);
+		setBounds(100, 100, 895, 481);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getPnContenidos());
 	}
+
 	private JRadioButton getRbActiva() {
 		if (rbActiva == null) {
 			rbActiva = new JRadioButton("Enfermedad Activa");
@@ -77,6 +87,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return rbActiva;
 	}
+
 	private JRadioButton getRbFinalizo() {
 		if (rbFinalizo == null) {
 			rbFinalizo = new JRadioButton("Enfermedad Finalizada");
@@ -85,6 +96,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return rbFinalizo;
 	}
+
 	private JDateChooser getDateChooser() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser();
@@ -92,6 +104,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return dateChooser;
 	}
+
 	private Label getLbFecha() {
 		if (lbFecha == null) {
 			lbFecha = new Label("Fecha:");
@@ -99,6 +112,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return lbFecha;
 	}
+
 	private JLabel getLbObservaciones() {
 		if (lbObservaciones == null) {
 			lbObservaciones = new JLabel("Observaciones");
@@ -106,6 +120,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return lbObservaciones;
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -114,12 +129,14 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return scrollPane;
 	}
+
 	private JTextArea getTxObservaciones() {
 		if (txObservaciones == null) {
 			txObservaciones = new JTextArea();
 		}
 		return txObservaciones;
 	}
+
 	private JButton getBtAñadir() {
 		if (btAñadir == null) {
 			btAñadir = new JButton("A\u00F1adir");
@@ -127,42 +144,51 @@ public class VentanaEnfermedad extends JDialog {
 			btAñadir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Timestamp d1 = new Timestamp(getDateChooser().getDate().getTime());
-					String i = d1.toString().split(" ")[0]+" "+getCbHora().getSelectedIndex()+":"+getCbMinutos().getSelectedIndex()+":00";
+					String i = d1.toString().split(" ")[0] + " " + getCbHora().getSelectedIndex() + ":"
+							+ getCbMinutos().getSelectedIndex() + ":00";
 					Timestamp inicio = Timestamp.valueOf(i);
-					if(rbActiva.isSelected())
-						new AddDiagnosticoAction( vp.getCita().idPaciente, inicio,  (String)getList().getSelectedValue(), vp.getCita().id, "Si", getTxObservaciones().getText()).execute();
-					if(rbFinalizo.isSelected())
-						new AddDiagnosticoAction( vp.getCita().idPaciente, inicio,  (String)getList().getSelectedValue(), vp.getCita().id, "No", getTxObservaciones().getText()).execute();
-				
+					if (rbActiva.isSelected())
+						new AddDiagnosticoAction(vp.getCita().idPaciente, inicio,
+								(String) getListDiagnosticos().getSelectedValue(), vp.getCita().id, "Si",
+								getTxObservaciones().getText()).execute();
+					if (rbFinalizo.isSelected())
+						new AddDiagnosticoAction(vp.getCita().idPaciente, inicio,
+								(String) getListDiagnosticos().getSelectedValue(), vp.getCita().id, "No",
+								getTxObservaciones().getText()).execute();
+					getSeguimiento();
+
 				}
 			});
 		}
 		return btAñadir;
 	}
+
 	private JComboBox<Integer> getCbHora() {
 		if (cbHora == null) {
 			cbHora = new JComboBox<Integer>();
-			cbHora.setBounds(336, 104, 95, 21);
-			Integer[] h= new Integer[24];
+			cbHora.setBounds(336, 116, 95, 21);
+			Integer[] h = new Integer[24];
 			for (int i = 0; i < h.length; i++) {
-				h[i]=i;
+				h[i] = i;
 			}
 			cbHora.setModel(new DefaultComboBoxModel<Integer>(h));
 		}
 		return cbHora;
 	}
+
 	private JComboBox<Integer> getCbMinutos() {
 		if (cbMinutos == null) {
 			cbMinutos = new JComboBox<Integer>();
-			cbMinutos.setBounds(454, 104, 95, 21);
-			Integer[] m= new Integer[60];
+			cbMinutos.setBounds(459, 116, 95, 21);
+			Integer[] m = new Integer[60];
 			for (int j = 0; j < m.length; j++) {
-				m[j]=j;
+				m[j] = j;
 			}
 			cbMinutos.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutos;
 	}
+
 	private JPanel getPnSeguimiento() {
 		if (pnSeguimiento == null) {
 			pnSeguimiento = new JPanel();
@@ -177,69 +203,86 @@ public class VentanaEnfermedad extends JDialog {
 			pnSeguimiento.add(getCbHora());
 			pnSeguimiento.add(getCbMinutos());
 			pnSeguimiento.add(getBtAtras());
+			pnSeguimiento.add(getLbHora());
+			pnSeguimiento.add(getLbMinuto());
 		}
 		return pnSeguimiento;
 	}
+
 	private JPanel getPnElegirEnfermedad() {
 		if (pnElegirEnfermedad == null) {
 			pnElegirEnfermedad = new JPanel();
 			pnElegirEnfermedad.setLayout(null);
-			pnElegirEnfermedad.add(getListDiagnosticos());
+			pnElegirEnfermedad.add(getScDiagnosticos());
 			pnElegirEnfermedad.add(getBtSeguimento());
+			pnElegirEnfermedad.add(getScSeguimiento());
+			pnElegirEnfermedad.add(getLbDiagnostico());
+			pnElegirEnfermedad.add(getLbSeguimiento());
 		}
 		return pnElegirEnfermedad;
 	}
-	private JScrollPane getListDiagnosticos() {
+
+	private JScrollPane getScDiagnosticos() {
+		if (scDiagnosticos == null) {
+			scDiagnosticos = new JScrollPane();
+			scDiagnosticos.setBounds(40, 72, 338, 270);
+			scDiagnosticos.setViewportView(getListDiagnosticos());
+		}
+		return scDiagnosticos;
+	}
+
+	private JList getListDiagnosticos() {
 		if (listDiagnosticos == null) {
-			listDiagnosticos = new JScrollPane();
-			listDiagnosticos.setBounds(40, 72, 258, 196);
-			listDiagnosticos.setViewportView(getList());
+			listDiagnosticos = new JList();
+			listDiagnosticos.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					getSeguimiento();
+				}
+			});
+			listDiagnosticos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			lista = new ListDiagnosticoByPaciente(vp.getCita().idPaciente).execute();
+			listDiagnosticos.setModel(new DefaultComboBoxModel<String>(getDiagnostico(lista)));
 		}
 		return listDiagnosticos;
 	}
-	private JList getList() {
-		if (list == null) {
-			list = new JList();
-			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			lista = new ListDiagnosticoByPaciente(vp.getCita().idPaciente).execute();
-			list.setModel(new DefaultComboBoxModel<String>(getDiagnostico(lista)));
-		}
-		return list;
-	}
-	
+
 	private String[] getDiagnostico(List<DiagnosticoDto> lista) {
 		String[] diagnosticos = new String[lista.size()];
 		for (int i = 0; i < diagnosticos.length; i++) {
 			String diagnostico = lista.get(i).diagnostico;
-			diagnosticos[i]=diagnostico;
+			diagnosticos[i] = diagnostico;
 		}
 		return diagnosticos;
 	}
+
 	private JButton getBtSeguimento() {
 		if (btSeguimento == null) {
-			btSeguimento = new JButton("Seguimiento");
+			btSeguimento = new JButton("Actualizar estado");
 			btSeguimento.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					mostrarPnSeguimiento();
+					if(getListDiagnosticos().getSelectedIndex()==-1)
+						JOptionPane.showMessageDialog(null, "No has seleccionado ninguna enfermedad");
+					else
+						mostrarPnSeguimiento();
 				}
 			});
-			btSeguimento.setBounds(376, 297, 114, 21);
+			btSeguimento.setBounds(343, 377, 169, 21);
 		}
 		return btSeguimento;
 	}
-	
+
 	private void mostrarPnSeguimiento() {
-		CardLayout c = (CardLayout)getPnContenidos().getLayout();
-		c.show(getPnContenidos(), "PnSeguimiento");	
-		
+		CardLayout c = (CardLayout) getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnSeguimiento");
+
 	}
-	
+
 	private void mostrarPnEnfermedad() {
-		CardLayout c = (CardLayout)getPnContenidos().getLayout();
-		c.show(getPnContenidos(), "PnEnfermedad");	
-		
+		CardLayout c = (CardLayout) getPnContenidos().getLayout();
+		c.show(getPnContenidos(), "PnEnfermedad");
+
 	}
-	
+
 	private JPanel getPnContenidos() {
 		if (pnContenidos == null) {
 			pnContenidos = new JPanel();
@@ -249,6 +292,7 @@ public class VentanaEnfermedad extends JDialog {
 		}
 		return pnContenidos;
 	}
+
 	private JButton getBtAtras() {
 		if (btAtras == null) {
 			btAtras = new JButton("Atras");
@@ -260,5 +304,74 @@ public class VentanaEnfermedad extends JDialog {
 			btAtras.setBounds(23, 347, 85, 21);
 		}
 		return btAtras;
+	}
+
+	private JScrollPane getScSeguimiento() {
+		if (scSeguimiento == null) {
+			scSeguimiento = new JScrollPane();
+			scSeguimiento.setBounds(465, 72, 356, 270);
+			scSeguimiento.setViewportView(getTxSeguimiento());
+		}
+		return scSeguimiento;
+	}
+
+	private JTextArea getTxSeguimiento() {
+		if (txSeguimiento == null) {
+			txSeguimiento = new JTextArea();
+		}
+		return txSeguimiento;
+	}
+
+	private void getSeguimiento() {
+		List<DiagnosticoDto> diagnosticos = new ListDiagnosticoByIdAction(vp.getCita().idPaciente).execute();
+		if (getListDiagnosticos().getSelectedValue() != null) {
+			String d = "";
+			for (DiagnosticoDto diag : diagnosticos) {
+				if (diag.diagnostico.equals(getListDiagnosticos().getSelectedValue())) {
+					d += "Fecha de la visita: " + diag.fecha.toString().substring(0, 16);
+					if (diag.prescripcion != null)
+						d += "\n\t-Prescripcion de la visita: " + diag.prescripcion;
+					else
+						d += "\n\t-Prescripcion de la visita: No hay prescripcion asociada";
+					if(diag.descripcion.isEmpty())
+						d += "\n\t-Observaciones: No hay ninguna observación";
+					else
+						d += "\n\t-Observaciones: " + diag.descripcion;
+					if (diag.status.equals("Si"))
+						d += "\n\t-Estado: Enfermedad activa\n";
+					else if (diag.status.equals("No"))
+						d += "\n\t-Estado: Enfermedad finalizada\n";
+				}
+			}
+			getTxSeguimiento().setText(d);
+		}
+	}
+	private JLabel getLbDiagnostico() {
+		if (lbDiagnostico == null) {
+			lbDiagnostico = new JLabel("Diagnosticos");
+			lbDiagnostico.setBounds(40, 42, 143, 13);
+		}
+		return lbDiagnostico;
+	}
+	private JLabel getLbSeguimiento() {
+		if (lbSeguimiento == null) {
+			lbSeguimiento = new JLabel("Seguimiento");
+			lbSeguimiento.setBounds(465, 42, 114, 13);
+		}
+		return lbSeguimiento;
+	}
+	private JLabel getLbHora() {
+		if (lbHora == null) {
+			lbHora = new JLabel("Hora");
+			lbHora.setBounds(366, 94, 65, 13);
+		}
+		return lbHora;
+	}
+	private JLabel getLbMinuto() {
+		if (lbMinuto == null) {
+			lbMinuto = new JLabel("Minuto");
+			lbMinuto.setBounds(494, 94, 45, 13);
+		}
+		return lbMinuto;
 	}
 }

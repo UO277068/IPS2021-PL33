@@ -212,6 +212,11 @@ public class CitaCrudServiceImpl implements CitaCrudService {
 	public CitaDto listCitaById(int id) {
 		return new ListCitaById(id).execute();
 	}
+
+	@Override
+	public List<DiagnosticoDto> listAllDiagnosticos() {
+		return new ListAllDiagnosticos().execute();
+	}
 	
 
 }

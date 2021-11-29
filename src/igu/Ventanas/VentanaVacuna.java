@@ -61,6 +61,7 @@ public class VentanaVacuna extends JDialog {
 	private JDateChooser dcFecha;
 	private JComboBox<Integer> cbHora;
 	private JComboBox<Integer> cbMinutos;
+	private JLabel lbAviso;
 
 	/**
 	 * Create the frame.
@@ -88,6 +89,7 @@ public class VentanaVacuna extends JDialog {
 		contentPane.add(getDcFecha());
 		contentPane.add(getCbHora());
 		contentPane.add(getCbMinutos());
+		contentPane.add(getLbAviso());
 	}
 
 	private JScrollPane getScVacuna() {
@@ -232,6 +234,7 @@ public class VentanaVacuna extends JDialog {
 						} else
 							fecha = Timestamp.valueOf(LocalDateTime.now().toString().replace('T', ' '));
 						new AddVacunaAction(cita.idPaciente, fecha, vacunasElegidas).execute();
+						getLbAviso().setText("Vacuna asignada correctamente");
 					}
 
 					FileUtil.escribirLog("MiLogger", "Medico ID: 1"+"null -> " + vacunasElegidas);
@@ -304,5 +307,12 @@ public class VentanaVacuna extends JDialog {
 			cbMinutos.setModel(new DefaultComboBoxModel<Integer>(m));
 		}
 		return cbMinutos;
+	}
+	private JLabel getLbAviso() {
+		if (lbAviso == null) {
+			lbAviso = new JLabel("");
+			lbAviso.setBounds(320, 416, 269, 19);
+		}
+		return lbAviso;
 	}
 }

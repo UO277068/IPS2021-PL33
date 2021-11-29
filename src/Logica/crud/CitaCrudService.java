@@ -29,6 +29,7 @@ public interface CitaCrudService {
 	List<DiagnosticoDto> listDiagnosticoByCode(String cap);
 	List<DiagnosticoDto> listDiagnostico(String id);
 	List<DiagnosticoDto> listDiagnosticoByPaciente(String id);
+	List<DiagnosticoDto> listAllDiagnosticos();
 	//Rober
 	List<JornadaDto> listJornadaLaboralByMedico(String id);
 	List<CitaDto> ListCitasByMedico(String id);

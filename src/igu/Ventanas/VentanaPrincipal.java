@@ -1070,7 +1070,7 @@ public class VentanaPrincipal extends JFrame {
 	private JPanel getPanelBotonesPrincipal() {
 		if (panelBotonesPrincipal == null) {
 			panelBotonesPrincipal = new JPanel();
-			panelBotonesPrincipal.setLayout(new GridLayout(0, 5, 0, 0));
+			panelBotonesPrincipal.setLayout(new GridLayout(0, 3, 0, 0));
 			panelBotonesPrincipal.add(getBtnHistorial());
 			panelBotonesPrincipal.add(getBtnCrearCita());
 			panelBotonesPrincipal.add(getBtnJornadaLaboral());
@@ -2994,6 +2994,7 @@ public class VentanaPrincipal extends JFrame {
 	private JTextField getTextFieldInformacionPrincipal() {
 		if (textFieldInformacionPrincipal == null) {
 			textFieldInformacionPrincipal = new JTextField();
+			textFieldInformacionPrincipal.setHorizontalAlignment(SwingConstants.LEFT);
 			textFieldInformacionPrincipal.setColumns(10);
 		}
 		return textFieldInformacionPrincipal;

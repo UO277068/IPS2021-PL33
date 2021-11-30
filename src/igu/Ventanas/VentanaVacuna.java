@@ -1,45 +1,36 @@
 package igu.Ventanas;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
+
+import com.toedter.calendar.JDateChooser;
 
 import Logica.Carta;
 import Logica.FileUtil;
 import Logica.Vacuna;
-import Logica.crud.commands.ListPacienteById;
 import Logica.crud.commands.ListVacunaById;
 import Logica.crud.dto.CitaDto;
-import Logica.crud.dto.MedicoDto;
-import Logica.crud.dto.PacienteDto;
 import Logica.crud.dto.VacunaDto;
 import igu.action.AddVacunaAction;
-
-import javax.swing.JScrollPane;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-
-import java.awt.event.ActionListener;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import com.toedter.calendar.JDateChooser;
-import javax.swing.JComboBox;
 
 public class VentanaVacuna extends JDialog {
 

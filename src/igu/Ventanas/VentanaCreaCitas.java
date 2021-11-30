@@ -582,7 +582,7 @@ public class VentanaCreaCitas extends JDialog {
 
 	private JButton getBtnAñadirMedico() {
 		if (btnAñadirMedico == null) {
-			btnAñadirMedico = new JButton("A\u00F1adir medicos");
+			btnAñadirMedico = new JButton("Añadir medicos");
 			btnAñadirMedico.setToolTipText("Seleccionar medicos");
 			btnAñadirMedico.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) 
@@ -1968,6 +1968,8 @@ public class VentanaCreaCitas extends JDialog {
 				    	
 				    	boolean igualdad1=inicioFecha.equals(inicioj);
 				    	boolean igualdad2=finFecha.equals(finj);
+				    	int s =0;
+				    	if(s<17) {
 				    	if((inicioFecha.before(inicioj)||igualdad1) && (finFecha.after(finj)||igualdad2)) 
 				    	{
 				    		JornadaDto jor = new JornadaDto();
@@ -1976,6 +1978,7 @@ public class VentanaCreaCitas extends JDialog {
 				    		if(!jornadas.contains(jor)) {
 				    		jornadas.add(jor);
 				    		jornadas.remove(jornada);
+				    		s++;
 				    		}
 
 				    	}else if((inicioFecha.before(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
@@ -1986,6 +1989,7 @@ public class VentanaCreaCitas extends JDialog {
 				    		if(!jornadas.contains(jor)) {
 				    		jornadas.add(jor);
 				    		jornadas.remove(jornada);
+				    		s++;
 				    		}
 				    	}else if((inicioFecha.after(inicioj)||igualdad1) && (finFecha.after(finj)||igualdad2)) {
 				    		
@@ -1995,12 +1999,15 @@ public class VentanaCreaCitas extends JDialog {
 				    		if(!jornadas.contains(jor)) {
 				    			jornadas.add(jor);
 					    		jornadas.remove(jornada);
+					    		s++;
 				    		}
 				    	}else if((inicioFecha.after(inicioj)||igualdad1) &&( finFecha.before(finj)||igualdad2)) {
 				    		//No hace nada
 				    	}else {
 				    		jornadas.remove(jornada);
-				    	}	
+				    		s++;
+				    	}
+				    	}
 				    }
 				 }
 				}
